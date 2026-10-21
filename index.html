@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Caja de herramientas para la nivelación en pensamiento matemático: un plano de estaciones con explicaciones, exploraciones, retos y retroalimentación.">
+<title>Caja de herramientas matemáticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<style>
+/* Layout: un plano de metro como portada; cada estación abre una ficha de cuatro momentos (información, exploración, reto, retroalimentación) */
+:root{
+  --bg:#F2F5F9; --surface:#FFFFFF; --surface-2:#E8EDF3; --ink:#111B27; --muted:#536274; --rule:#D2DAE4;
+  --l-ent:#2557C7; --l-rac:#D26A14; --l-rec:#157F4F; --l-alg:#86399A; --l-ecu:#BD3627; --l-bie:#0F8695; --l-off:#B9C3CF;
+  --on-accent:#FFFFFF;
+  --ok:#1B7443; --ok-bg:#E2F2E8; --bad:#AE2A20; --bad-bg:#FBE6E3; --warn:#7D5200; --warn-bg:#FFF1D2; --star:#D99A00;
+  --add:#BFE3CC; --rem:#F3C4BE; --twice:#D9776B; --corner:#F5D98A;
+  --av-coral:#E2574C; --av-sol:#E3A008; --av-menta:#1C9C74; --av-lila:#7B5BD6;
+  --f-disp:"Overpass","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Literata",Georgia,"Times New Roman",serif;
+  --f-mono:"Overpass Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D131B; --surface:#151F2A; --surface-2:#1D2935; --ink:#E4EBF3; --muted:#92A1B3; --rule:#2A3847;
+  --l-ent:#6A97F2; --l-rac:#F09A52; --l-rec:#45BE84; --l-alg:#BD7BD0; --l-ecu:#EE7264; --l-bie:#41C3D1; --l-off:#3A4857;
+  --on-accent:#0B1119;
+  --ok:#5ACB8C; --ok-bg:#13301F; --bad:#F27D72; --bad-bg:#3A1613; --warn:#F2C25A; --warn-bg:#332609; --star:#F2C25A;
+  --add:#1F5A39; --rem:#6A2A24; --twice:#A2453B; --corner:#6E5A1C;
+  --av-coral:#F07A70; --av-sol:#F2C25A; --av-menta:#45C49A; --av-lila:#A48CF0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D131B; --surface:#151F2A; --surface-2:#1D2935; --ink:#E4EBF3; --muted:#92A1B3; --rule:#2A3847;
+  --l-ent:#6A97F2; --l-rac:#F09A52; --l-rec:#45BE84; --l-alg:#BD7BD0; --l-ecu:#EE7264; --l-bie:#41C3D1; --l-off:#3A4857;
+  --on-accent:#0B1119;
+  --ok:#5ACB8C; --ok-bg:#13301F; --bad:#F27D72; --bad-bg:#3A1613; --warn:#F2C25A; --warn-bg:#332609; --star:#F2C25A;
+  --add:#1F5A39; --rem:#6A2A24; --twice:#A2453B; --corner:#6E5A1C;
+  --av-coral:#F07A70; --av-sol:#F2C25A; --av-menta:#45C49A; --av-lila:#A48CF0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.app{max-width:1120px;margin:0 auto;padding-block:18px 64px;display:grid;gap:18px}
+h1,h2,h3,h4{font-family:var(--f-disp);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--l-ent);outline-offset:2px}
+.m{font-family:var(--f-mono);white-space:nowrap;font-size:.95em}
+.eyebrow{font-family:var(--f-disp);font-weight:700;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* Barra superior */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;justify-content:space-between}
+.brand{display:grid;gap:2px;min-width:0}
+.brand h1{font-size:clamp(1.35rem,3.2vw,1.9rem);font-weight:800;letter-spacing:-.01em}
+.who{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.prog{display:flex;align-items:center;gap:10px;font-family:var(--f-disp);font-weight:600;font-size:.92rem}
+.prog .bar{width:120px;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--l-ent);border-radius:4px;transition:width .4s}
+.stars{color:var(--star);font-family:var(--f-disp);font-weight:700}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font-family:var(--f-disp);font-weight:600;font-size:.95rem;border:1.5px solid var(--rule);background:var(--surface);
+  border-radius:8px;padding:.5em .9em;cursor:pointer;line-height:1.2;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--muted)}
+.btn[aria-current="page"]{border-color:var(--ink);background:var(--surface-2)}
+.btn.primary{background:var(--l-ent);border-color:var(--l-ent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{font-size:.85rem;padding:.38em .7em}
+.notice{font-family:var(--f-disp);font-size:.88rem;background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:.55em .9em}
+
+/* Plano */
+.mapcard{background:var(--surface);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+.maphead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;padding:14px 18px 0}
+.maphead h2{font-size:1.15rem;font-weight:800}
+.mapscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mapscroll svg{display:block;width:100%;min-width:860px;height:auto;
+  background-image:radial-gradient(var(--rule) 1px,transparent 1.2px);background-size:20px 20px}
+.st{cursor:pointer}
+.st text{font-family:var(--f-disp);font-size:13px;font-weight:600;fill:var(--ink)}
+.st.soon text{fill:var(--muted);font-weight:400}
+.st.locked text{fill:var(--muted)}
+.st:focus{outline:none}
+.st:focus-visible .ring{stroke:var(--ink);stroke-width:6}
+.st:hover .dot{r:11}
+.pulse{animation:pulse 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(2.3)}}
+#avatar{transition:transform .22s ease-in-out}
+#avatar .bob{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-2px)}}
+.legend text{font-family:var(--f-disp);font-size:13px;fill:var(--ink)}
+.legend .lg-n{fill:var(--muted);font-size:12px}
+.maplist{display:none}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;
+  background:var(--ink);color:var(--bg);font-family:var(--f-disp);font-size:.92rem;padding:.7em 1.1em;border-radius:10px;max-width:min(92vw,460px);text-align:center;box-shadow:0 6px 24px rgb(0 0 0 / .25)}
+
+/* Ficha de estación */
+.node{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding-block:22px 28px;padding-inline:clamp(16px,4.5vw,44px);display:grid;gap:22px}
+.nodehead{display:grid;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-disp);font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+.badge i{width:22px;height:8px;border-radius:4px;display:inline-block}
+.nodehead h2{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;letter-spacing:-.015em}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:0}
+.steps button{width:100%;text-align:left;border:0;background:none;padding:8px 0 0;border-top:4px solid var(--surface-2);cursor:pointer;font-family:var(--f-disp);font-size:.85rem;font-weight:600;color:var(--muted)}
+.steps button span{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.steps button.done{border-top-color:var(--linec);color:var(--ink)}
+.steps button.cur{border-top-color:var(--linec);color:var(--ink)}
+.steps button.cur span{color:var(--linec)}
+.steps button:disabled{cursor:not-allowed;opacity:.55}
+.body{display:grid;gap:18px;max-width:74ch}
+.body.wide{max-width:none}
+.lead{font-size:1.12rem}
+.ex-box{background:var(--surface-2);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.ex-box .eyebrow{color:var(--linec)}
+.callout{background:var(--warn-bg);color:var(--ink);border-radius:10px;padding:14px 16px;display:grid;gap:6px}
+.callout .eyebrow{color:var(--warn)}
+.calc{font-family:var(--f-mono);font-size:1rem;line-height:1.9;overflow-x:auto}
+ol.plain,ul.plain{margin:0;padding-left:1.25em;display:grid;gap:6px}
+.navrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:16px}
+
+/* Ejercicios */
+.ex{border-top:1px solid var(--rule);padding-top:16px;display:grid;gap:12px;min-width:0}
+.ex:first-child{border-top:0;padding-top:0}
+.exn{font-family:var(--f-disp);font-weight:700;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--linec)}
+.ex .q{font-size:1.05rem}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1.5px solid var(--rule);background:var(--surface);border-radius:8px;padding:.6em .9em;cursor:pointer;font-family:var(--f-body);font-size:1rem;line-height:1.4}
+.opt:hover:not(:disabled){border-color:var(--muted)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt:disabled{cursor:default}
+.fillrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fillrow input{font-family:var(--f-mono);font-size:1.08rem;border:1.5px solid var(--rule);border-radius:8px;padding:.45em .7em;background:var(--surface);min-width:0;flex:1 1 200px;max-width:360px}
+.fillrow input.okv{border-color:var(--ok);background:var(--ok-bg)}
+.fb{border-radius:8px;padding:10px 14px;font-size:.98rem;display:grid;gap:4px}
+.fb b{font-family:var(--f-disp)}
+.fb.hint{background:var(--warn-bg)}
+.fb.hint b{color:var(--warn)}
+.fb.ok{background:var(--ok-bg)}
+.fb.ok b{color:var(--ok)}
+.fb.bad{background:var(--bad-bg)}
+.fb.bad b{color:var(--bad)}
+.fb.info{background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;padding:8px;border-radius:10px;background:var(--surface-2)}
+.chip{font-family:var(--f-mono);font-size:1rem;border:1.5px solid var(--rule);background:var(--surface);border-radius:7px;padding:.35em .75em;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;white-space:nowrap}
+.chip.sel{border-color:var(--linec);box-shadow:0 0 0 2px var(--linec)}
+.chip.dragging{opacity:.35}
+.chip.locked{cursor:default}
+.chip.ghost{position:fixed;z-index:60;pointer-events:none;box-shadow:0 8px 20px rgb(0 0 0 / .25);cursor:grabbing}
+.drop-hi{outline:2.5px dashed var(--linec);outline-offset:2px}
+.mrows{display:grid;gap:8px}
+.mrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.mrow .left{font-family:var(--f-mono);min-width:13em}
+.slot{min-width:8em;min-height:2.4em;border:1.5px dashed var(--muted);border-radius:8px;display:flex;align-items:center;padding:2px;background:var(--surface)}
+.slot.okv{border-style:solid;border-color:var(--ok)}
+.slot.badv{border-style:solid;border-color:var(--bad)}
+.tip{font-family:var(--f-disp);font-size:.85rem;color:var(--muted)}
+
+/* Exploraciones */
+.xp{display:grid;gap:14px;min-width:0}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.ctrl label{font-family:var(--f-disp);font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctrl input[type=range]{accent-color:var(--linec);width:160px;max-width:100%}
+.ctrl input[type=number]{width:5em;font-family:var(--f-mono);border:1.5px solid var(--rule);border-radius:8px;padding:.35em .5em;background:var(--surface)}
+.readout{font-family:var(--f-mono);font-size:1.02rem;line-height:1.9;background:var(--surface-2);border-radius:10px;padding:12px 14px;overflow-x:auto}
+.readout .k{font-family:var(--f-disp);font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;width:100%;height:auto}
+.svgwrap.nl svg{min-width:520px}
+.tchips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{font-family:var(--f-mono);font-size:1.05rem;border:1.5px solid var(--rule);border-radius:7px;padding:.3em .6em;background:var(--surface);cursor:pointer}
+.tchip.sel{border-color:var(--linec);box-shadow:0 0 0 2px var(--linec)}
+.tchip.gone{text-decoration:line-through;opacity:.35;cursor:default}
+.bars{display:grid;gap:8px}
+.barrow{display:grid;grid-template-columns:7.5em minmax(0,1fr) 4.5em;align-items:center;gap:10px;font-family:var(--f-disp);font-size:.92rem}
+.barrow .track{height:18px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.barrow .track i{display:block;height:100%;border-radius:4px;transition:width .25s}
+.barrow .v{font-family:var(--f-mono);text-align:right}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.legendrow{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--f-disp);font-size:.85rem}
+.legendrow span{display:inline-flex;align-items:center;gap:6px}
+.legendrow i{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--rule)}
+.bad-t{color:var(--bad)} .ok-t{color:var(--ok)}
+
+/* Bienestar */
+.likert{display:grid;gap:14px}
+.lk{display:grid;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
+.lk:first-child{border-top:0;padding-top:0}
+.lkopts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.lkopts button{border:1.5px solid var(--rule);background:var(--surface);border-radius:8px;padding:.5em .2em;cursor:pointer;font-family:var(--f-disp);font-size:.8rem;line-height:1.2}
+.lkopts button[aria-pressed="true"]{border-color:var(--linec);background:var(--surface-2);box-shadow:0 0 0 2px var(--linec)}
+.dimbar{display:grid;gap:6px;border-top:1px solid var(--rule);padding-top:14px}
+.dimbar .track{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.dimbar .track i{display:block;height:100%;border-radius:5px;background:var(--linec)}
+.dimbar h4{font-size:1rem;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dimbar h4 small{font-family:var(--f-disp);font-weight:600;color:var(--muted)}
+.strat{display:grid;gap:8px}
+.strat button{text-align:left;border:1.5px solid var(--rule);background:var(--surface);border-radius:8px;padding:.55em .8em;cursor:pointer;font-family:var(--f-body);font-size:.98rem}
+.strat button[aria-pressed="true"]{border-color:var(--linec);background:var(--surface-2);box-shadow:0 0 0 2px var(--linec)}
+textarea{width:100%;min-height:90px;border:1.5px solid var(--rule);border-radius:8px;padding:.6em .8em;background:var(--surface);font-family:var(--f-body);font-size:1rem;resize:vertical}
+
+/* Retroalimentación */
+.retro-score{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:baseline}
+.bigstars{font-size:2rem;color:var(--star);letter-spacing:.08em;font-family:var(--f-disp)}
+.tally{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--f-disp);font-size:.95rem}
+.tally b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+
+/* Panel y listas */
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding-block:20px 24px;padding-inline:clamp(16px,4vw,36px);display:grid;gap:16px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-family:var(--f-disp);font-size:.92rem;min-width:640px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:middle;font-variant-numeric:tabular-nums}
+th{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.sq{display:inline-flex;gap:3px}
+.sq i{width:14px;height:14px;border-radius:3px;background:var(--surface-2);border:1px solid var(--rule)}
+.sq i.d{background:var(--l-ent);border-color:var(--l-ent)}
+.sq i.c{background:repeating-linear-gradient(45deg,var(--l-ent) 0 3px,transparent 3px 6px);border-color:var(--l-ent)}
+.sq i.p{background:var(--surface);border-color:var(--l-ent)}
+.stlist{display:grid;gap:4px}
+.stitem{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule);font-family:var(--f-disp)}
+.stitem .dotl{width:14px;height:14px;border-radius:50%;border:3px solid var(--linec);background:var(--surface)}
+.stitem .dotl.d{background:var(--linec)}
+.stitem .state{font-size:.85rem;color:var(--muted)}
+
+/* Cuentas */
+.authwrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start;padding-block:12px}
+.authintro{display:grid;gap:14px;max-width:56ch}
+.authintro h2{font-size:clamp(1.8rem,4.5vw,2.7rem);font-weight:800;letter-spacing:-.02em}
+.authintro svg{width:100%;max-width:460px;height:auto}
+form.dialog{box-shadow:none;border:1px solid var(--rule);max-width:none}
+.linkbtn{background:none;border:0;padding:0;color:var(--l-ent);font-family:var(--f-disp);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.err{font-family:var(--f-disp);font-size:.9rem;color:var(--bad);min-height:1.2em}
+.okmsg{font-family:var(--f-disp);font-size:.9rem;color:var(--ok)}
+@media (max-width:760px){.authwrap{grid-template-columns:minmax(0,1fr)}}
+/* Bienvenida */
+.modal{position:fixed;inset:0;z-index:40;background:rgb(10 16 24 / .55);display:grid;place-items:center;overflow-y:auto;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dialog{background:var(--surface);border-radius:16px;max-width:520px;width:100%;padding:24px clamp(18px,4vw,30px);display:grid;gap:16px;box-shadow:0 20px 60px rgb(0 0 0 / .3)}
+.dialog h2{font-size:1.6rem;font-weight:800}
+.field{display:grid;gap:6px}
+.field label{font-family:var(--f-disp);font-weight:600;font-size:.92rem}
+.field input{border:1.5px solid var(--rule);border-radius:8px;padding:.55em .75em;background:var(--surface);font-family:var(--f-body)}
+.avs{display:flex;gap:10px}
+.avs button{width:44px;height:44px;border-radius:50%;border:3px solid transparent;cursor:pointer;display:grid;place-items:center;background:var(--surface-2)}
+.avs button[aria-pressed="true"]{border-color:var(--ink)}
+.avs button i{width:24px;height:24px;border-radius:50%;display:block}
+.dlg-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+@media (max-width:640px){
+  .steps button{font-size:.72rem}
+  .steps button span{font-size:.64rem}
+  .mrow .left{min-width:0;flex-basis:100%}
+  .lkopts{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .lkopts button{font-size:.68rem}
+  .barrow{grid-template-columns:5.5em minmax(0,1fr) 3.8em}
+  .maplist{display:block}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Nivelación en pensamiento matemático</span>
+      <h1>Caja de herramientas</h1>
+    </div>
+    <div class="who" id="who" hidden>
+      <div class="prog" id="prog" aria-live="polite"></div>
+      <nav class="tabs" aria-label="Secciones">
+        <button class="btn" id="tab-map" aria-current="page">Plano</button>
+        <button class="btn" id="tab-me">Mi progreso</button>
+        <button class="btn" id="tab-panel" hidden>Panel del grupo</button>
+        <button class="btn ghost" id="tab-out">Salir</button>
+      </nav>
+    </div>
+  </header>
+  <div id="notice" class="notice" hidden></div>
+
+  <section id="view-map" hidden>
+    <div class="mapcard">
+      <div class="maphead">
+        <h2 id="greet">Elige una estación</h2>
+        <span class="tip">Toca una estación para viajar. Las grises aún están en construcción.</span>
+      </div>
+      <div class="mapscroll"><svg id="map" viewBox="0 0 1100 640" role="img" aria-label="Plano de líneas y estaciones de aprendizaje"></svg></div>
+    </div>
+  </section>
+
+  <section id="view-node" hidden></section>
+  <section id="view-me" hidden></section>
+  <section id="view-panel" hidden></section>
+  <section id="view-auth"><p class="muted">Abriendo la caja de herramientas…</p></section>
+</div>
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+/* ============ utilidades ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>{const r=Math.round(n*1000)/1000;return r<0?"−"+Math.abs(r):String(r)};
+const fmtP=n=>n<0?"("+fmt(n)+")":fmt(n);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function seeded(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return((h>>>0)%100000)/100000}}
+function shuffle(arr,key){const r=seeded(key);const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+let toastT;function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3400)}
+
+/* ============ lector de expresiones (para corregir respuestas algebraicas) ============ */
+function tokenize(src){
+  let s=String(src).replace(/[−–—]/g,"-").replace(/[·×]/g,"*").replace(/²/g,"^2").replace(/³/g,"^3").replace(/\s+/g,"").toLowerCase();
+  const out=[];let i=0;
+  while(i<s.length){const c=s[i];
+    if(/[0-9.,]/.test(c)){let j=i;while(j<s.length&&/[0-9.,]/.test(s[j]))j++;const t=s.slice(i,j).replace(",",".");if(isNaN(+t))throw Error("num");out.push({t:"n",v:+t});i=j;continue}
+    if(/[a-z]/.test(c)){out.push({t:"v",v:c});i++;continue}
+    if("+-*/^()".includes(c)){out.push({t:c});i++;continue}
+    throw Error("char")}
+  const res=[];
+  for(let k=0;k<out.length;k++){const a=res[res.length-1],b=out[k];
+    if(a&&(a.t==="n"||a.t==="v"||a.t===")")&&(b.t==="v"||b.t==="("||(a.t===")"&&b.t==="n")))res.push({t:"*"});
+    res.push(b)}
+  return res}
+function parseExpr(src){
+  const tk=tokenize(src);let p=0;const peek=()=>tk[p],eat=t=>{if(!tk[p]||tk[p].t!==t)throw Error("syntax");p++};
+  function expr(){let n=term();while(peek()&&(peek().t==="+"||peek().t==="-")){const op=tk[p++].t;n={op,a:n,b:term()}}return n}
+  function term(){let n=unary();while(peek()&&(peek().t==="*"||peek().t==="/")){const op=tk[p++].t;n={op,a:n,b:unary()}}return n}
+  function unary(){if(peek()&&peek().t==="-"){p++;return{op:"neg",a:unary()}}if(peek()&&peek().t==="+"){p++;return unary()}return power()}
+  function power(){const b=atom();if(peek()&&peek().t==="^"){p++;return{op:"^",a:b,b:unary()}}return b}
+  function atom(){const t=peek();if(!t)throw Error("end");
+    if(t.t==="n"){p++;return{num:t.v}}if(t.t==="v"){p++;return{v:t.v}}
+    if(t.t==="("){p++;const e=expr();eat(")");return e}throw Error("syntax")}
+  const n=expr();if(p!==tk.length)throw Error("trail");return n}
+function evalAst(n,env){
+  if("num"in n)return n.num;if("v"in n)return env[n.v]??0;
+  switch(n.op){case"neg":return-evalAst(n.a,env);case"+":return evalAst(n.a,env)+evalAst(n.b,env);case"-":return evalAst(n.a,env)-evalAst(n.b,env);
+    case"*":return evalAst(n.a,env)*evalAst(n.b,env);case"/":return evalAst(n.a,env)/evalAst(n.b,env);case"^":return Math.pow(evalAst(n.a,env),evalAst(n.b,env))}}
+function varsOf(n,s=new Set()){if("v"in n)s.add(n.v);if(n.a)varsOf(n.a,s);if(n.b)varsOf(n.b,s);return s}
+function countTerms(n){if(n.op==="+"||n.op==="-")return countTerms(n.a)+countTerms(n.b);return 1}
+function equivalent(a,b){const vs=new Set([...varsOf(a),...varsOf(b)]);
+  for(let k=0;k<6;k++){const env={};vs.forEach(v=>env[v]=((k*7.31+v.charCodeAt(0)*1.17)%9)-4.21);
+    const x=evalAst(a,env),y=evalAst(b,env);if(!isFinite(x)||Math.abs(x-y)>1e-7*Math.max(1,Math.abs(y)))return false}return true}
+
+/* ============ contenido ============ */
+const LINES={
+  ent:{name:"Los números enteros",short:"Enteros",c:"--l-ent"},
+  rac:{name:"Los números racionales",short:"Racionales",c:"--l-rac"},
+  rec:{name:"La recta real",short:"Recta real",c:"--l-rec"},
+  alg:{name:"Álgebra básica",short:"Álgebra",c:"--l-alg"},
+  ecu:{name:"Ecuaciones",short:"Ecuaciones",c:"--l-ecu"},
+  bie:{name:"Bienestar y aprendizaje",short:"Bienestar",c:"--l-bie"}};
+const PATHS={ent:[[90,120],[810,120]],rac:[[810,120],[900,210],[900,520]],rec:[[900,520],[840,580],[280,580]],
+  alg:[[280,580],[200,500],[200,340]],ecu:[[200,340],[260,280],[810,280]],bie:[[90,120],[170,200],[650,200]]};
+const ST=[
+  {id:"inicio",line:"hub",x:90,y:120,lab:["Inicio","Diagnóstico"],lp:"top",built:true},
+  {id:"E1",line:"ent",x:210,y:120,lab:["Programas","de cálculo"],lp:"top",built:true},
+  {id:"E2",line:"ent",x:330,y:120,lab:["Calcular","con economía"],lp:"top",built:true},
+  {id:"E3",line:"ent",x:450,y:120,lab:["Diferencias","y paréntesis"],lp:"top",built:true},
+  {id:"E4",line:"ent",x:570,y:120,lab:["Las caras","del menos"],lp:"top",built:true},
+  {id:"E5",line:"ent",x:690,y:120,lab:["Una sola","fórmula"],lp:"top",built:true},
+  {id:"E6",line:"ent",x:810,y:120,lab:["Productos","con signo"],lp:"top",built:true},
+  {id:"R1",line:"rac",x:900,y:240,lab:["Fracciones","como medida"],lp:"right"},
+  {id:"R2",line:"rac",x:900,y:310,lab:["Fracciones","equivalentes"],lp:"right"},
+  {id:"R3",line:"rac",x:900,y:380,lab:["Sumar y restar","fracciones"],lp:"right"},
+  {id:"R4",line:"rac",x:900,y:450,lab:["Multiplicar","y dividir"],lp:"right"},
+  {id:"R5",line:"rac",x:900,y:520,lab:["Decimales y","porcentajes"],lp:"right"},
+  {id:"L1",line:"rec",x:760,y:580,lab:["Ordenar","en la recta"],lp:"bottom"},
+  {id:"L2",line:"rec",x:640,y:580,lab:["Densidad"],lp:"bottom"},
+  {id:"L3",line:"rec",x:520,y:580,lab:["Números","irracionales"],lp:"bottom"},
+  {id:"L4",line:"rec",x:400,y:580,lab:["Valor absoluto","e intervalos"],lp:"bottom"},
+  {id:"L5",line:"rec",x:280,y:580,lab:["Potencias","y raíces"],lp:"bottom"},
+  {id:"A1",line:"alg",x:240,y:540,lab:["Expresiones","y fórmulas"],lp:"left"},
+  {id:"A2",line:"alg",x:200,y:470,lab:["Productos","notables"],lp:"left"},
+  {id:"A3",line:"alg",x:200,y:410,lab:["Factorización"],lp:"left"},
+  {id:"A4",line:"alg",x:200,y:340,lab:["Fracciones","algebraicas"],lp:"left"},
+  {id:"Q1",line:"ecu",x:330,y:280,lab:["Igualdad y","equivalencia"],lp:"bottom"},
+  {id:"Q2",line:"ecu",x:450,y:280,lab:["Primer grado"],lp:"bottom"},
+  {id:"Q3",line:"ecu",x:570,y:280,lab:["Problemas con","ecuaciones"],lp:"bottom"},
+  {id:"Q4",line:"ecu",x:690,y:280,lab:["Sistemas 2 × 2"],lp:"bottom"},
+  {id:"Q5",line:"ecu",x:810,y:280,lab:["Inecuaciones"],lp:"bottom"},
+  {id:"B1",line:"bie",x:290,y:200,lab:["Mi relación con","las matemáticas"],lp:"bottom",built:true},
+  {id:"B2",line:"bie",x:450,y:200,lab:["Cuando","me bloqueo"],lp:"bottom"},
+  {id:"B3",line:"bie",x:610,y:200,lab:["Mi plan","de estudio"],lp:"bottom"}];
+const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
+const SEQS=[["inicio","E1","E2","E3","E4","E5","E6","R1","R2","R3","R4","R5","L1","L2","L3","L4","L5","A1","A2","A3","A4","Q1","Q2","Q3","Q4","Q5"],["inicio","B1","B2","B3"]];
+const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
+const ENT=["E1","E2","E3","E4","E5","E6"];
+const BUILT=[...ENT,"B1"];
+
+const NODES={
+E1:{title:"Programas de cálculo",sub:"Cuando falta un dato, la respuesta es una fórmula.",
+ info:`<p class="lead">Cuando a un problema le falta un dato, la respuesta ya no es un número: es una <b>fórmula</b> que guarda el programa de cálculo y sirve para cualquier valor de ese dato.</p>
+ <div class="ex-box"><span class="eyebrow">Ejemplo</span><p>Laura llevó sus tazos al colegio. En la primera partida perdió 9 y en la segunda ganó 7. ¿Cuántos tiene ahora?</p>
+ <p>No sabemos con cuántos empezó, así que llamamos <span class="m">a</span> a ese número. La respuesta es <span class="m">a − 9 + 7</span>.</p></div>
+ <p>Esa fórmula se puede decir más corta. Perder 9 y después ganar 7 tiene el mismo efecto que perder 2:</p>
+ <p class="calc">a − 9 + 7 = a − 2</p>
+ <p>Cada «+ número» o «− número» es un <b>movimiento</b> que se aplica a lo que haya. Dos movimientos seguidos se pueden <b>componer</b> en uno solo: restar 9 y sumar 7 es lo mismo que restar 2.</p>
+ <div class="callout"><span class="eyebrow">Cambia la forma de leer los signos</span>
+ <p>En aritmética, en <span class="m">13 − 5 − 3</span> se calcula de izquierda a derecha: 13 − 5 = 8 y luego 8 − 3 = 5. En <span class="m">b − 5 − 3</span> no se puede calcular <span class="m">b − 5</span>. Entonces cada signo se lee pegado al número que lo sigue: <span class="m">−5</span> y <span class="m">−3</span> son dos movimientos que, juntos, son <span class="m">−8</span>. Así, <span class="m">b − 5 − 3 = b − 8</span>.</p></div>
+ <div class="ex-box"><span class="eyebrow">Ejemplo resuelto</span><p>Un tren sale con <span class="m">b</span> pasajeros. En la primera parada bajan 15 y suben 12; en la segunda bajan 38 y suben 42. ¿Con cuántos llega?</p>
+ <p class="calc">b − 15 + 12 − 38 + 42<br>= b − 3 + 4<br>= b + 1</p><p>Si salió con 427 pasajeros, llegó con 428. La fórmula responde todas las preguntas de ese tipo a la vez.</p></div>`,
+ explore:{intro:"Arma un programa de movimientos y mira cómo varios saltos se convierten en uno solo, empieces donde empieces.",fn:"xTraslaciones"},
+ reto:[
+  {type:"choice",q:"Restar 5 y después sumar 2 es lo mismo que…",opts:["restar 3","sumar 3","restar 7","sumar 7"],hint:"Imagina que tienes 10: quitas 5 y añades 2. ¿Cuánto cambió respecto a 10?",explain:"−5 + 2 = −3. El efecto neto es restar 3."},
+  {type:"fill",kind:"expr",q:"Simplifica con las menos operaciones posibles: <span class='m'>h − 25 − 25 + 50 − 7</span>",answer:"h-7",show:"h − 7",maxTerms:2,hint:"Junta los dos −25: son −50. ¿Qué pasa con −50 y +50?",explain:"−25 − 25 = −50 y −50 + 50 = 0. Solo queda h − 7."},
+  {type:"fill",kind:"expr",q:"María sale de compras con 120 mil pesos. Compra un pantalón de 40 mil, unos zapatos de <span class='m'>z</span> mil y un libro de 15 mil. Escribe, simplificada, la fórmula de lo que le queda (en miles).",answer:"65-z",show:"65 − z",maxTerms:2,hint:"Escribe primero 120 − 40 − z − 15 y luego junta los números.",explain:"120 − 40 − z − 15 = 65 − z. Si le quedan 30 mil, los zapatos costaron 35 mil."},
+  {type:"match",q:"Arrastra cada forma simplificada junto a su expresión.",pairs:[["d − 7 − 4 + 10","d − 1"],["27 − q − 8 − 8","11 − q"],["18 − 5 + x + 5 − 8","x + 10"],["m − 45 + 44 − 17 + 18","m"]],hint:"Calcula el efecto neto de todos los números de cada expresión, por ejemplo −7 − 4 + 10.",explain:"−7 − 4 + 10 = −1; 27 − 8 − 8 = 11; −5 y +5 se anulan, y 18 − 8 = 10; −45 + 44 = −1 y −17 + 18 = +1, que también se anulan."},
+  {type:"fill",kind:"num",q:"Un tren sale con <span class='m'>b</span> pasajeros. En la primera parada bajan 15 y suben 12; en la segunda bajan 38 y suben 42. Si llegan 876 pasajeros, ¿con cuántos salió?",answer:875,hint:"Primero simplifica la fórmula b − 15 + 12 − 38 + 42.",explain:"La fórmula es b + 1. Si llegan 876, salieron 875."}],
+ key:"Una fórmula guarda un programa de cálculo. Los signos + y − quedan pegados al número que los sigue e indican si se suma o se resta; varios movimientos seguidos se componen en uno solo.",
+ ojo:"En una expresión con letras no siempre se puede operar de izquierda a derecha. La pregunta útil es: ¿qué efecto tienen todos estos movimientos juntos?"},
+
+E2:{title:"Calcular con economía",sub:"En álgebra se elige el camino más corto.",
+ info:`<p class="lead">El cálculo con letras no tiene un único algoritmo. Se trata de elegir el camino con menos cuentas. Hay cuatro herramientas:</p>
+ <ol class="plain">
+ <li><b>El orden de los movimientos no cambia el resultado.</b> Restar 5 y luego sumar 2 da lo mismo que sumar 2 y luego restar 5. Cada término se puede mover, siempre <b>con su signo</b>.</li>
+ <li><b>Lo que se suma y se resta se anula.</b> <span class="m">a − 36 + 87 − 5 + 36 = a + 82</span></li>
+ <li><b>Busca cuentas fáciles.</b> <span class="m">b − 42 + 25 − 38 = b − 80 + 25 = b − 55</span>, porque −42 − 38 da un número redondo.</li>
+ <li><b>Los términos con la misma letra se cuentan juntos.</b> <span class="m">3f + 5f − 2f = 6f</span>: tres efes más cinco efes menos dos efes.</li></ol>
+ <div class="ex-box"><span class="eyebrow">Ejemplo resuelto</span><p class="calc">3f + 77 + 5f − 82 + 23 + 82 − 2f<br>= 3f + 5f − 2f + 77 + 23   <span class="muted">(−82 y +82 se anulan)</span><br>= 6f + 100</p></div>
+ <div class="ex-box"><span class="eyebrow">Ejemplo resuelto</span><p class="calc">100 − r − n + 48 − 99 − 18<br>= 1 + 48 − 18 − r − n   <span class="muted">(100 − 99 = 1)</span><br>= 31 − r − n</p></div>`,
+ explore:{intro:"Toca un término y después su opuesto para tacharlos. Antes de hacer cuentas, busca todas las parejas que se anulan.",fn:"xTachar"},
+ reto:[
+  {type:"fill",kind:"expr",q:"Simplifica: <span class='m'>p − 15 + 85 + 36 + 24 − 35 − 1</span>",answer:"p+94",show:"p + 94",maxTerms:2,hint:"−15 + 85 da 70, y 36 + 24 da 60.",explain:"70 + 60 = 130 y 130 − 35 − 1 = 94. Resultado: p + 94."},
+  {type:"fill",kind:"expr",q:"Simplifica: <span class='m'>35 − a − a − a − a − a + 60</span>",answer:"95-5a",show:"95 − 5a",maxTerms:2,hint:"Restar a cinco veces es restar 5a.",explain:"35 + 60 = 95, y las cinco a restadas son −5a: 95 − 5a."},
+  {type:"choice",q:"Un estudiante escribió <span class='m'>d − 7 − 4 + 10 = d − 3 + 10 = d − 13</span>. ¿Qué opinas?",opts:["Se equivocó: −7 − 4 es −11, y el resultado es d − 1","Está bien hecho","Se equivocó: el resultado es d + 13","Se equivocó: el resultado es d − 21"],hint:"¿Restar 7 y luego restar 4 es lo mismo que restar 3?",explain:"Restar 7 y restar 4 es restar 11. Leyó «− 7 − 4» como «7 − 4». Lo correcto es d − 11 + 10 = d − 1."},
+  {type:"fill",kind:"expr",q:"Simplifica: <span class='m'>17p + 26 − 32q − 16 + 12q + 3p</span>",answer:"20p-20q+10",show:"20p − 20q + 10",maxTerms:3,hint:"Junta las p por un lado, las q por otro y los números por otro.",explain:"17p + 3p = 20p; −32q + 12q = −20q; 26 − 16 = 10."},
+  {type:"choice",q:"¿Cuál es la forma más simple de <span class='m'>4a − 8b − 6c − 3a + 18b</span>?",opts:["a + 10b − 6c","7a + 10b − 6c","a − 26b − 6c","a + 10b + 6c"],hint:"Calcula 4a − 3a y luego −8b + 18b.",explain:"4a − 3a = a; −8b + 18b = 10b; −6c no tiene con quién juntarse."}],
+ key:"En el cálculo algebraico no hay una sola receta: se elige el camino más corto. Los términos se reordenan con su signo, los opuestos se anulan y las letras iguales se cuentan juntas.",
+ ojo:"Al mover un término, su signo viaja con él. En d − 7 − 4, el 4 no se le resta al 7: se le resta a d."},
+
+E3:{title:"Diferencias y paréntesis",sub:"Comparar obliga a restar expresiones completas.",
+ info:`<p class="lead">Para comparar dos cantidades se calcula su <b>diferencia</b>. Cuando las cantidades son expresiones, hay que restar la expresión completa.</p>
+ <div class="ex-box"><span class="eyebrow">Ejemplo</span><p>Alberto tiene <span class="m">a</span> mil pesos. Laura tiene 35 más que él y Clara tiene 20 menos. ¿Cuánto más tiene Laura que Clara?</p>
+ <p>Laura tiene <span class="m">a + 35</span> y Clara <span class="m">a − 20</span>. Se resta todo lo de Clara, así que va entre paréntesis:</p>
+ <p class="calc">(a + 35) − (a − 20)<br>= a + 35 − a + 20<br>= 55</p></div>
+ <p>El menos que está delante de un paréntesis <b>cambia cada término de dentro</b>: lo que se sumaba pasa a restarse y lo que se restaba pasa a sumarse. Restar «20 menos» es devolver esos 20.</p>
+ <p><b>Diferencias con signo.</b> Si se calcula al revés, <span class="m">(a − 20) − (a + 35) = −55</span>. El 55 dice cuánto se diferencian; el signo dice quién tiene más. Una diferencia negativa significa que el primer término es el menor. No es un error ni una deuda.</p>
+ <div class="callout"><span class="eyebrow">El error más frecuente</span><p>En el estudio de Eva Cid (2015) con estudiantes de secundaria, cerca de la mitad cambiaba solo el signo del primer término del paréntesis y escribía <span class="m">a + 35 − a − 20</span>. Compruébalo siempre con un número: si <span class="m">a = 50</span>, Laura tiene 85, Clara tiene 30 y la diferencia es 55, no 15.</p></div>`,
+ explore:{intro:"Mueve el dinero de Alberto. La diferencia entre Laura y Clara no cambia, y la forma de escribirla decide si la cuenta sale bien.",fn:"xComparar"},
+ reto:[
+  {type:"choice",q:"¿Cuánto vale <span class='m'>20 − (8 − 3)</span>?",opts:["15","9","25","11"],hint:"Calcula primero el paréntesis completo, o bien cambia los signos de dentro: 20 − 8 + 3.",explain:"20 − (8 − 3) = 20 − 5 = 15. También 20 − 8 + 3 = 15: restar «8 menos 3» es restar 8 y devolver 3."},
+  {type:"fill",kind:"expr",q:"Simplifica: <span class='m'>(a + 35) − (a − 20)</span>",answer:"55",show:"55",maxTerms:1,hint:"Quita el paréntesis cambiando el signo de los dos términos: −a y +20.",explain:"a + 35 − a + 20 = 55, para cualquier valor de a."},
+  {type:"fill",kind:"expr",q:"Simplifica: <span class='m'>x − (12 − x + 5)</span>",answer:"2x-17",show:"2x − 17",maxTerms:2,hint:"El menos cambia los tres términos de dentro: −12, +x, −5.",explain:"x − 12 + x − 5 = 2x − 17."},
+  {type:"choice",q:"Si la diferencia (dinero de Clara) − (dinero de Laura) da <span class='m'>−55</span>, quiere decir que…",opts:["Clara tiene 55 menos que Laura","Clara tiene una deuda de 55","hubo un error: una diferencia no puede ser negativa","Laura tiene 55 menos que Clara"],hint:"El signo de una diferencia dice cuál de los dos términos es mayor.",explain:"−55 indica que el primer término (Clara) es 55 unidades menor que el segundo (Laura). Nadie debe nada."},
+  {type:"order",q:"Ordena de menor a mayor. El orden sirve para cualquier valor de <span class='m'>a</span>.",items:["a + 35","a − 25","a","a − 20"],correct:["a − 25","a − 20","a","a + 35"],hint:"Compara cada expresión con a: ¿cuánto se le suma o se le resta?",explain:"Restar 25 deja menos que restar 20, que deja menos que no hacer nada, que deja menos que sumar 35."}],
+ key:"Para restar una expresión completa hay que ponerla entre paréntesis, y el menos de delante cambia todos sus términos. Una diferencia negativa no es un error: indica que el primer término es el menor.",
+ ojo:"Cambiar solo el signo del primer término del paréntesis es el error más común. Compruébalo con un número."},
+
+E4:{title:"Las caras del menos",sub:"Un mismo signo, tres trabajos distintos.",
+ info:`<p class="lead">El signo <span class="m">−</span> hace tres trabajos distintos. Leer bien una expresión empieza por saber cuál está haciendo cada vez.</p>
+ <ol class="plain">
+ <li><b>Restar.</b> Está entre dos términos: <span class="m">7 − 3</span>, <span class="m">a − 5</span>.</li>
+ <li><b>Tomar el opuesto.</b> Cambia lo que tiene detrás: <span class="m">−(a − 5) = −a + 5</span>. Y <span class="m">−x</span> es el opuesto de <span class="m">x</span>.</li>
+ <li><b>Ser negativo.</b> Forma parte del nombre de un número: <span class="m">−3</span> es el número que está tres lugares a la izquierda del cero.</li></ol>
+ <div class="ex-box"><span class="eyebrow">Ejemplo</span><p>En <span class="m">5 − (−2)</span> el primer menos resta y el segundo dice que el 2 es negativo. Restar −2 es lo mismo que sumar 2:</p><p class="calc">5 − (−2) = 5 + 2 = 7</p></div>
+ <div class="ex-box"><span class="eyebrow">El opuesto del opuesto</span><p class="calc">−(−3) = 3</p><p>Tomar el opuesto es reflejar en el cero. Dos reflejos devuelven el número a su sitio. Por eso, si <span class="m">−x = 7</span>, entonces <span class="m">x = −7</span>: x es el número cuyo opuesto es 7. Muchas personas responden <span class="m">x = 7</span>; compruébalo: el opuesto de 7 es −7, no 7.</p></div>
+ <div class="callout"><span class="eyebrow">Una letra puede valer un negativo</span><p><span class="m">−x</span> no siempre es negativo. Si <span class="m">x = −4</span>, entonces <span class="m">−x = 4</span>. Una letra representa cualquier número, también uno negativo.</p></div>`,
+ explore:{intro:"Elige un número y toma su opuesto varias veces. Después mira qué pasa con −x cuando x es negativo.",fn:"xOpuestos"},
+ reto:[
+  {type:"choice",q:"En <span class='m'>5 − (−2)</span>, ¿qué trabajo hace cada signo menos?",opts:["El primero resta; el segundo indica que el 2 es negativo","Los dos restan","Los dos indican números negativos","El primero toma el opuesto; el segundo resta"],hint:"¿Cuál está entre dos números y cuál está pegado a un solo número?",explain:"El primero está entre 5 y (−2): resta. El segundo forma parte del número −2."},
+  {type:"choice",q:"«Si x es un número cualquiera, −x es negativo.» ¿Verdadero o falso?",opts:["Falso: si x es negativo, −x es positivo","Verdadero: siempre lleva el signo menos","Verdadero, salvo cuando x vale 0","Falso: −x siempre es positivo"],hint:"Prueba con x = −4.",explain:"−x es el opuesto de x. Si x = −4, −x = 4, que es positivo."},
+  {type:"fill",kind:"num",q:"Si <span class='m'>−x = 7</span>, ¿cuánto vale <span class='m'>x</span>?",answer:-7,hint:"x es el número cuyo opuesto es 7.",explain:"El opuesto de −7 es 7. Por eso x = −7."},
+  {type:"fill",kind:"num",q:"Calcula <span class='m'>−(−(−4))</span>",answer:-4,hint:"Trabaja de dentro hacia fuera: ¿cuánto es −(−4)?",explain:"−(−4) = 4, y −(4) = −4. Con un número impar de opuestos, el signo queda cambiado."},
+  {type:"choice",q:"Si <span class='m'>a</span> es positivo y <span class='m'>b</span> es negativo, <span class='m'>a − b</span> es…",opts:["siempre positivo","positivo o negativo, según los valores","siempre negativo","siempre cero"],hint:"Restar un número negativo es sumar su opuesto, que es positivo.",explain:"a − b = a + (−b), y −b es positivo. Una suma de dos positivos es positiva."}],
+ key:"El signo − tiene tres trabajos: restar, tomar el opuesto y marcar un número negativo. Para leer una expresión, pregúntate qué trabajo hace cada signo.",
+ ojo:"Una letra con un menos delante, como −x, no es necesariamente un número negativo."},
+
+E5:{title:"Una sola fórmula",sub:"Los negativos permiten que una fórmula sirva en todos los casos.",
+ info:`<p class="lead">Los números negativos no aparecieron para hablar de deudas o temperaturas. Su gran ventaja es que permiten que <b>una sola fórmula</b> sirva en todos los casos.</p>
+ <div class="ex-box"><span class="eyebrow">Ejemplo</span><p>Un día el termómetro marca 6 grados sobre cero y otro día 5 bajo cero. Contando las marcas, hay 11 grados de diferencia.</p>
+ <p>Si llamamos <span class="m">T</span> a la temperatura más alta y <span class="m">t</span> a la más baja, la diferencia es <span class="m">T − t</span>. ¿Sirve también bajo cero? Con <span class="m">t = −5</span>:</p>
+ <p class="calc">T − t = 6 − (−5) = 6 + 5 = 11</p>
+ <p>Y con dos temperaturas bajo cero, −3 y −8: <span class="m">−3 − (−8) = 5</span>. Sin negativos necesitaríamos una fórmula distinta para cada situación.</p></div>
+ <p><b>El orden.</b> Un número es mayor que otro cuando la diferencia entre ellos es positiva. <span class="m">−3</span> es mayor que <span class="m">−8</span> porque <span class="m">−3 − (−8) = 5</span>. En la recta, mayor quiere decir más a la derecha.</p>
+ <div class="callout"><span class="eyebrow">Lo que ya no vale en los enteros</span><p>Con los naturales, sumar siempre aumenta y restar siempre disminuye. Con los enteros no: <span class="m">7 + (−3) = 4</span> es menor que 7, y <span class="m">7 − (−3) = 10</span> es mayor que 7. Tampoco existe un número que sea el menor de todos.</p></div>`,
+ explore:{intro:"Mueve las dos marcas del termómetro. Cuenta los grados entre ellas y compara con lo que da la fórmula T − t.",fn:"xTermometro"},
+ reto:[
+  {type:"choice",q:"En una ciudad hay −7 °C y en otra −3 °C. Si viajas de la primera a la segunda, la temperatura…",opts:["sube 4 grados","baja 4 grados","sube 10 grados","baja 10 grados"],hint:"Calcula llegada menos salida: −3 − (−7).",explain:"−3 − (−7) = −3 + 7 = 4. Es positivo: sube. Calcular 7 − 3 = 4 y decir «baja» es ignorar los signos."},
+  {type:"order",q:"Ordena de menor a mayor.",items:["−3","5","−12","0","−8"],correct:["−12","−8","−3","0","5"],hint:"Entre dos negativos, el menor es el que está más lejos del cero.",explain:"−12 < −8 < −3 < 0 < 5. Por ejemplo, −8 − (−12) = 4 es positivo, así que −8 es mayor que −12."},
+  {type:"fill",kind:"num",q:"¿Qué número es una unidad mayor que <span class='m'>−3</span>?",answer:-2,hint:"Mayor quiere decir más a la derecha en la recta.",explain:"−3 + 1 = −2. Responder −4 es ordenar los negativos como si fueran naturales."},
+  {type:"choice",q:"¿Cuál de estas propiedades de los naturales deja de cumplirse en los enteros?",opts:["Al sumarle un número a otro, el resultado es mayor o igual que el primero","a + b = b + a","a + 0 = a","(a + b) + c = a + (b + c)"],hint:"Prueba sumando un número negativo.",explain:"7 + (−3) = 4, que es menor que 7. Las otras tres propiedades siguen valiendo."},
+  {type:"fill",kind:"num",q:"Alberto juega cuatro partidas: en la primera pierde 3 cromos, de la segunda no se acuerda, en la tercera gana 5 y en la cuarta pierde 4. En total perdió 3 cromos. ¿Cuántos ganó o perdió en la segunda? (Escribe las pérdidas con signo menos.)",answer:-1,hint:"Llama x a la segunda partida: −3 + x + 5 − 4 = x − 2. ¿Cuándo vale −3?",explain:"x − 2 = −3 cuando x = −1: en la segunda partida perdió 1 cromo."}],
+ key:"Los enteros permiten que una sola fórmula sirva en todos los casos. Las letras pueden valer números positivos o negativos, y el orden lo decide el signo de la diferencia.",
+ ojo:"Entre negativos, el que tiene la cifra más grande es el menor: −12 es menor que −3."},
+
+E6:{title:"Productos con signo",sub:"La regla de los signos sale de la cuenta.",
+ info:`<p class="lead">La regla de los signos del producto no hay que memorizarla a ciegas: sale de la <b>propiedad distributiva</b> y de llevar bien la cuenta de lo que se suma y lo que se quita.</p>
+ <div class="ex-box"><span class="eyebrow">Un rectángulo que crece y encoge</span><p>Un rectángulo de base <span class="m">a</span> y altura <span class="m">b</span> tiene área <span class="m">ab</span>.</p>
+ <p>Si la base aumenta 2: <span class="m">(a + 2)·b = ab + 2b</span>. Se añade una franja.</p>
+ <p>Si la altura disminuye 1: <span class="m">a·(b − 1) = ab − a</span>. Se quita una franja.</p></div>
+ <p>¿Y si los dos lados disminuyen? En <span class="m">(a − 1)(b − 2)</span> quitamos una franja de 1 por b y otra de a por 2. Pero la esquina de 1 por 2 queda quitada <b>dos veces</b>, así que hay que devolverla una vez:</p>
+ <p class="calc">(a − 1)(b − 2) = ab − 2a − b + 2</p>
+ <p>Ese <span class="m">+2</span> es «lo que se resta, multiplicado por lo que se resta, se suma». Con números: <span class="m">(−1)·(−2) = 2</span>.</p>
+ <div class="ex-box"><span class="eyebrow">La regla, en resumen</span><p class="calc">(+)·(+) = +    (+)·(−) = −<br>(−)·(+) = −    (−)·(−) = +</p></div>
+ <div class="callout"><span class="eyebrow">Ojo con el número de fuera</span><p>En <span class="m">−2(x − 5)</span> el −2 multiplica a los dos términos: <span class="m">−2x + 10</span>. El error frecuente es escribir <span class="m">−2x − 10</span>, cambiando solo el primer signo.</p></div>`,
+ explore:{intro:"Cambia los lados del rectángulo. Mira qué franjas se añaden (verde), cuáles se quitan (rojo) y qué esquina se quita dos veces.",fn:"xRectangulo"},
+ reto:[
+  {type:"fill",kind:"expr",q:"Desarrolla: <span class='m'>3(b + 2)</span>",answer:"3b+6",show:"3b + 6",maxTerms:2,noParens:true,hint:"El 3 multiplica a b y también a 2.",explain:"3(b + 2) = 3b + 6."},
+  {type:"fill",kind:"expr",q:"Desarrolla: <span class='m'>−2(x − 5)</span>",answer:"-2x+10",show:"−2x + 10",maxTerms:2,noParens:true,hint:"−2 por −5: lo que se resta por lo que se resta.",explain:"−2 · x = −2x y −2 · (−5) = +10."},
+  {type:"fill",kind:"expr",q:"Desarrolla: <span class='m'>(a − 1)(b − 2)</span>",answer:"ab-2a-b+2",show:"ab − 2a − b + 2",maxTerms:4,noParens:true,hint:"Multiplica cada término del primer paréntesis por cada término del segundo: salen cuatro productos.",explain:"ab − 2a − b + 2. El +2 es la esquina que se había quitado dos veces."},
+  {type:"choice",q:"Un rectángulo mide <span class='m'>a</span> cm de base y 5 cm de altura. Se aumenta la base 3 cm y se reduce la altura 3 cm. ¿Qué pasa con el área?",opts:["Cambia en 6 − 3a cm²: aumenta si a < 2 y disminuye si a > 2","Siempre se mantiene igual, porque se suma lo mismo que se quita","Siempre aumenta","Siempre disminuye 9 cm²"],hint:"Calcula (a + 3)(5 − 3) − 5a.",explain:"(a + 3)·2 = 2a + 6. La diferencia con 5a es 6 − 3a: positiva si a < 2, negativa si a > 2."},
+  {type:"fill",kind:"num",q:"Calcula <span class='m'>(−3)·(−4) − 2·(−5)</span>",answer:22,hint:"(−3)·(−4) = 12 y 2·(−5) = −10. ¿Cuánto es restar −10?",explain:"12 − (−10) = 12 + 10 = 22."}],
+ key:"La regla de los signos del producto sale de la propiedad distributiva: lo que se resta, multiplicado por lo que se resta, se devuelve sumando.",
+ ojo:"Un número negativo delante de un paréntesis multiplica a todos los términos y cambia el signo de cada uno."}
+};
+
+const DIAG=[
+  {node:"E1",type:"choice",q:"Restar 9 y después sumar 4 es lo mismo que…",opts:["restar 5","sumar 5","restar 13","sumar 13"]},
+  {node:"E1",type:"fill",kind:"expr",q:"Simplifica: <span class='m'>b − 6 − 10 − 4</span>",answer:"b-20",show:"b − 20",maxTerms:2},
+  {node:"E2",type:"fill",kind:"expr",q:"Simplifica: <span class='m'>m − 45 + 44 − 17 + 18 + 27 − 3</span>",answer:"m+24",show:"m + 24",maxTerms:2},
+  {node:"E2",type:"fill",kind:"expr",q:"Simplifica: <span class='m'>4a − 8b − 6c − 3a + 18b</span>",answer:"a+10b-6c",show:"a + 10b − 6c",maxTerms:3},
+  {node:"E3",type:"choice",q:"¿Cuánto vale <span class='m'>30 − (12 − 2)</span>?",opts:["20","16","40","14"]},
+  {node:"E3",type:"fill",kind:"expr",q:"Simplifica: <span class='m'>(2n + 5) − (n − 3)</span>",answer:"n+8",show:"n + 8",maxTerms:2},
+  {node:"E4",type:"fill",kind:"num",q:"Si <span class='m'>−x = −6</span>, ¿cuánto vale <span class='m'>x</span>?",answer:6},
+  {node:"E4",type:"choice",q:"«−a siempre es un número negativo.»",opts:["Falso","Verdadero"]},
+  {node:"E5",type:"choice",q:"¿Qué número está 7 unidades antes que <span class='m'>−3</span> en la recta?",opts:["−10","4","−4","10"]},
+  {node:"E5",type:"order",q:"Ordena de menor a mayor.",items:["−1","−10","4","−5"],correct:["−10","−5","−1","4"]},
+  {node:"E6",type:"fill",kind:"expr",q:"Desarrolla: <span class='m'>−3(2 − y)</span>",answer:"-6+3y",show:"−6 + 3y",maxTerms:2,noParens:true},
+  {node:"E6",type:"fill",kind:"expr",q:"Desarrolla: <span class='m'>(x + 2)(x − 2)</span>",answer:"x^2-4",show:"x² − 4",maxTerms:2,noParens:true}];
+
+const SOCIO=[
+ {id:"cre",name:"Creencias sobre las matemáticas",items:[
+   {t:"Las matemáticas son sobre todo memorizar fórmulas y procedimientos.",rev:true},
+   {t:"En matemáticas, entender por qué funciona algo es tan importante como llegar al resultado."},
+   {t:"Si un problema no me sale en pocos minutos, es que no lo voy a poder resolver.",rev:true}],
+  fb:{hi:"Ves las matemáticas como algo que se entiende y se construye, no solo como fórmulas. Esa idea te va a sostener cuando un tema se ponga difícil.",
+      mid:"Conviven en ti dos ideas: que las matemáticas se entienden y que se memorizan. Cada estación de esta caja empieza explicando el porqué; tómate ese momento antes de ir a los ejercicios.",
+      lo:"Es probable que hayas vivido las matemáticas como una lista de reglas que hay que recordar. Te proponemos otra forma: buscar el sentido de cada regla y darte más tiempo con cada problema. Atascarse unos minutos es parte normal del trabajo."}},
+ {id:"aut",name:"Autoconcepto como estudiante",items:[
+   {t:"Me considero una persona capaz de aprender matemáticas si le dedico tiempo."},
+   {t:"Hay gente que nace con cabeza para las matemáticas y yo no soy una de ellas.",rev:true},
+   {t:"Cuando entiendo un tema de matemáticas, siento que lo logré por mi propio esfuerzo."}],
+  fb:{hi:"Confías en tu capacidad de aprender matemáticas con esfuerzo. Esa confianza es una de las cosas que más ayudan a avanzar.",
+      mid:"Tu confianza cambia según el tema. Lleva la cuenta de lo que logras: cada reto superado en esta caja es una prueba de que sí aprendes.",
+      lo:"La idea de que hay que «nacer con cabeza para las matemáticas» es muy común y no se sostiene: la habilidad crece con práctica y con buenas estrategias. Empieza por estaciones cortas y date crédito por cada paso."}},
+ {id:"reg",name:"Autorregulación del aprendizaje",items:[
+   {t:"Antes de estudiar, decido qué quiero lograr en esa sesión."},
+   {t:"Cuando me equivoco, busco en qué parte del razonamiento estuvo el error."},
+   {t:"Suelo dejar el estudio de matemáticas para el último momento.",rev:true}],
+  fb:{hi:"Planeas, revisas tus errores y no lo dejas todo para el final. Mantén esas prácticas: son las que más pesan en la universidad.",
+      mid:"Ya tienes algunas buenas prácticas de estudio. Elige una más para esta semana, por ejemplo decidir qué quieres lograr antes de cada sesión.",
+      lo:"Organizar el estudio es una habilidad que se aprende. Sesiones cortas, con una meta clara y una revisión de los errores al final, funcionan mejor que una sesión larga la noche antes."}},
+ {id:"ans",name:"Ansiedad ante las matemáticas",anx:true,items:[
+   {t:"Me pongo nervioso o nerviosa cuando tengo que resolver un ejercicio delante de otras personas."},
+   {t:"Antes de un examen de matemáticas siento tensión en el cuerpo (en el estómago, las manos o la respiración)."},
+   {t:"Cuando veo un problema con muchos signos y letras, me bloqueo aunque sepa hacerlo."}],
+  fb:{lo:"Según tus respuestas, las matemáticas no te generan mucha tensión. Si algún tema te pone nervioso o nerviosa más adelante, vuelve a esta estación.",
+      mid:"Sientes algo de tensión en situaciones de matemáticas. Es muy frecuente y se puede trabajar: respirar despacio unos segundos antes de empezar y escribir lo que te preocupa ayudan a dejar la mente libre para pensar.",
+      hi:"Las matemáticas te generan bastante tensión. No es falta de capacidad: la ansiedad ocupa parte de la atención que necesitas para razonar. Además de las estrategias de tu plan, te recomendamos hablar con el servicio de bienestar o de acompañamiento psicológico de tu universidad; trabajan este tema con frecuencia."}}];
+const LIKERT=["Nada de acuerdo","Poco","Más o menos","Bastante","Totalmente de acuerdo"];
+const STRATS=["Antes de estudiar, escribir qué quiero lograr en la sesión","Cuando me equivoque, buscar en qué paso estuvo el error antes de mirar la respuesta","Estudiar en sesiones cortas (25 a 40 minutos) varios días a la semana","Respirar despacio un minuto antes de empezar un examen o un reto","Escribir en dos líneas lo que me preocupa antes de un examen","Explicarle un tema a otra persona","Pedir ayuda cuando lleve más de 20 minutos atascado o atascada","Comprobar mis resultados con un número concreto"];
+
+/* ============ configuración de Firebase ============ */
+// Pega aquí la configuración de tu proyecto:
+// Consola de Firebase → Configuración del proyecto → Tus apps → App web → «Configuración del SDK».
+const FIREBASE_CONFIG = {
+  apiKey: "PEGA_AQUI_TU_API_KEY",
+  authDomain: "tu-proyecto.firebaseapp.com",
+  projectId: "tu-proyecto",
+  storageBucket: "tu-proyecto.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000000000000:web:0000000000000000"
+};
+
+/* ============ estado y almacenamiento ============ */
+const AVS=["coral","sol","menta","lila"];
+function freshState(){return{v:1,nombre:"",grupo:"",avatar:"coral",current:"inicio",nodes:{},diag:null,bienestar:false,updatedAt:0}}
+let S=freshState();
+let BIE={answers:{},plan:[],goal:""};
+const RT={db:null,auth:null,uid:null,email:"",teacher:false,saving:false,dirty:false,unsubPanel:null,view:"auth",registering:false};
+let saveT;
+function save(){S.updatedAt=Date.now();if(!RT.uid)return;clearTimeout(saveT);saveT=setTimeout(flush,700)}
+async function flush(){if(!RT.uid)return;if(RT.saving){RT.dirty=true;return}RT.saving=true;
+  try{await RT.db.doc("progreso/"+RT.uid).set({...JSON.parse(JSON.stringify(S)),email:RT.email,uid:RT.uid})}
+  catch(e){toast("No se pudo guardar tu avance. Revisa tu conexión; se volverá a intentar.");setTimeout(()=>{RT.saving=false;flush()},8000);return}
+  RT.saving=false;if(RT.dirty){RT.dirty=false;flush()}}
+let bieT;
+function saveBie(){if(!RT.uid)return;clearTimeout(bieT);bieT=setTimeout(async()=>{try{await RT.db.doc("bienestar/"+RT.uid).set(JSON.parse(JSON.stringify({...BIE,updatedAt:Date.now()})))}catch(e){toast("No se pudieron guardar tus respuestas. Revisa tu conexión.")}},500)}
+const nodeSt=id=>(S.nodes[id]=S.nodes[id]||{moment:0,max:0,results:{},done:false,stars:0});
+const conv=id=>!!(S.diag&&S.diag.conv&&S.diag.conv.includes(id));
+const isDone=id=>id==="B1"?!!S.bienestar:!!(S.nodes[id]&&S.nodes[id].done);
+function unlocked(id){const s=STM[id];if(!s||!s.built)return false;if(id==="inicio"||id==="B1"||id==="E1")return true;
+  const k=ENT.indexOf(id);if(k>0){const p=ENT[k-1];return isDone(p)||conv(p)||conv(id)}return false}
+function nextTarget(){return ENT.find(id=>unlocked(id)&&!isDone(id)&&!conv(id))}
+
+/* ============ cabecera y navegación ============ */
+function renderProg(){const n=BUILT.filter(id=>isDone(id)||conv(id)).length;
+  const stars=ENT.reduce((a,id)=>a+(S.nodes[id]&&S.nodes[id].stars||0),0);
+  $("#prog").innerHTML=`<span>${n} de ${BUILT.length} estaciones</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(n/BUILT.length*100)}%"></i></span><span class="stars" title="Estrellas ganadas en los retos">★ ${stars}</span>`;
+  $("#greet").textContent=S.nombre?`Hola, ${S.nombre}. ¿A qué estación vas?`:"Elige una estación"}
+function showView(v){RT.view=v;["map","node","me","panel","auth"].forEach(k=>$("#view-"+k).hidden=k!==v);
+  $("#tab-map").setAttribute("aria-current",v==="map"||v==="node"?"page":"false");$("#tab-me").setAttribute("aria-current",v==="me"?"page":"false");$("#tab-panel").setAttribute("aria-current",v==="panel"?"page":"false");
+  if(v!=="panel"&&RT.unsubPanel){RT.unsubPanel();RT.unsubPanel=null}
+  window.scrollTo({top:0,behavior:reduceMotion?"auto":"smooth"})}
+$("#tab-map").onclick=()=>{showView("map");renderMap()};
+$("#tab-me").onclick=()=>{renderMe();showView("me")};
+$("#tab-panel").onclick=()=>{renderPanel();showView("panel")};
+function showNotice(msg){const n=$("#notice");n.hidden=!msg;n.textContent=msg||""}
+$("#tab-out").onclick=async()=>{clearTimeout(saveT);if(RT.uid)await flush();if(RT.unsubPanel){RT.unsubPanel();RT.unsubPanel=null}await RT.auth.signOut()};
+
+/* ============ plano ============ */
+const NS="http://www.w3.org/2000/svg";
+function stState(s){if(!s.built)return"soon";if(s.id==="inicio")return S.diag?"done":"open";if(isDone(s.id))return"done";if(conv(s.id))return"conv";if(!unlocked(s.id))return"locked";const ns=S.nodes[s.id];return ns&&ns.max>0?"prog":"open"}
+function renderMap(){
+  const svg=$("#map");const col=l=>`var(${LINES[l]?LINES[l].c:"--ink"})`;let h="";
+  // líneas
+  for(const [l,pts] of Object.entries(PATHS)){const built=l==="ent"||l==="bie";
+    h+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${col(l)}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" ${built?"":'stroke-opacity=".32"'}/>`}
+  // leyenda
+  h+=`<g class="legend" transform="translate(330,372)"><text x="0" y="0" style="font-weight:800;font-size:15px">Líneas</text>`;
+  Object.entries(LINES).forEach(([l,L],i)=>{const ids=ST.filter(s=>s.line===l).map(s=>s.id);const built=ids.filter(id=>STM[id].built);
+    const done=built.filter(id=>isDone(id)||conv(id)).length;const y=26+i*25;
+    h+=`<rect x="0" y="${y-10}" width="30" height="9" rx="4.5" fill="${col(l)}" ${built.length?"":'fill-opacity=".35"'}/><text x="42" y="${y}">${L.name}</text><text class="lg-n" x="300" y="${y}" text-anchor="end">${built.length?done+" / "+built.length:"en construcción"}</text>`});
+  h+=`</g>`;
+  // estaciones
+  const tgt=nextTarget();
+  for(const s of ST){const st=stState(s);const c=s.line==="hub"?"var(--ink)":col(s.line);
+    const r=s.id==="inicio"?13:9;
+    let lx=s.x,ly=s.y,anchor="middle",lines=s.lab;
+    if(s.lp==="top"){ly=s.y-22-(lines.length-1)*15}else if(s.lp==="bottom"){ly=s.y+28}else if(s.lp==="right"){lx=s.x+20;anchor="start";ly=s.y+4-(lines.length-1)*7.5}else{lx=s.x-20;anchor="end";ly=s.y+4-(lines.length-1)*7.5}
+    const ring=st==="soon"?"var(--l-off)":st==="locked"?"var(--l-off)":c;
+    const fill=st==="done"||st==="conv"?c:"var(--surface)";
+    const label=`${s.lab.join(" ")}. ${st==="soon"?"En construcción":st==="locked"?"Bloqueada":st==="done"?"Completada":st==="conv"?"Convalidada en el diagnóstico":st==="prog"?"En curso":"Disponible"}`;
+    h+=`<g class="st ${st}" data-id="${s.id}" tabindex="0" role="button" aria-label="${esc(label)}">`;
+    if(s.id===tgt&&!reduceMotion)h+=`<circle class="pulse" cx="${s.x}" cy="${s.y}" r="${r}" fill="none" stroke="${c}" stroke-width="3"/>`;
+    h+=`<circle class="ring" cx="${s.x}" cy="${s.y}" r="${r+4}" fill="transparent" stroke="transparent"/>`;
+    h+=`<circle class="dot" cx="${s.x}" cy="${s.y}" r="${st==="soon"?6:r}" fill="${fill}" stroke="${ring}" stroke-width="${st==="soon"?3:4}" ${st==="conv"?'stroke-dasharray="4 3"':""}/>`;
+    if(st==="done")h+=`<path d="M${s.x-4} ${s.y} l3 3.5 l5.5 -6.5" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    if(st==="locked")h+=`<rect x="${s.x-3.5}" y="${s.y-1}" width="7" height="5.5" rx="1" fill="var(--l-off)"/><path d="M${s.x-2} ${s.y-1} v-1.8 a2 2 0 0 1 4 0 v1.8" fill="none" stroke="var(--l-off)" stroke-width="1.5"/>`;
+    if(s.id==="inicio")h+=`<text x="${s.x}" y="${s.y+4.5}" text-anchor="middle" style="font-size:12px;font-weight:800;fill:${S.diag?"var(--surface)":"var(--ink)"}">${S.diag?"✓":"?"}</text>`;
+    h+=`<text text-anchor="${anchor}" x="${lx}" y="${ly}">${lines.map((t,i)=>`<tspan x="${lx}" dy="${i?15:0}">${esc(t)}</tspan>`).join("")}</text></g>`}
+  // avatar
+  const p=STM[S.current]||STM.inicio;
+  h+=`<g id="avatar" style="transform:translate(${p.x}px,${p.y-12}px)" aria-hidden="true"><g class="bob">
+    <ellipse cx="0" cy="11" rx="9" ry="3" fill="var(--ink)" fill-opacity=".18"/>
+    <path d="M-7 4 Q-7 -9 0 -9 Q7 -9 7 4 Z" fill="var(--av-${S.avatar})" stroke="var(--surface)" stroke-width="2"/>
+    <circle cx="0" cy="-15" r="6.5" fill="var(--av-${S.avatar})" stroke="var(--surface)" stroke-width="2"/>
+    <circle cx="2.2" cy="-16" r="1.3" fill="var(--surface)"/></g></g>`;
+  svg.innerHTML=h;
+  $$(".st",svg).forEach(g=>{const go=()=>clickStation(g.dataset.id);g.addEventListener("click",go);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
+  renderProg()}
+function route(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];
+  while(q.length){const x=q.shift();for(const y of ADJ[x]||[]){if(!(y in prev)){prev[y]=x;if(y===b){const r=[b];let z=b;while(prev[z]){z=prev[z];r.unshift(z)}return r}q.push(y)}}}return[a,b]}
+let moving=false;
+async function moveAvatar(to){const av=$("#avatar");if(!av){S.current=to;return}
+  const path=route(S.current,to);moving=true;
+  for(const id of path.slice(1)){const p=STM[id];av.style.transform=`translate(${p.x}px,${p.y-12}px)`;if(!reduceMotion)await sleep(230)}
+  S.current=to;moving=false;save()}
+async function clickStation(id){if(moving)return;const s=STM[id];
+  if(!s.built){toast(`«${s.lab.join(" ")}» está en construcción. Llegará en la próxima versión.`);return}
+  if(!unlocked(id)){const k=ENT.indexOf(id);toast(`Completa «${NODES[ENT[k-1]].title}» o haz el diagnóstico para desbloquear esta estación.`);return}
+  await moveAvatar(id);if(!reduceMotion)await sleep(120);
+  if(id==="inicio")openDiag();else if(id==="B1")openSocio();else openNode(id)}
+
+/* ============ arrastre (ratón y pantalla táctil) ============ */
+function dragify(el,{onDrop,onTap,can}){
+  el.addEventListener("pointerdown",e=>{if(e.button>0||(can&&!can()))return;e.preventDefault();
+    const r=el.getBoundingClientRect(),ox=e.clientX-r.left,oy=e.clientY-r.top,sx=e.clientX,sy=e.clientY;let moved=false,ghost=null,hi=null;
+    const mv=ev=>{if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>5){moved=true;ghost=el.cloneNode(true);ghost.classList.add("ghost");ghost.classList.remove("sel");ghost.style.width=r.width+"px";document.body.appendChild(ghost);el.classList.add("dragging")}
+      if(moved){ghost.style.left=ev.clientX-ox+"px";ghost.style.top=ev.clientY-oy+"px";const t=dropAt(ev.clientX,ev.clientY);if(hi!==t){hi&&hi.classList.remove("drop-hi");hi=t;hi&&hi.classList.add("drop-hi")}}};
+    const up=ev=>{window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);window.removeEventListener("pointercancel",up);
+      hi&&hi.classList.remove("drop-hi");if(ghost)ghost.remove();el.classList.remove("dragging");
+      if(moved&&ev.type==="pointerup")onDrop(dropAt(ev.clientX,ev.clientY),ev.clientX);else if(!moved)onTap&&onTap()};
+    window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);window.addEventListener("pointercancel",up)})}
+function dropAt(x,y){const t=document.elementFromPoint(x,y);return t?t.closest("[data-drop]"):null}
+
+/* ============ motor de ejercicios ============ */
+function mountItem(box,item,opts){
+  // opts: {idx,total,prev,single,key,onResult}
+  const single=!!opts.single;let attempts=0,finished=false;
+  box.className="ex";
+  box.innerHTML=`<span class="exn">${opts.label||"Reto"} ${opts.idx+1} de ${opts.total}</span><div class="q">${item.q}</div><div class="area"></div><div class="fbz" aria-live="polite"></div>`;
+  const area=$(".area",box),fbz=$(".fbz",box);
+  const fb=(cls,title,text)=>{fbz.innerHTML=`<div class="fb ${cls}"><b>${title}</b>${text?`<span>${text}</span>`:""}</div>`};
+  function finish(res,silent){finished=true;
+    if(single){fb(res==="first"?"ok":"bad",res==="first"?"Correcto.":"Incorrecto.",res==="first"?"":`Respuesta: ${correctText()}`)}
+    else{const t=res==="first"?"¡Bien, a la primera!":res==="hint"?"Correcto, con ayuda de la pista.":"Esta vez no salió. Aquí está la respuesta.";
+      fb(res==="shown"?"bad":"ok",t,(res==="shown"?`Respuesta: <span class="m">${esc(correctText())}</span>. `:"")+(item.explain||""))}
+    if(!silent)opts.onResult(res)}
+  function wrong(extra){attempts++;
+    if(single){finish("shown");return true}
+    if(attempts===1){fb("hint","Todavía no. Pista:",(extra?extra+" ":"")+(item.hint||"Revisa con calma cada paso."));return false}
+    finish("shown");return true}
+  function correctText(){if(item.type==="choice")return item.opts[0].replace(/<[^>]+>/g,"");if(item.type==="fill")return item.kind==="num"?fmt(item.answer):item.show;
+    if(item.type==="order")return item.correct.join("  <  ");if(item.type==="match")return item.pairs.map(p=>p[0]+" → "+p[1]).join(";  ");return""}
+
+  if(item.type==="choice"){
+    const order=shuffle(item.opts.map((t,i)=>({t,i})),opts.key);
+    area.innerHTML=`<div class="opts">${order.map(o=>`<button class="opt" data-i="${o.i}">${o.t}</button>`).join("")}</div>`;
+    const btns=$$(".opt",area);
+    const reveal=()=>{btns.forEach(b=>{b.disabled=true;if(b.dataset.i==="0")b.classList.add("right")})};
+    btns.forEach(b=>b.onclick=()=>{if(finished)return;
+      if(b.dataset.i==="0"){b.classList.add("right");btns.forEach(x=>x.disabled=true);finish(attempts===0?"first":"hint")}
+      else{b.classList.add("wrong");b.disabled=true;if(wrong())reveal()}});
+    if(opts.prev){reveal();finish(opts.prev,true)}}
+
+  else if(item.type==="fill"){
+    area.innerHTML=`<div class="fillrow"><input type="text" inputmode="${item.kind==="num"?"text":"text"}" autocomplete="off" spellcheck="false" aria-label="Tu respuesta" id="in-${opts.key}" placeholder="${item.kind==="num"?"Escribe un número":"Escribe la expresión"}"><button class="btn primary">Comprobar</button></div><span class="tip">${item.kind==="num"?"Para un negativo, escribe el signo menos: -7.":"Puedes escribir 2x, a-5, (x+1). Para potencias usa ^, como x^2."}</span>`;
+    const inp=$("input",area),btn=$("button",area);
+    const lock=()=>{inp.disabled=true;btn.disabled=true;inp.value=item.kind==="num"?fmt(item.answer):item.show;inp.classList.add("okv")};
+    const check=()=>{if(finished)return;const v=inp.value.trim();if(!v)return;let ast;
+      try{ast=parseExpr(v)}catch(e){fb("info","No entendí lo que escribiste.","Usa números, letras, +, −, paréntesis y ^ para potencias.");return}
+      let ok=false;
+      if(item.kind==="num"){ok=varsOf(ast).size===0&&Math.abs(evalAst(ast,{})-item.answer)<1e-9}
+      else{const target=parseExpr(item.answer);
+        if(equivalent(ast,target)){
+          if(!single&&(countTerms(ast)>item.maxTerms||(item.noParens&&/[()]/.test(v)))){fb("info","Es equivalente, pero se puede "+(item.noParens?"desarrollar":"simplificar")+" más.",item.noParens?"Quita los paréntesis multiplicando cada término.":"Junta los términos que se puedan juntar.");return}
+          ok=countTerms(ast)<=item.maxTerms&&!(item.noParens&&/[()]/.test(v))}}
+      if(ok){lock();finish(attempts===0?"first":"hint")}else{if(wrong())lock()}};
+    btn.onclick=check;inp.addEventListener("keydown",e=>{if(e.key==="Enter")check()});
+    if(opts.prev){lock();finish(opts.prev,true)}}
+
+  else if(item.type==="order"){
+    area.innerHTML=`<div class="chips" data-drop="row" aria-label="Fichas para ordenar"></div><div class="fillrow"><button class="btn primary">Comprobar orden</button><span class="tip">Arrastra las fichas, o toca dos para intercambiarlas.</span></div>`;
+    const row=$(".chips",area),btn=$(".btn",area);let sel=null;
+    const start=shuffle(item.items,opts.key+"o");const lockAll=()=>{$$(".chip",row).forEach(c=>{c.classList.add("locked");c.disabled=true});btn.disabled=true};
+    const build=arr=>{row.innerHTML=arr.map(t=>`<button class="chip" data-drop="chip" data-v="${esc(t)}">${esc(t)}</button>`).join("");
+      $$(".chip",row).forEach(c=>{
+        dragify(c,{can:()=>!finished,onDrop:(t,x)=>{if(!t)return;if(t.dataset.drop==="chip"&&t!==c){const rr=t.getBoundingClientRect();if(x<rr.left+rr.width/2)row.insertBefore(c,t);else row.insertBefore(c,t.nextSibling)}else if(t===row)row.appendChild(c)},
+          onTap:()=>{if(finished)return;if(sel&&sel!==c){const a=sel,b=c,n=b.nextSibling===a?b:b.nextSibling;row.insertBefore(b,a);row.insertBefore(a,n);a.classList.remove("sel");sel=null}else if(sel===c){c.classList.remove("sel");sel=null}else{sel=c;c.classList.add("sel")}}});
+        c.addEventListener("keydown",e=>{if(finished)return;if(e.key==="ArrowLeft"&&c.previousElementSibling){row.insertBefore(c,c.previousElementSibling);c.focus();e.preventDefault()}if(e.key==="ArrowRight"&&c.nextElementSibling){row.insertBefore(c.nextElementSibling,c);c.focus();e.preventDefault()}})})};
+    build(start);
+    btn.onclick=()=>{if(finished)return;const cur=$$(".chip",row).map(c=>c.dataset.v);
+      if(cur.join("|")===item.correct.join("|")){lockAll();finish(attempts===0?"first":"hint")}else if(wrong()){build(item.correct);lockAll()}};
+    if(opts.prev){build(item.correct);lockAll();finish(opts.prev,true)}}
+
+  else if(item.type==="match"){
+    const rights=shuffle(item.pairs.map(p=>p[1]),opts.key+"m");
+    area.innerHTML=`<div class="mrows">${item.pairs.map((p,i)=>`<div class="mrow"><span class="left">${esc(p[0])}</span><span aria-hidden="true">=</span><div class="slot" data-drop="slot" data-i="${i}" tabindex="0" aria-label="Casilla para ${esc(p[0])}"></div></div>`).join("")}</div>
+      <div class="chips" data-drop="bank">${rights.map(t=>`<button class="chip" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+      <div class="fillrow"><button class="btn primary chk">Comprobar</button><span class="tip">Arrastra cada ficha a su casilla, o toca una ficha y después la casilla.</span></div>`;
+    const bank=$(".chips",area),slots=$$(".slot",area),btn=$(".chk",area);let sel=null;
+    const place=(chip,target)=>{if(!target)return;if(target.dataset.drop==="slot"){const old=target.querySelector(".chip");const from=chip.parentElement;if(old&&old!==chip){from.dataset.drop==="slot"?from.appendChild(old):bank.appendChild(old)}target.appendChild(chip)}else if(target===bank)bank.appendChild(chip);
+      slots.forEach(s=>s.classList.remove("okv","badv"))};
+    $$(".chip",area).forEach(c=>dragify(c,{can:()=>!finished,onDrop:t=>place(c,t),onTap:()=>{if(finished)return;if(sel===c){c.classList.remove("sel");sel=null;return}sel&&sel.classList.remove("sel");sel=c;c.classList.add("sel")}}));
+    const slotTap=s=>{if(finished||!sel)return;place(sel,s);sel.classList.remove("sel");sel=null};
+    slots.forEach(s=>{s.addEventListener("click",()=>slotTap(s));s.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();slotTap(s)}})});
+    bank.addEventListener("click",e=>{if(e.target===bank&&sel){place(sel,bank);sel.classList.remove("sel");sel=null}});
+    const solve=()=>{const chips=$$(".chip",area);slots.forEach((s,i)=>{const c=chips.find(x=>x.dataset.v===item.pairs[i][1]&&!x._u);c._u=1;s.appendChild(c);s.classList.add("okv")});chips.forEach(c=>{c.classList.add("locked");c.disabled=true});btn.disabled=true};
+    btn.onclick=()=>{if(finished)return;let all=true,ok=true;
+      slots.forEach((s,i)=>{const c=s.querySelector(".chip");if(!c){all=false;return}const good=c.dataset.v===item.pairs[i][1];s.classList.toggle("okv",good);s.classList.toggle("badv",!good);if(!good)ok=false});
+      if(!all){fb("info","Faltan casillas por llenar.","");return}
+      if(ok){solve();finish(attempts===0?"first":"hint")}else if(wrong("Las casillas en rojo no corresponden.")){solve()}};
+    if(opts.prev){solve();finish(opts.prev,true)}}
+}
+
+/* ============ ficha de estación ============ */
+const MOMENTS=["Información","Exploración","Reto","Retroalimentación"];
+function nodeShell(id,line,num,title,sub){
+  return `<article class="node" style="--linec:var(${LINES[line].c})"><div class="nodehead"><span class="badge"><i style="background:var(${LINES[line].c})"></i>Línea ${LINES[line].short} · Estación ${num}</span><h2>${title}</h2><p class="muted">${sub}</p></div>
+  <ol class="steps" aria-label="Momentos de la actividad"></ol><div class="body"></div><div class="navrow"></div></article>`}
+function renderSteps(root,cur,max,go,canGo){const ol=$(".steps",root);
+  ol.innerHTML=MOMENTS.map((m,i)=>`<li><button class="${i<cur||i<=max&&i!==cur?"done":""} ${i===cur?"cur":""}" ${canGo(i)?"":"disabled"} data-i="${i}" ${i===cur?'aria-current="step"':""}><span>${i+1} · ${["Lee","Explora","Resuelve","Revisa"][i]}</span>${m}</button></li>`).join("");
+  $$("button",ol).forEach(b=>b.onclick=()=>go(+b.dataset.i))}
+function openNode(id){const N=NODES[id],ns=nodeSt(id);const v=$("#view-node");
+  v.innerHTML=nodeShell(id,"ent",ENT.indexOf(id)+1,N.title,N.sub);showView("node");
+  const root=$(".node",v),body=$(".body",root),nav=$(".navrow",root);
+  const allAnswered=()=>N.reto.every((_,i)=>ns.results[i]);
+  const canGo=i=>i<=Math.max(ns.max,ns.moment)+(i===3?0:1)&&(i<3||allAnswered());
+  function go(m){ns.moment=m;ns.max=Math.max(ns.max,m);if(m===3&&allAnswered()){const st=calcStars(N.reto,ns.results);ns.last=st;ns.stars=Math.max(ns.stars||0,st);if(!ns.done){ns.done=true;ns.doneAt=Date.now()}}
+    save();draw();root.scrollIntoView({behavior:reduceMotion?"auto":"smooth",block:"start"})}
+  function draw(){const m=ns.moment;renderSteps(root,m,ns.max,go,canGo);body.className="body";
+    if(m===0){body.innerHTML=N.info}
+    else if(m===1){body.classList.add("wide");body.innerHTML=`<p class="lead" style="max-width:70ch">${N.explore.intro}</p><div class="xp-host"></div>`;EXPLORE[N.explore.fn]($(".xp-host",body))}
+    else if(m===2){body.innerHTML=`<p class="lead">Resuelve los retos. Si te equivocas una vez, recibes una pista; a la segunda, la respuesta explicada. Tómate tu tiempo.</p><div class="items" style="display:grid;gap:20px"></div>`;
+      const host=$(".items",body);N.reto.forEach((it,i)=>{const b=document.createElement("div");host.appendChild(b);
+        mountItem(b,it,{idx:i,total:N.reto.length,prev:ns.results[i],key:id+"-"+i,onResult:r=>{ns.results[i]=r;save();drawNav()}})})}
+    else{drawRetro()}
+    drawNav()}
+  function drawNav(){const m=ns.moment;const nextOk=m<3&&(m<2||allAnswered());
+    nav.innerHTML=`<button class="btn ghost" data-a="back">${m===0?"Volver al plano":"Anterior"}</button>`+
+     (m<3?`<button class="btn primary" data-a="next" ${nextOk?"":"disabled"}>${m===2?(allAnswered()?"Ver mi retroalimentación":"Responde todos los retos para seguir"):"Siguiente: "+MOMENTS[m+1]}</button>`:`<button class="btn primary" data-a="map">Volver al plano</button>`);
+    $$("button",nav).forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="back"){if(m===0){showView("map");renderMap()}else go(m-1)}else if(a==="next")go(m+1);else{showView("map");renderMap()}})}
+  function drawRetro(){const res=N.reto.map((_,i)=>ns.results[i]);const c=k=>res.filter(r=>r===k).length;const st=ns.last||ns.stars;
+    const k=ENT.indexOf(id),nxt=ENT[k+1];const best=ns.stars;
+    body.innerHTML=`<div class="retro-score"><span class="bigstars" aria-label="${st} de 3 estrellas">${"★".repeat(st)}<span style="opacity:.25">${"★".repeat(3-st)}</span></span>
+      <div class="tally">${best>st?`<span>Tu mejor resultado: <b>${"★".repeat(best)}</b></span>`:""}<span><b>${c("first")}</b> a la primera</span><span><b>${c("hint")}</b> con pista</span><span><b>${c("shown")}</b> con la respuesta</span></div></div>
+      <div class="ex-box"><span class="eyebrow">Idea clave</span><p>${N.key}</p></div>
+      <div class="callout"><span class="eyebrow">Para la próxima vez</span><p>${N.ojo}</p></div>
+      <p>${st===3?"Dominas esta estación. Puedes seguir a la siguiente.":st===2?"Vas bien. Antes de seguir, relee la explicación de los retos en los que usaste la pista.":"Esta estación todavía te cuesta, y es normal. Vuelve a la exploración y repite el reto cuando quieras: se aprende mucho del segundo intento."}</p>
+      <div class="fillrow"><button class="btn" id="redo">Repetir el reto</button>${nxt?`<button class="btn primary" id="nextst">Ir a «${NODES[nxt].title}»</button>`:""}</div>`;
+    $("#redo",body).onclick=()=>{ns.results={};go(2)};
+    if(nxt)$("#nextst",body).onclick=async()=>{showView("map");renderMap();await sleep(150);clickStation(nxt)}}
+  draw()}
+function calcStars(items,res){const pts=items.reduce((a,_,i)=>a+(res[i]==="first"?2:res[i]==="hint"?1:0),0)/(2*items.length);return pts>=.8?3:pts>=.5?2:1}
+
+/* ============ exploraciones ============ */
+const EXPLORE={
+xTraslaciones(host){let a=30,steps=[-9,7];
+  host.innerHTML=`<div class="xp"><div class="ctrl"><label for="xa">Valor inicial de <span class="m">a</span>: <output class="m" id="xao">30</output></label><input type="range" id="xa" min="0" max="60" value="30"></div>
+   <div class="ctrl"><label for="xamt">Cantidad</label><input type="number" id="xamt" min="1" max="40" value="5"><button class="btn sm" data-s="1">Sumar</button><button class="btn sm" data-s="-1">Restar</button><button class="btn sm ghost" id="xundo">Quitar el último</button><button class="btn sm ghost" id="xreset">Empezar de nuevo</button></div>
+   <div class="readout" id="xr"></div><div class="svgwrap nl"><svg id="xsvg" viewBox="0 0 640 176" role="img" aria-label="Saltos sobre la recta numérica"></svg></div></div>`;
+  const draw=()=>{const net=steps.reduce((s,x)=>s+x,0);const parts=[a];steps.forEach(s=>parts.push(parts[parts.length-1]+s));
+    const ex="a"+steps.map(s=>(s<0?" − ":" + ")+Math.abs(s)).join("");const simp=net===0?"a":"a"+(net<0?" − ":" + ")+Math.abs(net);
+    $("#xr",host).innerHTML=`<span class="k">Programa</span>${ex}<br><span class="k">Un solo movimiento</span>= ${simp}<br><span class="k">Con a = ${a}</span>${a}${steps.map(s=>(s<0?" − ":" + ")+Math.abs(s)).join("")} = ${fmt(parts[parts.length-1])}`;
+    const lo=Math.min(...parts)-4,hi=Math.max(...parts)+4,X=v=>30+(v-lo)/(hi-lo)*580;let g=`<line x1="20" y1="90" x2="620" y2="90" stroke="var(--muted)" stroke-width="1.5"/>`;
+    const stp=(hi-lo)>60?10:5;for(let v=Math.ceil(lo/stp)*stp;v<=hi;v+=stp)g+=`<line x1="${X(v)}" y1="85" x2="${X(v)}" y2="95" stroke="var(--muted)"/><text x="${X(v)}" y="110" text-anchor="middle" style="font:12px var(--f-mono);fill:var(--muted)">${fmt(v)}</text>`;
+    parts.slice(0,-1).forEach((p,i)=>{const q=parts[i+1],x1=X(p),x2=X(q),h=18+((i%2)*14);const c=steps[i]>0?"var(--ok)":"var(--bad)";
+      g+=`<path d="M${x1} 88 Q${(x1+x2)/2} ${88-h*2} ${x2} 88" fill="none" stroke="${c}" stroke-width="2.2"/><polygon points="${x2},88 ${x2+(x2>x1?-7:7)},82 ${x2+(x2>x1?-3:3)},92" fill="${c}"/><text x="${(x1+x2)/2}" y="${88-h-6}" text-anchor="middle" style="font:600 12px var(--f-mono);fill:${c}">${steps[i]>0?"+":"−"}${Math.abs(steps[i])}</text>`});
+    const x0=X(a),xn=X(parts[parts.length-1]);
+    g+=`<line x1="${x0}" y1="142" x2="${xn}" y2="142" stroke="var(--linec)" stroke-width="4"/>`+(net?`<polygon points="${xn},142 ${xn+(xn>x0?-9:9)},136 ${xn+(xn>x0?-9:9)},148" fill="var(--linec)"/>`:"")+`<text x="${(x0+xn)/2}" y="166" text-anchor="middle" style="font:700 12px var(--f-disp);fill:var(--linec)">un solo movimiento: ${net===0?"no se mueve":(net>0?"+":"−")+Math.abs(net)}</text>`;
+    parts.forEach((p,i)=>g+=`<circle cx="${X(p)}" cy="90" r="${i===0?6:4}" fill="${i===0?"var(--ink)":"var(--surface)"}" stroke="var(--ink)" stroke-width="1.5"/>`);
+    g+=`<text x="${x0}" y="126" text-anchor="middle" style="font:700 12px var(--f-mono);fill:var(--ink)">inicio: a</text>`;
+    $("#xsvg",host).innerHTML=g};
+  $("#xa",host).oninput=e=>{a=+e.target.value;$("#xao",host).textContent=a;draw()};
+  $$("[data-s]",host).forEach(b=>b.onclick=()=>{const n=Math.max(1,Math.min(40,Math.round(+$("#xamt",host).value||1)));if(steps.length>=7){toast("Hasta siete movimientos por programa.");return}steps.push(n*+b.dataset.s);draw()});
+  $("#xundo",host).onclick=()=>{steps.pop();draw()};$("#xreset",host).onclick=()=>{steps=[];draw()};draw()},
+
+xTachar(host){const EXPRS=["45 − f + g − 10 + 500 + f − 500 + 19 + 27 − 19","s + 72 − 67 + s + 67 − 48 − 72 − 5 − s + 50","a − 36 + 87 − 5 + 36 − 87 + 2a"];let k=0,terms,sel=null,pairs=0;
+  const load=()=>{const tk=EXPRS[k].split(" ");terms=[{s:1,b:tk[0],g:false}];for(let i=1;i<tk.length;i+=2)terms.push({s:tk[i]==="−"?-1:1,b:tk[i+1],g:false});sel=null;pairs=0;draw()};
+  const canPair=()=>terms.some((t,i)=>!t.g&&terms.some((u,j)=>j!==i&&!u.g&&u.b===t.b&&u.s===-t.s));
+  const simplify=()=>{let c=0;const co={};terms.filter(t=>!t.g).forEach(t=>{const m=t.b.match(/^(\d*)([a-z])$/);if(m){co[m[2]]=(co[m[2]]||0)+t.s*(m[1]?+m[1]:1)}else c+=t.s*+t.b});
+    let out=Object.entries(co).filter(([,v])=>v).map(([l,v],i)=>(i?(v<0?" − ":" + "):(v<0?"−":""))+(Math.abs(v)===1?"":Math.abs(v))+l).join("");
+    if(c)out+=(out?(c<0?" − ":" + "):(c<0?"−":""))+Math.abs(c);return out||"0"};
+  const draw=()=>{const live=terms.filter(t=>!t.g);
+    host.innerHTML=`<div class="xp"><div class="tchips" role="group" aria-label="Términos de la expresión">${terms.map((t,i)=>`<button class="tchip ${t.g?"gone":""} ${sel===i?"sel":""}" data-i="${i}" ${t.g?"disabled":""}>${i===0&&t.s>0?"":t.s<0?"− ":"+ "}${t.b}</button>`).join("")}</div>
+      <div class="readout" id="tr"><span class="k">Quedan</span>${live.map((t,i)=>(i===0?(t.s<0?"−":""):(t.s<0?" − ":" + "))+t.b).join("")||"0"}<br><span class="k">Parejas tachadas</span>${pairs}${canPair()?"":`<br><span class="k">Forma más simple</span>= ${simplify()}`}</div>
+      <div class="fbz" aria-live="polite"></div><div class="fillrow"><button class="btn sm" id="tnext">Otra expresión</button><button class="btn sm ghost" id="treset">Empezar de nuevo</button></div></div>`;
+    $$(".tchip",host).forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(sel===null){sel=i;draw();return}if(sel===i){sel=null;draw();return}
+      const a=terms[sel],c=terms[i];if(a.b===c.b&&a.s===-c.s){a.g=c.g=true;pairs++;sel=null;draw()}
+      else{const n=(t,j)=>(j===0&&t.s>0?"+":t.s<0?"−":"+")+t.b;const s0=sel;sel=null;draw();$(".fbz",host).innerHTML=`<div class="fb info"><b>«${n(a,s0)}» y «${n(c,i)}» no se anulan.</b><span>Para anularse tienen que ser el mismo término con signos contrarios.</span></div>`}});
+    $("#tnext",host).onclick=()=>{k=(k+1)%EXPRS.length;load()};$("#treset",host).onclick=load};
+  load()},
+
+xComparar(host){let a=50,mode="lc";
+  host.innerHTML=`<div class="xp"><div class="ctrl"><label for="ca">Dinero de Alberto (<span class="m">a</span>, en miles): <output class="m" id="cao">50</output></label><input type="range" id="ca" min="25" max="100" value="50"></div>
+   <div class="bars" id="cb"></div><div class="seg" role="group" aria-label="Qué calcular"><button class="btn sm" data-m="lc">Laura − Clara</button><button class="btn sm" data-m="cl">Clara − Laura</button><button class="btn sm" data-m="err">Sin paréntesis</button></div><div class="readout" id="cr"></div></div>`;
+  const draw=()=>{const L=a+35,C=a-20,mx=135;
+    $("#cb",host).innerHTML=[["Alberto",a,"--muted"],["Laura",L,"--linec"],["Clara",C,"--l-rac"]].map(([n,v,c])=>`<div class="barrow"><span>${n}</span><span class="track"><i style="width:${v/mx*100}%;background:var(${c})"></i></span><span class="v">${v}</span></div>`).join("");
+    $$("[data-m]",host).forEach(b=>b.setAttribute("aria-current",b.dataset.m===mode?"page":"false"));
+    let t;if(mode==="lc")t=`<span class="k">Con letras</span>(a + 35) − (a − 20) = a + 35 − a + 20 = 55<br><span class="k">Con a = ${a}</span>(${a} + 35) − (${a} − 20) = ${L} − ${C} = <b>55</b>`;
+    else if(mode==="cl")t=`<span class="k">Con letras</span>(a − 20) − (a + 35) = a − 20 − a − 35 = −55<br><span class="k">Con a = ${a}</span>${C} − ${L} = <b>−55</b><br><span class="k">Qué dice el signo</span>El primer término (Clara) es 55 menor que el segundo (Laura).`;
+    else t=`<span class="k">Sin paréntesis</span>a + 35 − a − 20 = 15<br><span class="k">Con a = ${a}</span>${a} + 35 − ${a} − 20 = <b class="bad-t">15</b>, pero Laura tiene ${L} y Clara ${C}: la diferencia real es <b class="ok-t">55</b>.<br><span class="k">Qué pasó</span>Se restó a, pero no se devolvieron los 20 que Clara tiene de menos.`;
+    $("#cr",host).innerHTML=t};
+  $("#ca",host).oninput=e=>{a=+e.target.value;$("#cao",host).textContent=a;draw()};$$("[data-m]",host).forEach(b=>b.onclick=()=>{mode=b.dataset.m;draw()});draw()},
+
+xOpuestos(host){let n=3,k=0,x=-4;
+  host.innerHTML=`<div class="xp"><div class="ctrl"><label for="on">Número de partida: <output class="m" id="ono">3</output></label><input type="range" id="on" min="-9" max="9" value="3"><button class="btn sm primary" id="oop">Tomar el opuesto −( )</button><button class="btn sm ghost" id="ore">Empezar de nuevo</button></div>
+   <div class="readout" id="orr"></div><div class="svgwrap nl"><svg id="osv" viewBox="0 0 640 120" role="img" aria-label="Recta numérica con el número y su opuesto"></svg></div>
+   <h4 style="margin-top:6px">¿−x es negativo?</h4><div class="ctrl"><label for="ox">Valor de <span class="m">x</span>: <output class="m" id="oxo">−4</output></label><input type="range" id="ox" min="-8" max="8" value="-4"></div>
+   <div class="readout" id="oxr"></div><div class="svgwrap nl"><svg id="oxs" viewBox="0 0 640 90" role="img" aria-label="Recta numérica con x y −x"></svg></div></div>`;
+  const X=v=>320+v*29;const axis=y=>{let g=`<line x1="20" y1="${y}" x2="620" y2="${y}" stroke="var(--muted)" stroke-width="1.5"/>`;for(let v=-10;v<=10;v++)g+=`<line x1="${X(v)}" y1="${y-(v===0?9:5)}" x2="${X(v)}" y2="${y+(v===0?9:5)}" stroke="var(--muted)" stroke-width="${v===0?2:1}"/>${v%2===0?`<text x="${X(v)}" y="${y+24}" text-anchor="middle" style="font:12px var(--f-mono);fill:var(--muted)">${fmt(v)}</text>`:""}`;return g};
+  const draw=()=>{const val=n*(k%2?-1:1),prev=n*((k-1)%2?-1:1);
+    const ex=k===0?fmt(n):"−(".repeat(k)+(n<0?"("+fmt(n)+")":fmt(n))+")".repeat(k);
+    $("#orr",host).innerHTML=`<span class="k">Expresión</span>${ex} = <b>${fmt(val)}</b><br><span class="k">Opuestos aplicados</span>${k} ${k?(k%2?"(impar: el signo cambia)":"(par: vuelve al número de partida)"):""}`;
+    let g=axis(70);if(k>0&&val!==prev){const x1=X(prev),x2=X(val);g+=`<path d="M${x1} 64 Q${(x1+x2)/2} ${10} ${x2} 64" fill="none" stroke="var(--linec)" stroke-width="2" stroke-dasharray="5 4"/><circle cx="${x1}" cy="70" r="5" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`}
+    g+=`<circle cx="${X(val)}" cy="70" r="7" fill="var(--linec)"/>`;$("#osv",host).innerHTML=g;
+    const nx=-x;$("#oxr",host).innerHTML=`<span class="k">Si x = ${fmt(x)}</span>−x = −(${fmt(x)}) = <b>${fmt(nx)}</b>, que es ${nx>0?"positivo":nx<0?"negativo":"cero"}.`;
+    let h=axis(40);h+=`<circle cx="${X(x)}" cy="40" r="7" fill="var(--ink)"/><text x="${X(x)}" y="20" text-anchor="middle" style="font:700 13px var(--f-mono);fill:var(--ink)">x</text>`;
+    if(nx!==x)h+=`<circle cx="${X(nx)}" cy="40" r="7" fill="var(--l-rac)"/><text x="${X(nx)}" y="20" text-anchor="middle" style="font:700 13px var(--f-mono);fill:var(--l-rac)">−x</text>`;$("#oxs",host).innerHTML=h};
+  $("#on",host).oninput=e=>{n=+e.target.value;k=0;$("#ono",host).textContent=fmt(n);draw()};
+  $("#oop",host).onclick=()=>{if(k>=5){toast("Con cinco basta: ya se ve el patrón.");return}k++;draw()};$("#ore",host).onclick=()=>{k=0;draw()};
+  $("#ox",host).oninput=e=>{x=+e.target.value;$("#oxo",host).textContent=fmt(x);draw()};draw()},
+
+xTermometro(host){let A=6,B=-5;
+  host.innerHTML=`<div class="xp"><div class="ctrl"><label for="ta">Primera marca: <output class="m" id="tao">6</output> °C</label><input type="range" id="ta" min="-20" max="35" value="6"><label for="tb">Segunda marca: <output class="m" id="tbo">−5</output> °C</label><input type="range" id="tb" min="-20" max="35" value="-5"></div>
+   <div class="seg"><button class="btn sm" data-p="6,-5">6 y −5</button><button class="btn sm" data-p="7,2">7 y 2</button><button class="btn sm" data-p="-3,-8">−3 y −8</button></div>
+   <div style="display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:16px;align-items:start"><div class="svgwrap"><svg id="tsv" viewBox="0 0 170 420" role="img" aria-label="Termómetro con dos marcas"></svg></div><div class="readout" id="trr"></div></div></div>`;
+  const Y=v=>380-(v+20)/55*350;
+  const draw=()=>{const T=Math.max(A,B),t=Math.min(A,B);let g=`<rect x="60" y="22" width="22" height="364" rx="11" fill="var(--surface-2)" stroke="var(--rule)"/>`;
+    for(let v=-20;v<=35;v+=5)g+=`<line x1="82" y1="${Y(v)}" x2="${v%10===0?98:92}" y2="${Y(v)}" stroke="var(--muted)"/>${v%10===0?`<text x="104" y="${Y(v)+4}" style="font:12px var(--f-mono);fill:var(--muted)">${fmt(v)}</text>`:""}`;
+    g+=`<line x1="40" y1="${Y(0)}" x2="100" y2="${Y(0)}" stroke="var(--ink)" stroke-width="2"/>`;
+    g+=`<rect x="64" y="${Y(T)}" width="14" height="${Y(t)-Y(T)}" fill="var(--linec)" fill-opacity=".55" rx="4"/>`;
+    [[T,"T"],[t,"t"]].forEach(([v,l])=>g+=`<polygon points="56,${Y(v)} 44,${Y(v)-6} 44,${Y(v)+6}" fill="var(--ink)"/><text x="38" y="${Y(v)+4}" text-anchor="end" style="font:700 13px var(--f-mono);fill:var(--ink)">${l}=${fmt(v)}</text>`);
+    $("#tsv",host).innerHTML=g;
+    const cnt=t<0&&T>0?`de ${fmt(t)} a 0 hay ${-t} y de 0 a ${fmt(T)} hay ${T}: en total ${T-t}`:`de ${fmt(t)} a ${fmt(T)} hay ${T-t}`;
+    $("#trr",host).innerHTML=`<span class="k">Contando en el termómetro</span>${cnt} grados.<br><span class="k">Con la fórmula T − t</span>${fmt(T)} − ${fmtP(t)} = <b>${fmt(T-t)}</b><br><span class="k">Al revés, t − T</span>${fmt(t)} − ${fmtP(T)} = ${fmt(t-T)} <span class="muted">(negativo: t es la menor)</span>`};
+  const sync=()=>{$("#ta",host).value=A;$("#tb",host).value=B;$("#tao",host).textContent=fmt(A);$("#tbo",host).textContent=fmt(B);draw()};
+  $("#ta",host).oninput=e=>{A=+e.target.value;sync()};$("#tb",host).oninput=e=>{B=+e.target.value;sync()};
+  $$("[data-p]",host).forEach(b=>b.onclick=()=>{[A,B]=b.dataset.p.split(",").map(Number);sync()});sync()},
+
+xRectangulo(host){let a=6,b=4,da=-1,db=-2;
+  host.innerHTML=`<div class="xp"><div class="ctrl"><label for="ra">Base <span class="m">a</span>: <output class="m" id="rao">6</output></label><input type="range" id="ra" min="3" max="9" value="6"><label for="rb">Altura <span class="m">b</span>: <output class="m" id="rbo">4</output></label><input type="range" id="rb" min="2" max="7" value="4"></div>
+   <div class="ctrl"><label for="rda">Cambio en la base: <output class="m" id="rdao">−1</output></label><input type="range" id="rda" min="-2" max="3" value="-1"><label for="rdb">Cambio en la altura: <output class="m" id="rdbo">−2</output></label><input type="range" id="rdb" min="-2" max="3" value="-2"></div>
+   <div class="legendrow"><span><i style="background:var(--surface-2)"></i>se mantiene</span><span><i style="background:var(--add)"></i>se añade</span><span><i style="background:var(--rem)"></i>se quita</span><span><i style="background:var(--twice)"></i>se quitó dos veces</span><span><i style="background:var(--corner)"></i>esquina añadida</span></div>
+   <div class="svgwrap"><svg id="rsv" viewBox="0 0 400 330" role="img" aria-label="Rectángulo con franjas añadidas y quitadas" style="max-width:440px"></svg></div><div class="readout" id="rr"></div></div>`;
+  const draw=()=>{const A=a+da,B=b+db,W=Math.max(a,A),H=Math.max(b,B),cs=Math.min(36,Math.floor(340/Math.max(W,H)));const ox=40,oy=20;let g="";
+    for(let i=0;i<W;i++)for(let j=0;j<H;j++){const o=i<a&&j<b,n=i<A&&j<B;let f=null;
+      if(o&&n)f="var(--surface-2)";else if(n&&!o)f=(i>=a&&j>=b)?"var(--corner)":"var(--add)";else if(o&&!n)f=(da<0&&db<0&&i>=A&&j>=B)?"var(--twice)":"var(--rem)";
+      if(f)g+=`<rect x="${ox+i*cs}" y="${oy+j*cs}" width="${cs}" height="${cs}" fill="${f}" stroke="var(--surface)" stroke-width="1.5"/>`}
+    g+=`<rect x="${ox}" y="${oy}" width="${a*cs}" height="${b*cs}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 4"/>`;
+    g+=`<rect x="${ox}" y="${oy}" width="${A*cs}" height="${B*cs}" fill="none" stroke="var(--linec)" stroke-width="3"/>`;
+    g+=`<text x="${ox+A*cs/2}" y="${oy+H*cs+22}" text-anchor="middle" style="font:600 13px var(--f-mono);fill:var(--ink)">a ${da<0?"−":"+"} ${Math.abs(da)} = ${A}</text><text x="${ox-10}" y="${oy+B*cs/2}" text-anchor="end" dominant-baseline="middle" style="font:600 13px var(--f-mono);fill:var(--ink)">${B}</text>`;
+    $("#rsv",host).setAttribute("viewBox",`0 0 ${Math.max(400,ox+W*cs+20)} ${oy+H*cs+40}`);$("#rsv",host).innerHTML=g;
+    const sg=v=>v<0?" − "+Math.abs(v):" + "+v;const t2=a*db,t3=da*b,t4=da*db;
+    const term=(v,s)=>v===0?"":(v<0?" − ":" + ")+s;const cf=(v,l)=>(Math.abs(v)===1?"":Math.abs(v))+l;
+    $("#rr",host).innerHTML=`<span class="k">Con letras</span>(a${da?sg(da):""})(b${db?sg(db):""}) = ab${term(db,cf(db,"a"))}${term(da,cf(da,"b"))}${term(t4,Math.abs(t4))}<br>
+     <span class="k">Con a = ${a}, b = ${b}</span>${a}·${b}${term(t2,Math.abs(a)+"·"+Math.abs(db))}${term(t3,Math.abs(da)+"·"+b)}${term(t4,Math.abs(da)+"·"+Math.abs(db))} = ${a*b}${term(t2,Math.abs(t2))}${term(t3,Math.abs(t3))}${term(t4,Math.abs(t4))} = <b>${a*b+t2+t3+t4}</b><br>
+     <span class="k">Comprobación</span>${A} · ${B} = ${A*B} ${A*B===a*b+t2+t3+t4?'<span class="ok-t">✓</span>':""}
+     ${da<0&&db<0?`<br><span class="k">La esquina</span>Al quitar las dos franjas, la esquina de ${-da}·${-db} se quitó dos veces. Por eso se suma una vez: (${fmt(da)})·(${fmt(db)}) = +${t4}.`:""}`};
+  const bind=(id,fn)=>$("#"+id,host).oninput=e=>{fn(+e.target.value);$("#"+id+"o",host).textContent=fmt(+e.target.value);draw()};
+  bind("ra",v=>a=v);bind("rb",v=>b=v);bind("rda",v=>da=v);bind("rdb",v=>db=v);draw()}
+};
+
+/* ============ estación de bienestar ============ */
+function socioScores(){return SOCIO.map(d=>{const vals=d.items.map((it,i)=>{const v=BIE.answers[d.id+i];return v?(it.rev?6-v:v):null}).filter(v=>v!=null);
+  const m=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;const band=d.anx?(m>=3.7?"hi":m<=2.3?"lo":"mid"):(m>=3.7?"hi":m<=2.5?"lo":"mid");return{d,m,band}})}
+function openSocio(){const ns=nodeSt("B1");const v=$("#view-node");
+  v.innerHTML=nodeShell("B1","bie",1,"Mi relación con las matemáticas","Creencias, confianza, forma de estudiar y emociones.");showView("node");
+  const root=$(".node",v),body=$(".body",root),nav=$(".navrow",root);
+  const allQ=()=>SOCIO.every(d=>d.items.every((_,i)=>BIE.answers[d.id+i]));const planOk=()=>BIE.plan.length>0&&(BIE.goal||"").trim().length>=5;
+  const canGo=i=>i===0||(i===1)||(i===2&&allQ())||(i===3&&allQ()&&planOk());
+  function go(m){ns.moment=m;ns.max=Math.max(ns.max,m);if(m===3&&allQ()&&planOk()&&!S.bienestar){S.bienestar=true;ns.done=true;ns.doneAt=Date.now()}save();draw();root.scrollIntoView({behavior:reduceMotion?"auto":"smooth",block:"start"})}
+  function draw(){const m=ns.moment;renderSteps(root,m,ns.max,go,canGo);
+    if(m===0)body.innerHTML=`<p class="lead">Aprender matemáticas no es solo cuestión de contenidos. Lo que crees sobre las matemáticas, lo que piensas de ti, cómo organizas el estudio y lo que sientes frente a un problema influyen en lo que logras.</p>
+      <div class="ex-box"><span class="eyebrow">Cuatro cosas que vamos a mirar</span><ul class="plain"><li><b>Creencias:</b> ¿las matemáticas se memorizan o se entienden?</li><li><b>Autoconcepto:</b> ¿te ves capaz de aprenderlas?</li><li><b>Autorregulación:</b> ¿planeas, revisas y ajustas tu forma de estudiar?</li><li><b>Ansiedad:</b> ¿qué sientes en el cuerpo y en la mente frente a un examen o un ejercicio?</li></ul></div>
+      <p>La ansiedad ante las matemáticas es muy frecuente entre quienes empiezan la universidad. No mide tu inteligencia: ocupa parte de la atención que necesitas para razonar, y por eso conviene reconocerla y trabajarla.</p>
+      <div class="callout"><span class="eyebrow">Tus respuestas son privadas</span><p>Lo que respondas en esta estación solo lo ves tú. Tu profesor únicamente ve que completaste la estación. No es un examen ni un diagnóstico: es una herramienta para conocerte mejor.</p></div>`;
+    else if(m===1){body.innerHTML=`<p class="lead">Responde con sinceridad. No hay respuestas buenas ni malas.</p><div class="likert">${SOCIO.flatMap(d=>d.items.map((it,i)=>{const k=d.id+i,v=BIE.answers[k];
+        return `<div class="lk" role="group" aria-label="${esc(it.t)}"><p>${esc(it.t)}</p><div class="lkopts">${LIKERT.map((l,j)=>`<button data-k="${k}" data-v="${j+1}" aria-pressed="${v===j+1}">${l}</button>`).join("")}</div></div>`})).join("")}</div>`;
+      $$(".lkopts button",body).forEach(b=>b.onclick=()=>{BIE.answers[b.dataset.k]=+b.dataset.v;$$(`[data-k="${b.dataset.k}"]`,body).forEach(x=>x.setAttribute("aria-pressed",x===b));saveBie();drawNav()})}
+    else if(m===2){body.innerHTML=`<p class="lead">Tu reto: armar un plan pequeño y concreto para esta semana.</p><h4>Elige hasta tres estrategias</h4><div class="strat">${STRATS.map((t,i)=>`<button data-i="${i}" aria-pressed="${BIE.plan.includes(i)}">${t}</button>`).join("")}</div>
+       <div class="field"><label for="goal">Mi meta concreta para esta semana</label><textarea id="goal" placeholder="Por ejemplo: hacer dos estaciones de la línea Enteros, el martes y el jueves después de clase.">${esc(BIE.goal||"")}</textarea></div>`;
+      $$(".strat button",body).forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(BIE.plan.includes(i))BIE.plan=BIE.plan.filter(x=>x!==i);else{if(BIE.plan.length>=3){toast("Elige como máximo tres: un plan corto se cumple mejor.");return}BIE.plan.push(i)}b.setAttribute("aria-pressed",BIE.plan.includes(i));saveBie();drawNav()});
+      let gt;$("#goal",body).oninput=e=>{BIE.goal=e.target.value;clearTimeout(gt);gt=setTimeout(saveBie,800);drawNav()}}
+    else{const sc=socioScores();
+      body.innerHTML=`<p class="lead">Esto es lo que dicen tus respuestas. Léelo como un punto de partida, no como una etiqueta.</p>${sc.map(({d,m,band})=>`<div class="dimbar"><h4>${d.name}<small>${d.anx?(band==="hi"?"tensión alta":band==="mid"?"tensión moderada":"tensión baja"):(band==="hi"?"fortaleza":band==="mid"?"en desarrollo":"para trabajar")}</small></h4>
+        <div class="track" aria-hidden="true"><i style="width:${(m-1)/4*100}%;${d.anx?"background:var(--l-rac)":""}"></i></div><p>${d.fb[band]}</p></div>`).join("")}
+        <div class="ex-box"><span class="eyebrow">Tu plan</span><ul class="plain">${BIE.plan.map(i=>`<li>${STRATS[i]}</li>`).join("")}</ul><p><b>Meta:</b> ${esc(BIE.goal)}</p></div>
+        <p class="muted">Esta herramienta sirve para reflexionar; no es un diagnóstico. Si en algún momento la tensión o el malestar te superan, busca a alguien de confianza o al servicio de bienestar de tu universidad.</p>`}
+    drawNav()}
+  function drawNav(){const m=ns.moment;const ok=m===0||(m===1&&allQ())||(m===2&&planOk());
+    const lbl=m===1&&!allQ()?"Responde todas las afirmaciones para seguir":m===2&&!planOk()?"Elige al menos una estrategia y escribe tu meta":"Siguiente: "+MOMENTS[m+1];
+    nav.innerHTML=`<button class="btn ghost" data-a="back">${m===0?"Volver al plano":"Anterior"}</button>`+(m<3?`<button class="btn primary" data-a="next" ${ok?"":"disabled"}>${lbl}</button>`:`<button class="btn primary" data-a="map">Volver al plano</button>`);
+    $$("button",nav).forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="back"){if(m===0){showView("map");renderMap()}else go(m-1)}else if(a==="next")go(m+1);else{showView("map");renderMap()}})}
+  draw()}
+
+/* ============ diagnóstico ============ */
+function openDiag(){const v=$("#view-node");const res={};
+  v.innerHTML=`<article class="node" style="--linec:var(--ink)"><div class="nodehead"><span class="badge"><i style="background:var(--ink)"></i>Inicio · Opcional</span><h2>Test de diagnóstico</h2><p class="muted">Doce preguntas, unos quince minutos.</p></div><div class="body"></div><div class="navrow"></div></article>`;showView("node");
+  const body=$(".body",v),nav=$(".navrow",v);
+  if(S.diag){const c=S.diag.conv||[];body.innerHTML=`<p class="lead">Ya hiciste el diagnóstico: acertaste ${S.diag.score} de ${DIAG.length}.</p><p>${c.length?`Convalidaste ${c.length===1?"la estación":"las estaciones"} ${c.map(id=>`«${NODES[id].title}»`).join(", ")}. Puedes visitarlas cuando quieras para repasar.`:"No convalidaste estaciones: empieza por «Programas de cálculo»."}</p>`;
+    nav.innerHTML=`<button class="btn ghost" id="dback">Volver al plano</button><button class="btn" id="dredo">Repetir el diagnóstico</button>`;
+    $("#dback",v).onclick=()=>{showView("map");renderMap()};$("#dredo",v).onclick=()=>{S.diag=null;save();openDiag()};return}
+  body.innerHTML=`<p class="lead">Si ya manejas algunos temas, este test te permite saltarlos. Cada par de preguntas corresponde a una estación de la línea Enteros: si aciertas las dos, la estación queda convalidada y desbloquea la siguiente.</p><p class="muted">Aquí no hay pistas: una sola oportunidad por pregunta. Es un punto de partida, no una nota.</p><div class="items" style="display:grid;gap:20px"></div>`;
+  const host=$(".items",body);
+  DIAG.forEach((it,i)=>{const b=document.createElement("div");host.appendChild(b);mountItem(b,it,{idx:i,total:DIAG.length,single:true,label:"Pregunta",key:"D"+i,onResult:r=>{res[i]=r;draw()}})});
+  const draw=()=>{const n=Object.keys(res).length;nav.innerHTML=`<button class="btn ghost" id="dback">Volver al plano</button><button class="btn primary" id="dend" ${n<DIAG.length?"disabled":""}>${n<DIAG.length?`Respondidas ${n} de ${DIAG.length}`:"Ver mi resultado"}</button>`;
+    $("#dback",v).onclick=()=>{showView("map");renderMap()};
+    $("#dend",v).onclick=async()=>{const score=DIAG.filter((_,i)=>res[i]==="first").length;const convs=ENT.filter(id=>DIAG.every((d,i)=>d.node!==id||res[i]==="first"));
+      S.diag={score,conv:convs,at:Date.now()};save();showView("map");renderMap();
+      toast(convs.length?`Convalidaste ${convs.length} ${convs.length===1?"estación":"estaciones"}. Tu avatar va a la siguiente.`:"Listo. Empieza por «Programas de cálculo».");
+      const t=nextTarget();if(t){await sleep(400);moveAvatar(t)}}};
+  draw()}
+
+/* ============ mi progreso ============ */
+function renderMe(){const v=$("#view-me");
+  const row=(id,line,name,state)=>`<div class="stitem" style="--linec:var(${LINES[line].c})"><span class="dotl ${state==="Completada"||state.startsWith("Convalidada")?"d":""}"></span><span>${name}</span><span class="state">${state}</span></div>`;
+  const stTxt=id=>{if(isDone(id)){const s=S.nodes[id]&&S.nodes[id].stars;return"Completada"+(id!=="B1"&&s?" · "+"★".repeat(s):"")}if(conv(id))return"Convalidada en el diagnóstico";if(!unlocked(id))return"Bloqueada";return S.nodes[id]&&S.nodes[id].max>0?"En curso":"Disponible"};
+  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||"Tu recorrido")}</h2><p class="muted">${esc(RT.email)}${S.grupo?" · "+esc(S.grupo):""}</p></div>
+    <p>${S.diag?`Diagnóstico: ${S.diag.score} de ${DIAG.length} aciertos.`:"Aún no has hecho el diagnóstico opcional. Lo encuentras en la estación Inicio."}</p>
+    <h3>Línea Enteros</h3><div class="stlist">${ENT.map(id=>row(id,"ent",NODES[id].title,stTxt(id))).join("")}</div>
+    <h3>Línea Bienestar</h3><div class="stlist">${row("B1","bie","Mi relación con las matemáticas",stTxt("B1"))}</div>
+    <p class="muted">Las líneas Racionales, Recta real, Álgebra básica y Ecuaciones llegarán en próximas versiones.</p>
+    <div class="fillrow"><button class="btn" id="edit">Cambiar mi grupo o avatar</button></div></div>`;
+  $("#edit",v).onclick=openProfile}
+
+/* ============ panel del grupo (docente) ============ */
+function renderPanel(){const v=$("#view-panel");
+  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Solo visible para ti</span><h2 style="font-size:1.6rem;font-weight:800">Panel del grupo</h2></div>
+   <p class="muted">Aquí aparece cada estudiante que se registra en la caja. Las respuestas de la estación de bienestar son privadas: solo ves si la completaron.</p>
+   <div class="tablewrap"><table><thead><tr><th>Estudiante</th><th>Grupo</th><th>Diagnóstico</th><th>Línea Enteros</th><th>Bienestar</th><th>Estrellas</th><th>Última actividad</th></tr></thead><tbody id="pt"><tr><td colspan="7" class="muted">Cargando el avance del grupo…</td></tr></tbody></table></div>
+   <p class="tip">Cuadros: lleno = completada · rayado = convalidada en el diagnóstico · borde = en curso.</p></div>`;
+  if(!RT.db){$("#pt",v).innerHTML=`<tr><td colspan="7" class="muted">El avance compartido no está disponible en esta vista.</td></tr>`;return}
+  if(RT.unsubPanel)RT.unsubPanel();
+  RT.unsubPanel=RT.db.collection("progreso").onSnapshot(snap=>{const rows=snap.docs.map(d=>d.data()).filter(Boolean).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+    const tb=$("#pt",v);if(!tb)return;
+    if(!rows.length){tb.innerHTML=`<tr><td colspan="7" class="muted">Todavía no hay estudiantes registrados. Comparte el enlace de la página para que creen su cuenta.</td></tr>`;return}
+    tb.innerHTML=rows.map(r=>{const nodes=r.nodes||{},cv=(r.diag&&r.diag.conv)||[];const stars=ENT.reduce((a,id)=>a+(nodes[id]&&nodes[id].stars||0),0);
+      const sq=ENT.map(id=>`<i class="${nodes[id]&&nodes[id].done?"d":cv.includes(id)?"c":nodes[id]&&nodes[id].max>0?"p":""}" title="${NODES[id].title}"></i>`).join("");
+      return`<tr><td>${esc(r.nombre||"Sin nombre")}<br><span class="muted" style="font-size:.82rem">${esc(r.email||"")}</span></td><td>${esc(r.grupo||"—")}</td><td>${r.diag?r.diag.score+" / "+DIAG.length:"—"}</td><td><span class="sq">${sq}</span></td><td>${r.bienestar?"Completada":"—"}</td><td>★ ${stars}</td><td>${r.updatedAt?new Date(r.updatedAt).toLocaleString("es-CO",{dateStyle:"medium",timeStyle:"short"}):"—"}</td></tr>`}).join("")},
+   ()=>{const tb=$("#pt",v);if(tb)tb.innerHTML=`<tr><td colspan="7" class="muted">No se pudo leer el avance del grupo. Vuelve a abrir el panel en un momento.</td></tr>`})}
+
+/* ============ perfil ============ */
+function openProfile(){const m=$("#modal");let av=S.avatar;
+  m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pt-t"><span class="eyebrow">Tu cuenta</span><h2 id="pt-t">${esc(S.nombre)}</h2><p class="muted">${esc(RT.email)}</p>
+   <div class="field"><label for="pg">Grupo o curso <span class="muted">(opcional)</span></label><input id="pg" value="${esc(S.grupo)}" placeholder="Por ejemplo: Grupo 3"></div>
+   ${avatarPicker(av)}
+   <div class="dlg-actions"><button class="btn primary" id="psave">Guardar</button><button class="btn ghost" id="pcancel">Cancelar</button></div></div>`;
+  m.hidden=false;bindAvatar(m,a=>av=a);
+  $("#pcancel",m).onclick=()=>m.hidden=true;
+  $("#psave",m).onclick=()=>{S.grupo=$("#pg",m).value.trim().slice(0,40);S.avatar=av;save();m.hidden=true;renderMap();renderMe()}}
+const avatarPicker=av=>`<div class="field"><span style="font-family:var(--f-disp);font-weight:600;font-size:.92rem">Color de tu viajero</span><div class="avs" role="group" aria-label="Color del avatar">${AVS.map(a=>`<button type="button" data-a="${a}" aria-pressed="${a===av}" aria-label="${a}"><i style="background:var(--av-${a})"></i></button>`).join("")}</div></div>`;
+function bindAvatar(root,set){$$(".avs button",root).forEach(b=>b.onclick=()=>{set(b.dataset.a);$$(".avs button",root).forEach(x=>x.setAttribute("aria-pressed",x===b))})}
+function openStart(){const m=$("#modal");
+  m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="st-t"><span class="eyebrow">Cuenta creada</span><h2 id="st-t">Hola, ${esc(S.nombre)}</h2>
+   <p>En cada estación lees una explicación, exploras, resuelves un reto y recibes retroalimentación. Si ya manejas algunos temas, el diagnóstico te permite saltarlos.</p>
+   <div class="dlg-actions"><button class="btn primary" id="sd">Empezar con el diagnóstico</button><button class="btn" id="sm">Ir directo al plano</button></div></div>`;
+  m.hidden=false;$("#sm",m).onclick=()=>m.hidden=true;$("#sd",m).onclick=()=>{m.hidden=true;clickStation("inicio")}}
+
+/* ============ cuentas ============ */
+const AUTH_ERR={"auth/email-already-in-use":"Ya existe una cuenta con ese email. Inicia sesión.","auth/invalid-email":"El email no es válido.","auth/weak-password":"La contraseña debe tener al menos 6 caracteres.",
+  "auth/user-not-found":"Email o contraseña incorrectos.","auth/wrong-password":"Email o contraseña incorrectos.","auth/invalid-credential":"Email o contraseña incorrectos.","auth/invalid-login-credentials":"Email o contraseña incorrectos.",
+  "auth/too-many-requests":"Demasiados intentos seguidos. Espera unos minutos y vuelve a probar.","auth/network-request-failed":"No hay conexión. Revisa tu internet.","auth/operation-not-allowed":"El registro con email no está activado en Firebase."};
+const authMsg=e=>AUTH_ERR[e&&e.code]||"Algo salió mal. Inténtalo de nuevo.";
+const USER_RE=/^[a-z0-9_.]{3,20}$/;
+const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)"><path d="M-7 4 Q-7 -9 0 -9 Q7 -9 7 4 Z" fill="var(--av-coral)" stroke="var(--surface)" stroke-width="2"/><circle cx="0" cy="-15" r="6.5" fill="var(--av-coral)" stroke="var(--surface)" stroke-width="2"/></g></svg>`;
+function renderAuth(mode){const v=$("#view-auth");let av="coral";
+  const intro=`<div class="authintro"><span class="eyebrow">Nivelación en pensamiento matemático</span><h2>Un plano para repasar las bases, estación por estación.</h2>${MINI_MAP}
+    <p>En cada estación lees una explicación, exploras con una herramienta interactiva, resuelves un reto y recibes retroalimentación. Tu avance queda guardado en tu cuenta.</p></div>`;
+  let form;
+  if(mode==="reg")form=`<form class="dialog" id="af" novalidate><h2>Crear una cuenta</h2>
+    <div class="field"><label for="fu">Nombre de usuario</label><input id="fu" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="por ejemplo: laura.gomez" maxlength="20"><span class="tip">De 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo. Lo verá tu profesor.</span></div>
+    <div class="field"><label for="fe">Email</label><input id="fe" type="email" autocomplete="email" autocapitalize="none"></div>
+    <div class="field"><label for="fp">Contraseña</label><input id="fp" type="password" autocomplete="new-password" minlength="6"><span class="tip">Al menos 6 caracteres.</span></div>
+    <div class="field"><label for="fp2">Repite la contraseña</label><input id="fp2" type="password" autocomplete="new-password"></div>
+    <div class="field"><label for="fg">Grupo o curso <span class="muted">(opcional)</span></label><input id="fg" placeholder="Por ejemplo: Grupo 3" maxlength="40"></div>
+    ${avatarPicker(av)}
+    <p class="err" id="ferr" aria-live="polite"></p>
+    <div class="dlg-actions"><button class="btn primary" type="submit" id="fsub">Crear mi cuenta</button></div>
+    <p class="tip">¿Ya tienes cuenta? <button type="button" class="linkbtn" data-go="login">Inicia sesión</button></p></form>`;
+  else if(mode==="reset")form=`<form class="dialog" id="af" novalidate><h2>Recuperar la contraseña</h2><p>Escribe el email de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.</p>
+    <div class="field"><label for="fe">Email</label><input id="fe" type="email" autocomplete="email" autocapitalize="none"></div>
+    <p class="err" id="ferr" aria-live="polite"></p>
+    <div class="dlg-actions"><button class="btn primary" type="submit" id="fsub">Enviar el enlace</button></div>
+    <p class="tip"><button type="button" class="linkbtn" data-go="login">Volver a iniciar sesión</button></p></form>`;
+  else form=`<form class="dialog" id="af" novalidate><h2>Iniciar sesión</h2>
+    <div class="field"><label for="fe">Email</label><input id="fe" type="email" autocomplete="email" autocapitalize="none"></div>
+    <div class="field"><label for="fp">Contraseña</label><input id="fp" type="password" autocomplete="current-password"></div>
+    <p class="err" id="ferr" aria-live="polite"></p>
+    <div class="dlg-actions"><button class="btn primary" type="submit" id="fsub">Entrar</button></div>
+    <p class="tip"><button type="button" class="linkbtn" data-go="reset">¿Olvidaste tu contraseña?</button></p>
+    <p class="tip">¿Es tu primera vez? <button type="button" class="linkbtn" data-go="reg">Crea una cuenta</button></p></form>`;
+  v.innerHTML=`<div class="authwrap">${intro}${form}</div>`;
+  bindAvatar(v,a=>av=a);
+  $$("[data-go]",v).forEach(b=>b.onclick=()=>renderAuth(b.dataset.go));
+  const err=t=>{$("#ferr",v).className="err";$("#ferr",v).textContent=t};const busy=on=>{$("#fsub",v).disabled=on};
+  $("#af",v).addEventListener("submit",async e=>{e.preventDefault();err("");const email=($("#fe",v).value||"").trim();
+    if(!/^\S+@\S+\.\S+$/.test(email)){err("Escribe un email válido.");return}
+    if(mode==="reset"){busy(true);try{await RT.auth.sendPasswordResetEmail(email)}catch(x){if(!x||x.code!=="auth/user-not-found"){err(authMsg(x));busy(false);return}}
+      $("#ferr",v).className="okmsg";$("#ferr",v).textContent="Si hay una cuenta con ese email, te llegará un enlace en unos minutos. Revisa también la carpeta de spam.";busy(false);return}
+    const pass=$("#fp",v).value;
+    if(mode==="login"){if(!pass){err("Escribe tu contraseña.");return}busy(true);try{await RT.auth.signInWithEmailAndPassword(email,pass)}catch(x){err(authMsg(x));busy(false)}return}
+    const u=($("#fu",v).value||"").trim().toLowerCase();
+    if(!USER_RE.test(u)){err("El nombre de usuario debe tener de 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo.");return}
+    if(pass.length<6){err("La contraseña debe tener al menos 6 caracteres.");return}
+    if(pass!==$("#fp2",v).value){err("Las dos contraseñas no coinciden.");return}
+    busy(true);RT.registering=true;let cred;
+    try{cred=await RT.auth.createUserWithEmailAndPassword(email,pass)}catch(x){RT.registering=false;err(authMsg(x));busy(false);return}
+    try{await RT.db.doc("nombres/"+u).set({uid:cred.user.uid,creado:Date.now()})}
+    catch(x){await cred.user.delete().catch(()=>{});RT.registering=false;busy(false);
+      err(x&&x.code==="permission-denied"?"Ese nombre de usuario ya está en uso. Elige otro.":"No se pudo crear la cuenta. Revisa tu conexión e inténtalo de nuevo.");return}
+    await cred.user.updateProfile({displayName:u}).catch(()=>{});
+    S=freshState();S.nombre=u;S.grupo=($("#fg",v).value||"").trim().slice(0,40);S.avatar=av;BIE={answers:{},plan:[],goal:""};
+    RT.uid=cred.user.uid;RT.email=email;RT.teacher=false;await flush();RT.registering=false;enterApp(true)});
+  setTimeout(()=>{const f=$("input",v);f&&f.focus()},30)}
+function enterApp(isNew){$("#who").hidden=false;$("#tab-panel").hidden=!RT.teacher;$("#modal").hidden=true;showView("map");renderMap();if(isNew)openStart()}
+
+/* ============ arranque ============ */
+(function boot(){
+  const configured=window.firebase&&FIREBASE_CONFIG.apiKey&&!FIREBASE_CONFIG.apiKey.startsWith("PEGA");
+  if(!configured){$("#view-auth").innerHTML=`<div class="panel"><span class="eyebrow">Falta un paso</span><h2 style="font-size:1.5rem;font-weight:800">Conecta la caja con Firebase</h2>
+    <p>Esta página necesita un proyecto de Firebase para guardar las cuentas y el progreso. Abre el archivo en un editor de texto, busca <span class="m">FIREBASE_CONFIG</span> y pega la configuración de tu proyecto. La guía que acompaña al archivo explica cada paso.</p>
+    ${window.firebase?"":`<p class="muted">Tampoco se pudo cargar la librería de Firebase. Revisa la conexión a internet.</p>`}</div>`;return}
+  firebase.initializeApp(FIREBASE_CONFIG);RT.auth=firebase.auth();RT.db=firebase.firestore();
+  RT.auth.onAuthStateChanged(async u=>{if(RT.registering)return;
+    if(!u){RT.uid=null;RT.email="";RT.teacher=false;S=freshState();BIE={answers:{},plan:[],goal:""};$("#who").hidden=true;$("#modal").hidden=true;showNotice("");showView("auth");renderAuth("login");return}
+    RT.uid=u.uid;RT.email=u.email||"";$("#view-auth").innerHTML=`<p class="muted">Abriendo tu plano…</p>`;
+    try{const snap=await RT.db.doc("progreso/"+u.uid).get();
+      if(snap.exists){const d=snap.data();delete d.email;delete d.uid;S={...freshState(),...d}}else{S=freshState();S.nombre=u.displayName||(u.email||"").split("@")[0];flush()}
+      const b=await RT.db.doc("bienestar/"+u.uid).get();BIE=b.exists?{answers:{},plan:[],goal:"",...b.data()}:{answers:{},plan:[],goal:""};
+      showNotice("")}
+    catch(e){RT.uid=null;showNotice("No se pudo cargar tu avance guardado. Revisa tu conexión y recarga la página; mientras tanto, lo que hagas no se guardará.")}
+    try{const d=await RT.db.doc("docentes/"+u.uid).get();RT.teacher=d.exists}catch(e){RT.teacher=false}
+    enterApp(false)})})();
+</script>
+</body>
+</html>
