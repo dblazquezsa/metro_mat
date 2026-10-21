@@ -48,11 +48,11 @@ Para dar acceso al panel a otra persona docente, repite los pasos con su UID.
 | Colección | Contenido | Quién lo lee |
 |---|---|---|
 | `progreso/{uid}` | Usuario, email, grupo, estaciones, estrellas, diagnóstico | El propio estudiante y los docentes |
-| `bienestar/{uid}` | Respuestas y plan de la estación de bienestar | Solo el propio estudiante |
+| `bienestar/{uid}` | Respuestas, historial, notas y plan de las cuatro estaciones de bienestar | Solo el propio estudiante |
 | `nombres/{usuario}` | Reserva del nombre de usuario | Usuarios con sesión iniciada |
 | `docentes/{uid}` | Lista de docentes | Cada persona solo comprueba si es docente |
 
-Los estudiantes inician sesión con su email y contraseña. Si olvidan la contraseña, la página les envía un enlace de recuperación al correo. Para borrar la cuenta de un estudiante, elimínala en **Authentication → Usuarios** y borra sus documentos en `progreso`, `bienestar` y `nombres`.
+Quien no quiera registrarse puede pulsar **Explorar sin cuenta**: abre todas las estaciones, pero su avance no se guarda en ningún sitio y no aparece en el panel. Los estudiantes inician sesión con su email y contraseña. Si olvidan la contraseña, la página les envía un enlace de recuperación al correo. Para borrar la cuenta de un estudiante, elimínala en **Authentication → Usuarios** y borra sus documentos en `progreso`, `bienestar` y `nombres`.
 
 ## Antes de usarla con estudiantes
 
