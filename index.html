@@ -581,7 +581,7 @@ const AVS=["coral","sol","menta","lila"];
 function freshState(){return{v:1,nombre:"",grupo:"",avatar:"coral",current:"inicio",nodes:{},diag:null,bienestar:false,updatedAt:0}}
 let S=freshState();
 let BIE={answers:{},plan:[],goal:""};
-const RT={db:null,auth:null,uid:null,email:"",teacher:false,saving:false,dirty:false,unsubPanel:null,view:"auth",registering:false};
+const RT={db:null,auth:null,uid:null,email:"",teacher:false,saving:false,dirty:false,unsubPanel:null,view:"auth",registering:false,guest:false};
 let saveT;
 function save(){S.updatedAt=Date.now();if(!RT.uid)return;clearTimeout(saveT);saveT=setTimeout(flush,700)}
 async function flush(){if(!RT.uid)return;if(RT.saving){RT.dirty=true;return}RT.saving=true;
@@ -593,7 +593,7 @@ function saveBie(){if(!RT.uid)return;clearTimeout(bieT);bieT=setTimeout(async()=
 const nodeSt=id=>(S.nodes[id]=S.nodes[id]||{moment:0,max:0,results:{},done:false,stars:0});
 const conv=id=>!!(S.diag&&S.diag.conv&&S.diag.conv.includes(id));
 const isDone=id=>id==="B1"?!!S.bienestar:!!(S.nodes[id]&&S.nodes[id].done);
-function unlocked(id){const s=STM[id];if(!s||!s.built)return false;if(id==="inicio"||id==="B1"||id==="E1")return true;
+function unlocked(id){const s=STM[id];if(!s||!s.built)return false;if(RT.guest)return true;if(id==="inicio"||id==="B1"||id==="E1")return true;
   const k=ENT.indexOf(id);if(k>0){const p=ENT[k-1];return isDone(p)||conv(p)||conv(id)}return false}
 function nextTarget(){return ENT.find(id=>unlocked(id)&&!isDone(id)&&!conv(id))}
 
@@ -609,8 +609,12 @@ function showView(v){RT.view=v;["map","node","me","panel","auth"].forEach(k=>$("
 $("#tab-map").onclick=()=>{showView("map");renderMap()};
 $("#tab-me").onclick=()=>{renderMe();showView("me")};
 $("#tab-panel").onclick=()=>{renderPanel();showView("panel")};
-function showNotice(msg){const n=$("#notice");n.hidden=!msg;n.textContent=msg||""}
-$("#tab-out").onclick=async()=>{clearTimeout(saveT);if(RT.uid)await flush();if(RT.unsubPanel){RT.unsubPanel();RT.unsubPanel=null}await RT.auth.signOut()};
+function showNotice(msg,action){const n=$("#notice");n.hidden=!msg;n.textContent=msg||"";
+  if(msg&&action){const b=document.createElement("button");b.className="linkbtn";b.style.marginLeft="8px";b.textContent=action.label;b.onclick=action.fn;n.appendChild(b)}}
+function leaveGuest(){RT.guest=false;S=freshState();BIE={answers:{},plan:[],goal:""};$("#who").hidden=true;$("#modal").hidden=true;showNotice("");showView("auth");renderAuth("login")}
+function enterGuest(){RT.guest=true;RT.uid=null;RT.email="";RT.teacher=false;S=freshState();BIE={answers:{},plan:[],goal:""};
+  enterApp(false);showNotice("Estás explorando sin cuenta: puedes abrir todas las estaciones, pero tu avance no se guarda.",{label:"Crear una cuenta",fn:leaveGuest})}
+$("#tab-out").onclick=async()=>{if(RT.guest){leaveGuest();return}clearTimeout(saveT);if(RT.uid)await flush();if(RT.unsubPanel){RT.unsubPanel();RT.unsubPanel=null}await RT.auth.signOut()};
 
 /* ============ plano ============ */
 const NS="http://www.w3.org/2000/svg";
@@ -961,13 +965,13 @@ function openDiag(){const v=$("#view-node");const res={};
 function renderMe(){const v=$("#view-me");
   const row=(id,line,name,state)=>`<div class="stitem" style="--linec:var(${LINES[line].c})"><span class="dotl ${state==="Completada"||state.startsWith("Convalidada")?"d":""}"></span><span>${name}</span><span class="state">${state}</span></div>`;
   const stTxt=id=>{if(isDone(id)){const s=S.nodes[id]&&S.nodes[id].stars;return"Completada"+(id!=="B1"&&s?" · "+"★".repeat(s):"")}if(conv(id))return"Convalidada en el diagnóstico";if(!unlocked(id))return"Bloqueada";return S.nodes[id]&&S.nodes[id].max>0?"En curso":"Disponible"};
-  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||"Tu recorrido")}</h2><p class="muted">${esc(RT.email)}${S.grupo?" · "+esc(S.grupo):""}</p></div>
+  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||(RT.guest?"Recorrido sin cuenta":"Tu recorrido"))}</h2>${RT.guest?"":`<p class="muted">${esc(RT.email)}${S.grupo?" · "+esc(S.grupo):""}</p>`}</div>
     <p>${S.diag?`Diagnóstico: ${S.diag.score} de ${DIAG.length} aciertos.`:"Aún no has hecho el diagnóstico opcional. Lo encuentras en la estación Inicio."}</p>
     <h3>Línea Enteros</h3><div class="stlist">${ENT.map(id=>row(id,"ent",NODES[id].title,stTxt(id))).join("")}</div>
     <h3>Línea Bienestar</h3><div class="stlist">${row("B1","bie","Mi relación con las matemáticas",stTxt("B1"))}</div>
     <p class="muted">Las líneas Racionales, Recta real, Álgebra básica y Ecuaciones llegarán en próximas versiones.</p>
-    <div class="fillrow"><button class="btn" id="edit">Cambiar mi grupo o avatar</button></div></div>`;
-  $("#edit",v).onclick=openProfile}
+    ${RT.guest?`<div class="callout"><span class="eyebrow">Sin cuenta</span><p>Este recorrido no se guarda: al cerrar o recargar la página empiezas de cero. Crea una cuenta si quieres conservar tu avance.</p></div><div class="fillrow"><button class="btn primary" id="mkacc">Crear una cuenta</button></div>`:`<div class="fillrow"><button class="btn" id="edit">Cambiar mi grupo o avatar</button></div>`}</div>`;
+  if(RT.guest)$("#mkacc",v).onclick=leaveGuest;else $("#edit",v).onclick=openProfile}
 
 /* ============ panel del grupo (docente) ============ */
 function renderPanel(){const v=$("#view-panel");
@@ -1011,7 +1015,8 @@ const USER_RE=/^[a-z0-9_.]{3,20}$/;
 const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)"><path d="M-7 4 Q-7 -9 0 -9 Q7 -9 7 4 Z" fill="var(--av-coral)" stroke="var(--surface)" stroke-width="2"/><circle cx="0" cy="-15" r="6.5" fill="var(--av-coral)" stroke="var(--surface)" stroke-width="2"/></g></svg>`;
 function renderAuth(mode){const v=$("#view-auth");let av="coral";
   const intro=`<div class="authintro"><span class="eyebrow">Nivelación en pensamiento matemático</span><h2>Un plano para repasar las bases, estación por estación.</h2>${MINI_MAP}
-    <p>En cada estación lees una explicación, exploras con una herramienta interactiva, resuelves un reto y recibes retroalimentación. Tu avance queda guardado en tu cuenta.</p></div>`;
+    <p>En cada estación lees una explicación, exploras con una herramienta interactiva, resuelves un reto y recibes retroalimentación. Con una cuenta, tu avance queda guardado.</p>
+    <div class="fillrow"><button type="button" class="btn" data-guest>Explorar sin cuenta</button><span class="tip">Abres todas las estaciones, pero tu avance no se guarda.</span></div></div>`;
   let form;
   if(mode==="reg")form=`<form class="dialog" id="af" novalidate><h2>Crear una cuenta</h2>
     <div class="field"><label for="fu">Nombre de usuario</label><input id="fu" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="por ejemplo: laura.gomez" maxlength="20"><span class="tip">De 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo. Lo verá tu profesor.</span></div>
@@ -1037,7 +1042,7 @@ function renderAuth(mode){const v=$("#view-auth");let av="coral";
     <p class="tip">¿Es tu primera vez? <button type="button" class="linkbtn" data-go="reg">Crea una cuenta</button></p></form>`;
   v.innerHTML=`<div class="authwrap">${intro}${form}</div>`;
   bindAvatar(v,a=>av=a);
-  $$("[data-go]",v).forEach(b=>b.onclick=()=>renderAuth(b.dataset.go));
+  $$("[data-go]",v).forEach(b=>b.onclick=()=>renderAuth(b.dataset.go));$("[data-guest]",v).onclick=enterGuest;
   const err=t=>{$("#ferr",v).className="err";$("#ferr",v).textContent=t};const busy=on=>{$("#fsub",v).disabled=on};
   $("#af",v).addEventListener("submit",async e=>{e.preventDefault();err("");const email=($("#fe",v).value||"").trim();
     if(!/^\S+@\S+\.\S+$/.test(email)){err("Escribe un email válido.");return}
@@ -1058,7 +1063,7 @@ function renderAuth(mode){const v=$("#view-auth");let av="coral";
     S=freshState();S.nombre=u;S.grupo=($("#fg",v).value||"").trim().slice(0,40);S.avatar=av;BIE={answers:{},plan:[],goal:""};
     RT.uid=cred.user.uid;RT.email=email;RT.teacher=false;await flush();RT.registering=false;enterApp(true)});
   setTimeout(()=>{const f=$("input",v);f&&f.focus()},30)}
-function enterApp(isNew){$("#who").hidden=false;$("#tab-panel").hidden=!RT.teacher;$("#modal").hidden=true;showView("map");renderMap();if(isNew)openStart()}
+function enterApp(isNew){$("#who").hidden=false;$("#tab-out").textContent=RT.guest?"Crear cuenta o entrar":"Salir";$("#tab-panel").hidden=!RT.teacher;$("#modal").hidden=true;showView("map");renderMap();if(isNew)openStart()}
 
 /* ============ arranque ============ */
 (function boot(){
@@ -1068,8 +1073,8 @@ function enterApp(isNew){$("#who").hidden=false;$("#tab-panel").hidden=!RT.teach
     ${window.firebase?"":`<p class="muted">Tampoco se pudo cargar la librería de Firebase. Revisa la conexión a internet.</p>`}</div>`;return}
   firebase.initializeApp(FIREBASE_CONFIG);RT.auth=firebase.auth();RT.db=firebase.firestore();
   RT.auth.onAuthStateChanged(async u=>{if(RT.registering)return;
-    if(!u){RT.uid=null;RT.email="";RT.teacher=false;S=freshState();BIE={answers:{},plan:[],goal:""};$("#who").hidden=true;$("#modal").hidden=true;showNotice("");showView("auth");renderAuth("login");return}
-    RT.uid=u.uid;RT.email=u.email||"";$("#view-auth").innerHTML=`<p class="muted">Abriendo tu plano…</p>`;
+    if(!u){if(RT.guest)return;RT.uid=null;RT.email="";RT.teacher=false;S=freshState();BIE={answers:{},plan:[],goal:""};$("#who").hidden=true;$("#modal").hidden=true;showNotice("");showView("auth");renderAuth("login");return}
+    RT.guest=false;RT.uid=u.uid;RT.email=u.email||"";$("#view-auth").innerHTML=`<p class="muted">Abriendo tu plano…</p>`;
     try{const snap=await RT.db.doc("progreso/"+u.uid).get();
       if(snap.exists){const d=snap.data();delete d.email;delete d.uid;S={...freshState(),...d}}else{S=freshState();S.nombre=u.displayName||(u.email||"").split("@")[0];flush()}
       const b=await RT.db.doc("bienestar/"+u.uid).get();BIE=b.exists?{answers:{},plan:[],goal:"",...b.data()}:{answers:{},plan:[],goal:""};
