@@ -508,7 +508,7 @@ const dbMsg=e=>{console.error("[Caja] Error de Firestore:",e&&e.code,e&&e.messag
 const USER_RE=/^[a-z0-9_.]{3,20}$/;
 const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)">${avatarSVG("var(--av-coral)")}</g></svg>`;
 function renderAuth(mode){const v=$("#view-auth");let av="coral";
-  const intro=`<div class="authintro"><h2>Un plano para repasar las bases, estación por estación.</h2>${MINI_MAP}
+  const intro=`<div class="authintro"><h2>Desarrollemos las bases del pensamiento matemático estación a estación.</h2>${MINI_MAP}
     <p>En cada estación lees una explicación, exploras con una herramienta interactiva, resuelves un reto y recibes retroalimentación. Con una cuenta, tu avance queda guardado.</p>
     <div class="fillrow"><button type="button" class="btn" data-guest>Explorar sin cuenta</button><span class="tip">Abres todas las estaciones, pero tu avance no se guarda.</span></div>
     <p class="tip"><button type="button" class="linkbtn" id="apol">Política de tratamiento de datos personales</button></p></div>`;
