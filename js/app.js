@@ -24,15 +24,16 @@ const ST=[
   {id:"R4",line:"rac",x:900,y:408,lab:["Sumar y restar","fracciones"],lp:"right"},
   {id:"R5",line:"rac",x:900,y:464,lab:["Multiplicar","y dividir"],lp:"right"},
   {id:"R6",line:"rac",x:900,y:520,lab:["Decimales y","porcentajes"],lp:"right"},
-  {id:"L1",line:"rec",x:760,y:580,lab:["Ordenar","en la recta"],lp:"bottom"},
-  {id:"L2",line:"rec",x:640,y:580,lab:["Densidad"],lp:"bottom"},
-  {id:"L3",line:"rec",x:520,y:580,lab:["Números","irracionales"],lp:"bottom"},
-  {id:"L4",line:"rec",x:400,y:580,lab:["Valor absoluto","e intervalos"],lp:"bottom"},
-  {id:"L5",line:"rec",x:280,y:580,lab:["Potencias","y raíces"],lp:"bottom"},
-  {id:"A1",line:"alg",x:240,y:540,lab:["Expresiones","y fórmulas"],lp:"left"},
-  {id:"A2",line:"alg",x:200,y:470,lab:["Productos","notables"],lp:"left"},
-  {id:"A3",line:"alg",x:200,y:410,lab:["Factorización"],lp:"left"},
-  {id:"A4",line:"alg",x:200,y:340,lab:["Fracciones","algebraicas"],lp:"left"},
+  {id:"L1",line:"rec",x:760,y:580,lab:["Decimales","periódicos"],lp:"bottom"},
+  {id:"L2",line:"rec",x:640,y:580,lab:["Números","irracionales"],lp:"bottom"},
+  {id:"L3",line:"rec",x:520,y:580,lab:["Densidad","y orden"],lp:"bottom"},
+  {id:"L4",line:"rec",x:400,y:580,lab:["Valor","absoluto"],lp:"bottom"},
+  {id:"L5",line:"rec",x:280,y:580,lab:["Intervalos"],lp:"bottom"},
+  {id:"A1",line:"alg",x:240,y:540,lab:["Fórmulas y patrones"],lp:"left"},
+  {id:"A2",line:"alg",x:200,y:486,lab:["Potencias"],lp:"left"},
+  {id:"A3",line:"alg",x:200,y:438,lab:["Productos notables"],lp:"left"},
+  {id:"A4",line:"alg",x:200,y:390,lab:["Factorización"],lp:"left"},
+  {id:"A5",line:"alg",x:200,y:340,lab:["Fracciones algebraicas"],lp:"left"},
   {id:"Q1",line:"ecu",x:330,y:280,lab:["Igualdad y","equivalencia"],lp:"bottom"},
   {id:"Q2",line:"ecu",x:450,y:280,lab:["Primer grado"],lp:"bottom"},
   {id:"Q3",line:"ecu",x:570,y:280,lab:["Problemas con","ecuaciones"],lp:"bottom"},
@@ -43,7 +44,7 @@ const ST=[
   {id:"B3",line:"bie",x:500,y:200,lab:["Cómo organizo","mi estudio"],lp:"bottom",built:true},
   {id:"B4",line:"bie",x:620,y:200,lab:["Ansiedad ante","las matemáticas"],lp:"bottom",built:true}];
 const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
-const SEQS=[["inicio","E1","E2","E3","E4","E5","E6","R1","R2","R3","R4","R5","R6","L1","L2","L3","L4","L5","A1","A2","A3","A4","Q1","Q2","Q3","Q4","Q5"],["inicio","B1","B2","B3","B4"]];
+const SEQS=[["inicio","E1","E2","E3","E4","E5","E6","R1","R2","R3","R4","R5","R6","L1","L2","L3","L4","L5","A1","A2","A3","A4","A5","Q1","Q2","Q3","Q4","Q5"],["inicio","B1","B2","B3","B4"]];
 const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
 // Una estación está construida cuando su línea la registró (js/lineas/*.js o js/bienestar.js)
 ST.forEach(s=>{if(s.line==="bie")s.built=!!SOCIO[s.id];else if(s.line!=="hub")s.built=!!NODES[s.id]});
@@ -85,7 +86,7 @@ async function flush(){if(!RT.uid)return;if(RT.saving){RT.dirty=true;return}RT.s
   catch(e){toast(dbMsg(e));setTimeout(()=>{RT.saving=false;flush()},8000);return}
   RT.saving=false;if(RT.dirty){RT.dirty=false;flush()}}
 let bieT;
-function saveBie(){if(!RT.uid)return;clearTimeout(bieT);bieT=setTimeout(async()=>{try{await RT.db.doc("bienestar/"+RT.uid).set(JSON.parse(JSON.stringify({...BIE,updatedAt:Date.now()})))}catch(e){toast("No se pudieron guardar tus respuestas. Revisa tu conexión.")}},500)}
+function saveBie(){if(!RT.uid||!bieAllowed())return;clearTimeout(bieT);bieT=setTimeout(async()=>{try{await RT.db.doc("bienestar/"+RT.uid).set(JSON.parse(JSON.stringify({...BIE,updatedAt:Date.now()})))}catch(e){toast("No se pudieron guardar tus respuestas. Revisa tu conexión.")}},500)}
 const nodeSt=id=>(S.nodes[id]=S.nodes[id]||{moment:0,max:0,results:{},done:false,stars:0});
 const conv=id=>{const d=S.diags&&S.diags[lineOf(id)];return!!(d&&d.conv&&d.conv.includes(id))};
 const hasDiag=()=>!!(S.diags&&Object.keys(S.diags).length);
@@ -220,7 +221,7 @@ function mountItem(box,item,opts){
     if(single){finish("shown");return true}
     if(attempts===1){fb("hint","Todavía no. Pista:",(extra?extra+" ":"")+(item.hint||"Revisa con calma cada paso."));return false}
     finish("shown");return true}
-  function correctText(){if(item.type==="choice")return item.opts[0].replace(/<[^>]+>/g,"");if(item.type==="fill")return item.kind==="num"?(item.show||fmt(item.answer)):item.show;
+  function correctText(){if(item.type==="choice")return item.opts[0].replace(/<[^>]+>/g,"");if(item.type==="fill")return item.kind==="pair"?`x = ${fmt(item.answer[0])}, y = ${fmt(item.answer[1])}`:item.kind==="num"?(item.show||fmt(item.answer)):item.show;
     if(item.type==="order")return item.correct.join("  <  ");if(item.type==="line")return item.den>1?frs(Math.round(item.answer*item.den),item.den):fmt(item.answer);if(item.type==="shade")return item.show||"";if(item.type==="bins")return item.bins.join(" · ");if(item.type==="cancel")return "tachar "+item.pairsIdx.length+" términos";if(item.type==="match")return item.pairs.map(p=>p[0]+" → "+p[1]).join(";  ");return""}
 
   if(item.type==="choice"){
@@ -233,11 +234,22 @@ function mountItem(box,item,opts){
       else{b.classList.add("wrong");b.disabled=true;if(wrong())reveal()}});
     if(opts.prev){reveal();finish(opts.prev,true)}}
 
+  else if(item.type==="fill"&&item.kind==="pair"){
+    area.innerHTML=`<div class="fillrow pair"><label>x = <input type="text" autocomplete="off" spellcheck="false" aria-label="Valor de x"></label><label>y = <input type="text" autocomplete="off" spellcheck="false" aria-label="Valor de y"></label><button class="btn primary">Comprobar</button></div><span class="tip">Escribe el valor de cada incógnita. Puede ser negativo o una fracción.</span>`;
+    const ins=$$("input",area),btn=$("button",area);
+    const lock=()=>{ins.forEach((i,k)=>{i.disabled=true;i.value=fmt(item.answer[k]);i.classList.add("okv")});btn.disabled=true};
+    const check=()=>{if(finished)return;const vals=[];for(const i of ins){const t=i.value.trim();if(!t){fb("info","Escribe los dos valores.","");return}try{const a=parseExpr(t);if(varsOf(a).size)throw 0;vals.push(evalAst(a,{}))}catch(e){fb("info","No entendí alguno de los valores.","Escribe solo números, como -3 o 5/2.");return}}
+      if(vals.every((x,k)=>Math.abs(x-item.answer[k])<1e-9)){lock();finish(attempts===0?"first":"hint")}else if(wrong())lock()};
+    btn.onclick=check;ins.forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")check()}));
+    if(opts.prev){lock();finish(opts.prev,true)}}
+
   else if(item.type==="fill"){
-    area.innerHTML=`<div class="fillrow"><input type="text" inputmode="${item.kind==="num"?"text":"text"}" autocomplete="off" spellcheck="false" aria-label="Tu respuesta" id="in-${opts.key}" placeholder="${item.kind==="num"?"Escribe un número":item.kind==="frac"||item.kind==="between"?"Escribe una fracción, como 3/4":"Escribe la expresión"}"><button class="btn primary">Comprobar</button></div><span class="tip">${item.kind==="num"?"Para un negativo, escribe el signo menos: -7. Para decimales, usa coma o punto: 0,75.":item.kind==="frac"||item.kind==="between"?"Escribe la fracción con una barra: 3/4. Para un negativo: -5/12.":"Puedes escribir 2x, a-5, (x+1). Para potencias usa ^, como x^2."}</span>`;
+    area.innerHTML=`<div class="fillrow"><input type="text" inputmode="${item.kind==="num"?"text":"text"}" autocomplete="off" spellcheck="false" aria-label="Tu respuesta" id="in-${opts.key}" placeholder="${item.kind==="ineq"?"Por ejemplo: x < 4":item.kind==="num"?"Escribe un número":item.kind==="frac"||item.kind==="between"?"Escribe una fracción, como 3/4":"Escribe la expresión"}"><button class="btn primary">Comprobar</button></div><span class="tip">${item.kind==="ineq"?"Escribe la solución despejando x: x < 4, x > -2, x <= 5 o x >= 1/2 (también sirven ≤ y ≥).":item.kind==="num"?"Para un negativo, escribe el signo menos: -7. Para decimales, usa coma o punto: 0,75.":item.kind==="frac"||item.kind==="between"?"Escribe la fracción con una barra: 3/4. Para un negativo: -5/12.":"Puedes escribir 2x, a-5, (x+1). Para potencias usa ^, como x^2."}</span>`;
     const inp=$("input",area),btn=$("button",area);
     const lock=()=>{inp.disabled=true;btn.disabled=true;inp.value=item.kind==="num"?(item.show||fmt(item.answer)):item.show;inp.classList.add("okv")};
     const check=()=>{if(finished)return;const v=inp.value.trim();if(!v)return;let ast;
+      if(item.kind==="ineq"){const r=parseIneq(v);if(!r){fb("info","Escribe la solución despejando x.","Por ejemplo: x < 4, x >= -2 o x ≤ 1/2.");return}
+        if(r.op===item.op&&Math.abs(r.val-item.value)<1e-9){lock();finish(attempts===0?"first":"hint")}else if(wrong(r.op!==item.op&&Math.abs(r.val-item.value)<1e-9?"El número límite es correcto, pero revisa el sentido de la desigualdad.":""))lock();return}
       try{ast=parseExpr(v)}catch(e){fb("info","No entendí lo que escribiste.","Usa números, las letras de las cantidades Variables, +, −, paréntesis y ^ para potencias.");return}
       let ok=false;
       if(item.kind==="num"){ok=varsOf(ast).size===0&&Math.abs(evalAst(ast,{})-item.answer)<1e-9}
@@ -248,8 +260,12 @@ function mountItem(box,item,opts){
       else if(item.kind==="between"){if(varsOf(ast).size){fb("info","Escribe un número o una fracción, sin letras.","");return}const val=evalAst(ast,{});ok=val>item.lo+1e-12&&val<item.hi-1e-12}
       else{const target=parseExpr(item.answer);
         if(equivalent(ast,target)){
-          if(!single&&(countTerms(ast)>item.maxTerms||(item.noParens&&/[()]/.test(v)))){fb("info","Es equivalente, pero se puede "+(item.noParens?"desarrollar":"simplificar")+" más.",item.noParens?"Quita los paréntesis multiplicando cada término.":"Junta los términos que se puedan juntar.");return}
-          ok=countTerms(ast)<=item.maxTerms&&!(item.noParens&&/[()]/.test(v))}}
+          const why=countTerms(ast)>item.maxTerms?["simplificar","Junta los términos que se puedan juntar."]:(item.noParens&&/[()]/.test(v))?["desarrollar","Quita los paréntesis multiplicando cada término."]
+            :(item.noDiv&&/\//.test(v))?["simplificar","Factoriza el numerador y tacha los factores comunes: el resultado no lleva fracción."]
+            :(item.onePow&&(/[*·(]/.test(v)||(v.match(/\^/g)||[]).length>1))?["escribir como una sola potencia","Usa las reglas de los exponentes para dejar una base y un exponente."]
+            :(item.factor&&!isProduct(ast))?["factorizar","Escríbela como una multiplicación de factores, por ejemplo 3(x + 2) o (x + 1)(x − 1)."]:null;
+          if(why&&!single){fb("info","Es equivalente, pero todavía se puede "+why[0]+".",why[1]);return}
+          ok=!why}}
       if(ok){lock();finish(attempts===0?"first":"hint")}else{if(wrong())lock()}};
     btn.onclick=check;inp.addEventListener("keydown",e=>{if(e.key==="Enter")check()});
     if(opts.prev){lock();finish(opts.prev,true)}}
@@ -397,7 +413,7 @@ function openNode(id){const N=NODES[id],ns=nodeSt(id);const v=$("#view-node");co
         <div class="rq"><p><b>¿Sientes que has aprendido o pensado algo nuevo en esta actividad?</b></p><div class="lkopts four" role="group" aria-label="Aprendizaje">${APRS.map((f,i)=>`<button data-q="apr" data-v="${i}" aria-pressed="${r.apr===i}">${f}</button>`).join("")}</div></div>
         <div class="field"><label for="rnote">Si quieres, escribe en una frase lo más importante que te llevas de esta estación.</label><textarea id="rnote" placeholder="Por ejemplo: que el menos delante de un paréntesis cambia todos los signos.">${esc(r.note||"")}</textarea></div>
         <p class="fb info" id="rmsg" aria-live="polite" ${reflMsg(r,st)?"":"hidden"}>${reflMsg(r,st)}</p>
-        <p class="tip">${RT.guest?"Sin cuenta, tus respuestas no se guardan.":"Tu profesor puede ver estas respuestas para mejorar la actividad."}</p>
+        <p class="tip">${RT.guest?"Sin cuenta, tus respuestas no se guardan.":"La administración de la plataforma puede ver estas respuestas para mejorar las actividades."}</p>
       </div>`;
     $$(".refl [data-q]",body).forEach(b=>b.onclick=()=>{ns.refl={...(ns.refl||{}),[b.dataset.q]:+b.dataset.v,at:Date.now()};
       $$(`.refl [data-q="${b.dataset.q}"]`,body).forEach(x=>x.setAttribute("aria-pressed",x===b));const msg=reflMsg(ns.refl,st),el=$("#rmsg",body);el.textContent=msg;el.hidden=!msg;save()});
@@ -435,29 +451,30 @@ function openDiag(line){const v=$("#view-node");
 function renderMe(){const v=$("#view-me");
   const row=(id,line,name,state)=>`<div class="stitem" style="--linec:var(${LINES[line].c})"><span class="dotl ${state==="Completada"||state.startsWith("Convalidada")?"d":""}"></span><span>${name}</span><span class="state">${state}</span></div>`;
   const stTxt=id=>{if(isDone(id)){const s=S.nodes[id]&&S.nodes[id].stars;return"Completada"+(id[0]!=="B"&&s?" · "+"★".repeat(s):"")}if(conv(id))return"Convalidada en el diagnóstico";if(!unlocked(id))return"Bloqueada";return S.nodes[id]&&S.nodes[id].max>0?"En curso":"Disponible"};
-  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||(RT.guest?"Recorrido sin cuenta":"Tu recorrido"))}</h2>${RT.guest?"":`<p class="muted">${esc(RT.email)}${S.grupo?" · "+esc(S.grupo):""}</p>`}</div>
+  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||(RT.guest?"Recorrido sin cuenta":"Tu recorrido"))}</h2>${RT.guest?"":`<p class="muted">${esc(RT.email)}</p>`}</div>
     ${ACTIVE.map(l=>`<h3>Línea ${LINES[l].short}</h3><p class="muted">${S.diags[l]?`Diagnóstico: ${S.diags[l].score} de ${diagN(l)} aciertos.`:"Diagnóstico opcional sin hacer: lo encuentras en la estación Inicio."}</p><div class="stlist">${LSEQ[l].map(id=>row(id,l,NODES[id].title,stTxt(id))).join("")}</div>`).join("")}
     <h3>Línea Bienestar</h3><div class="stlist">${BIE_IDS.map(id=>row(id,"bie",SOCIO[id].title,stTxt(id)+(isDone(id)&&BIE.ans[id]&&SOCIO[id].items.every((_,i)=>BIE.ans[id][i])?" · "+bandName(id,bieScore(id).band).toLowerCase():""))).join("")}</div>
     ${MLINES.filter(l=>!ACTIVE.includes(l)).length?`<p class="muted">En construcción: ${MLINES.filter(l=>!ACTIVE.includes(l)).map(l=>LINES[l].name.toLowerCase()).join(", ")}.</p>`:""}
-    ${RT.guest?`<div class="callout"><span class="eyebrow">Sin cuenta</span><p>Este recorrido no se guarda: al cerrar o recargar la página empiezas de cero. Crea una cuenta si quieres conservar tu avance.</p></div><div class="fillrow"><button class="btn primary" id="mkacc">Crear una cuenta</button></div>`:`<div class="fillrow"><button class="btn" id="edit">Cambiar mi grupo o avatar</button></div>`}</div>`;
-  if(RT.guest)$("#mkacc",v).onclick=leaveGuest;else $("#edit",v).onclick=openProfile}
+    ${RT.guest?`<div class="callout"><span class="eyebrow">Sin cuenta</span><p>Este recorrido no se guarda: al cerrar o recargar la página empiezas de cero. Crea una cuenta si quieres conservar tu avance.</p></div><div class="fillrow"><button class="btn primary" id="mkacc">Crear una cuenta</button></div>`:`<div class="fillrow"><button class="btn" id="edit">Cambiar mi avatar</button></div>`}
+    ${dataSection()}</div>`;
+  if(RT.guest)$("#mkacc",v).onclick=leaveGuest;else $("#edit",v).onclick=openProfile;bindDataSection(v)}
 
-/* ============ panel del grupo (docente) ============ */
+/* ============ panel de administración ============ */
 function renderPanel(){const v=$("#view-panel");
-  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Solo visible para ti</span><h2 style="font-size:1.6rem;font-weight:800">Panel del grupo</h2></div>
-   <p class="muted">Aquí aparece cada estudiante que se registra en la caja. Las respuestas de la estación de bienestar son privadas: solo ves si la completaron.</p>
-   <div class="tablewrap"><table><thead><tr><th>Estudiante</th><th>Grupo</th><th>Diagnóstico</th><th>Estaciones</th><th>Bienestar</th><th>Estrellas</th><th>Última actividad</th></tr></thead><tbody id="pt"><tr><td colspan="7" class="muted">Cargando el avance del grupo…</td></tr></tbody></table></div>
-   <p class="tip">Cuadros: lleno = completada · rayado = convalidada en el diagnóstico · borde = en curso.</p><h3>Cómo vivieron las estaciones</h3><p class="muted">Respuestas de los estudiantes a las preguntas de reflexión al final de cada estación.</p><div class="tablewrap"><table><thead><tr><th>Estación</th><th>Respuestas</th><th>Cómo se sintieron</th><th>La encontraron difícil</th><th>Aprendieron algo nuevo</th></tr></thead><tbody id="pr"><tr><td colspan="5" class="muted">Sin respuestas todavía.</td></tr></tbody></table></div></div>`;
-  if(!RT.db){$("#pt",v).innerHTML=`<tr><td colspan="7" class="muted">El avance compartido no está disponible en esta vista.</td></tr>`;return}
+  v.innerHTML=`<div class="panel"><div><span class="eyebrow">Solo visible para la administración</span><h2 style="font-size:1.6rem;font-weight:800">Panel de administración</h2></div>
+   <p class="muted">Aquí aparece cada persona que crea una cuenta en la caja. Las respuestas de la línea Bienestar son privadas: solo ves si completaron cada estación. Usa estos datos únicamente para las finalidades de la política de tratamiento de datos.</p>
+   <div class="tablewrap"><table><thead><tr><th>Usuario</th><th>Diagnóstico</th><th>Estaciones</th><th>Bienestar</th><th>Estrellas</th><th>Última actividad</th></tr></thead><tbody id="pt"><tr><td colspan="6" class="muted">Cargando el avance de los usuarios…</td></tr></tbody></table></div>
+   <p class="tip">Cuadros: lleno = completada · rayado = convalidada en el diagnóstico · borde = en curso.</p><h3>Cómo vivieron las estaciones</h3><p class="muted">Respuestas de los usuarios a las preguntas de reflexión al final de cada estación.</p><div class="tablewrap"><table><thead><tr><th>Estación</th><th>Respuestas</th><th>Cómo se sintieron</th><th>La encontraron difícil</th><th>Aprendieron algo nuevo</th></tr></thead><tbody id="pr"><tr><td colspan="5" class="muted">Sin respuestas todavía.</td></tr></tbody></table></div></div>`;
+  if(!RT.db){$("#pt",v).innerHTML=`<tr><td colspan="6" class="muted">El avance compartido no está disponible en esta vista.</td></tr>`;return}
   if(RT.unsubPanel)RT.unsubPanel();
   RT.unsubPanel=RT.db.collection("progreso").onSnapshot(snap=>{const rows=snap.docs.map(d=>d.data()).filter(Boolean).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
     const tb=$("#pt",v);if(!tb)return;
-    if(!rows.length){tb.innerHTML=`<tr><td colspan="7" class="muted">Todavía no hay estudiantes registrados. Comparte el enlace de la página para que creen su cuenta.</td></tr>`;return}
+    if(!rows.length){tb.innerHTML=`<tr><td colspan="6" class="muted">Todavía no hay usuarios registrados. Comparte el enlace de la página para que creen su cuenta.</td></tr>`;return}
     tb.innerHTML=rows.map(r=>{const nodes=r.nodes||{},dg={...(r.diag?{ent:r.diag}:{}),...(r.diags||{})},cv=Object.values(dg).flatMap(x=>x.conv||[]);const stars=MATH.reduce((a,id)=>a+(nodes[id]&&nodes[id].stars||0),0);
       const sq=ACTIVE.map(l=>`<span class="sqg" title="Línea ${LINES[l].short}" style="--sqc:var(${LINES[l].c})">${LSEQ[l].map(id=>`<i class="${nodes[id]&&nodes[id].done?"d":cv.includes(id)?"c":nodes[id]&&nodes[id].max>0?"p":""}" title="${NODES[id].title}"></i>`).join("")}</span>`).join("");
       const dtxt=ACTIVE.filter(l=>dg[l]).map(l=>`${LINES[l].short} ${dg[l].score}/${diagN(l)}`).join("<br>")||"—";
-      return`<tr><td>${esc(r.nombre||"Sin nombre")}<br><span class="muted" style="font-size:.82rem">${esc(r.email||"")}</span></td><td>${esc(r.grupo||"—")}</td><td>${dtxt}</td><td><span class="sq">${sq}</span></td><td>${r.bie?Object.values(r.bie).filter(Boolean).length:0} / 4</td><td>★ ${stars}</td><td>${r.updatedAt?new Date(r.updatedAt).toLocaleString("es-CO",{dateStyle:"medium",timeStyle:"short"}):"—"}</td></tr>`}).join("");renderRefl(rows)},
-   ()=>{const tb=$("#pt",v);if(tb)tb.innerHTML=`<tr><td colspan="7" class="muted">No se pudo leer el avance del grupo. Vuelve a abrir el panel en un momento.</td></tr>`})}
+      return`<tr><td>${esc(r.nombre||"Sin nombre")}<br><span class="muted" style="font-size:.82rem">${esc(r.email||"")}</span></td><td>${dtxt}</td><td><span class="sq">${sq}</span></td><td>${r.bie?Object.values(r.bie).filter(Boolean).length:0} / 4</td><td>★ ${stars}</td><td>${r.updatedAt?new Date(r.updatedAt).toLocaleString("es-CO",{dateStyle:"medium",timeStyle:"short"}):"—"}</td></tr>`}).join("");renderRefl(rows)},
+   ()=>{const tb=$("#pt",v);if(tb)tb.innerHTML=`<tr><td colspan="6" class="muted">No se pudo leer el avance de los usuarios. Vuelve a abrir el panel en un momento.</td></tr>`})}
 
 function renderRefl(rows){const tb=$("#pr");if(!tb)return;
   const out=MATH.map(id=>{const rs=rows.map(r=>r.nodes&&r.nodes[id]&&r.nodes[id].refl).filter(x=>x&&x.emo!=null);if(!rs.length)return"";
@@ -468,12 +485,11 @@ function renderRefl(rows){const tb=$("#pr");if(!tb)return;
 /* ============ perfil ============ */
 function openProfile(){const m=$("#modal");let av=S.avatar;
   m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pt-t"><span class="eyebrow">Tu cuenta</span><h2 id="pt-t">${esc(S.nombre)}</h2><p class="muted">${esc(RT.email)}</p>
-   <div class="field"><label for="pg">Grupo o curso <span class="muted">(opcional)</span></label><input id="pg" value="${esc(S.grupo)}" placeholder="Por ejemplo: Grupo 3"></div>
    ${avatarPicker(av)}
    <div class="dlg-actions"><button class="btn primary" id="psave">Guardar</button><button class="btn ghost" id="pcancel">Cancelar</button></div></div>`;
   m.hidden=false;bindAvatar(m,a=>av=a);
   $("#pcancel",m).onclick=()=>m.hidden=true;
-  $("#psave",m).onclick=()=>{S.grupo=$("#pg",m).value.trim().slice(0,40);S.avatar=av;save();m.hidden=true;renderMap();renderMe()}}
+  $("#psave",m).onclick=()=>{S.avatar=av;save();m.hidden=true;renderMap();renderMe()}}
 const avatarPicker=av=>`<div class="field"><span style="font-family:var(--f-disp);font-weight:600;font-size:.92rem">Color de tu viajero</span><div class="avs" role="group" aria-label="Color del avatar">${AVS.map(a=>`<button type="button" data-a="${a}" aria-pressed="${a===av}" aria-label="${a}"><svg viewBox="-13 -29 26 43" width="26" height="40">${avatarSVG(`var(--av-${a})`,true)}</svg></button>`).join("")}</div></div>`;
 function bindAvatar(root,set){$$(".avs button",root).forEach(b=>b.onclick=()=>{set(b.dataset.a);$$(".avs button",root).forEach(x=>x.setAttribute("aria-pressed",x===b))})}
 function openStart(){const m=$("#modal");
@@ -492,19 +508,21 @@ const dbMsg=e=>{console.error("[Caja] Error de Firestore:",e&&e.code,e&&e.messag
 const USER_RE=/^[a-z0-9_.]{3,20}$/;
 const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)">${avatarSVG("var(--av-coral)")}</g></svg>`;
 function renderAuth(mode){const v=$("#view-auth");let av="coral";
-  const intro=`<div class="authintro"><span class="eyebrow">Nivelación en pensamiento matemático</span><h2>Un plano para repasar las bases, estación por estación.</h2>${MINI_MAP}
+  const intro=`<div class="authintro"><h2>Un plano para repasar las bases, estación por estación.</h2>${MINI_MAP}
     <p>En cada estación lees una explicación, exploras con una herramienta interactiva, resuelves un reto y recibes retroalimentación. Con una cuenta, tu avance queda guardado.</p>
-    <div class="fillrow"><button type="button" class="btn" data-guest>Explorar sin cuenta</button><span class="tip">Abres todas las estaciones, pero tu avance no se guarda.</span></div></div>`;
+    <div class="fillrow"><button type="button" class="btn" data-guest>Explorar sin cuenta</button><span class="tip">Abres todas las estaciones, pero tu avance no se guarda.</span></div>
+    <p class="tip"><button type="button" class="linkbtn" id="apol">Política de tratamiento de datos personales</button></p></div>`;
   let form;
   if(mode==="reg")form=`<form class="dialog" id="af" novalidate><h2>Crear una cuenta</h2>
-    <div class="field"><label for="fu">Nombre de usuario</label><input id="fu" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="por ejemplo: laura.gomez" maxlength="20"><span class="tip">De 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo. Lo verá tu profesor.</span></div>
+    <div class="field"><label for="fu">Nombre de usuario</label><input id="fu" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="por ejemplo: laura.gomez" maxlength="20"><span class="tip">De 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo. Lo verá la administración de la plataforma.</span></div>
     <div class="field"><label for="fe">Email</label><input id="fe" type="email" autocomplete="email" autocapitalize="none"></div>
     <div class="field"><label for="fp">Contraseña</label><input id="fp" type="password" autocomplete="new-password" minlength="6"><span class="tip">Al menos 6 caracteres.</span></div>
     <div class="field"><label for="fp2">Repite la contraseña</label><input id="fp2" type="password" autocomplete="new-password"></div>
-    <div class="field"><label for="fg">Grupo o curso <span class="muted">(opcional)</span></label><input id="fg" placeholder="Por ejemplo: Grupo 3" maxlength="40"></div>
     ${avatarPicker(av)}
+    ${consentBlock()}
     <p class="err" id="ferr" aria-live="polite"></p>
     <div class="dlg-actions"><button class="btn primary" type="submit" id="fsub">Crear mi cuenta</button></div>
+    ${GOOGLE_ROW}
     <p class="tip">¿Ya tienes cuenta? <button type="button" class="linkbtn" data-go="login">Inicia sesión</button></p></form>`;
   else if(mode==="reset")form=`<form class="dialog" id="af" novalidate><h2>Recuperar la contraseña</h2><p>Escribe el email de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.</p>
     <div class="field"><label for="fe">Email</label><input id="fe" type="email" autocomplete="email" autocapitalize="none"></div>
@@ -516,11 +534,12 @@ function renderAuth(mode){const v=$("#view-auth");let av="coral";
     <div class="field"><label for="fp">Contraseña</label><input id="fp" type="password" autocomplete="current-password"></div>
     <p class="err" id="ferr" aria-live="polite"></p>
     <div class="dlg-actions"><button class="btn primary" type="submit" id="fsub">Entrar</button></div>
+    ${GOOGLE_ROW}
     <p class="tip"><button type="button" class="linkbtn" data-go="reset">¿Olvidaste tu contraseña?</button></p>
     <p class="tip">¿Es tu primera vez? <button type="button" class="linkbtn" data-go="reg">Crea una cuenta</button></p></form>`;
   v.innerHTML=`<div class="authwrap">${intro}${form}</div>`;
   bindAvatar(v,a=>av=a);
-  $$("[data-go]",v).forEach(b=>b.onclick=()=>renderAuth(b.dataset.go));$("[data-guest]",v).onclick=enterGuest;
+  $$("[data-go]",v).forEach(b=>b.onclick=()=>renderAuth(b.dataset.go));$("[data-guest]",v).onclick=enterGuest;$("#apol",v).onclick=openPolicy;const gb=$("#gbtn",v);if(gb)gb.onclick=()=>googleSignIn(t=>{$("#ferr",v).className="err";$("#ferr",v).textContent=t});
   const err=t=>{$("#ferr",v).className="err";$("#ferr",v).textContent=t};const busy=on=>{$("#fsub",v).disabled=on};
   $("#af",v).addEventListener("submit",async e=>{e.preventDefault();err("");const email=($("#fe",v).value||"").trim();
     if(!/^\S+@\S+\.\S+$/.test(email)){err("Escribe un email válido.");return}
@@ -532,16 +551,47 @@ function renderAuth(mode){const v=$("#view-auth");let av="coral";
     if(!USER_RE.test(u)){err("El nombre de usuario debe tener de 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo.");return}
     if(pass.length<6){err("La contraseña debe tener al menos 6 caracteres.");return}
     if(pass!==$("#fp2",v).value){err("Las dos contraseñas no coinciden.");return}
+    const consent=readConsent(v);if(!consent.ok){err(CONSENT_ERR);return}
     busy(true);RT.registering=true;let cred;
     try{cred=await RT.auth.createUserWithEmailAndPassword(email,pass)}catch(x){RT.registering=false;err(authMsg(x));busy(false);return}
-    let taken=false;
-    try{const n=await RT.db.doc("nombres/"+u).get();taken=n.exists;if(!taken)await RT.db.doc("nombres/"+u).set({uid:cred.user.uid,creado:Date.now()})}
-    catch(x){await cred.user.delete().catch(()=>{});RT.registering=false;busy(false);err(dbMsg(x));return}
-    if(taken){await cred.user.delete().catch(()=>{});RT.registering=false;busy(false);err("Ese nombre de usuario ya está en uso. Elige otro.");return}
+    const rv=await reserveName(u,cred.user.uid);
+    if(rv.error){await cred.user.delete().catch(()=>{});RT.registering=false;busy(false);err(dbMsg(rv.error));return}
+    if(rv.taken){await cred.user.delete().catch(()=>{});RT.registering=false;busy(false);err("Ese nombre de usuario ya está en uso. Elige otro.");return}
     await cred.user.updateProfile({displayName:u}).catch(()=>{});
-    S=freshState();S.nombre=u;S.grupo=($("#fg",v).value||"").trim().slice(0,40);S.avatar=av;BIE=freshBie();
+    S=freshState();S.nombre=u;S.avatar=av;S.consent=consent.data;BIE=freshBie();
     RT.uid=cred.user.uid;RT.email=email;RT.teacher=false;await flush();RT.registering=false;enterApp(true)});
   setTimeout(()=>{const f=$("input",v);f&&f.focus()},30)}
+/* ---------- nombre de usuario y acceso con Google ---------- */
+async function reserveName(name,uid){try{const n=await RT.db.doc("nombres/"+name).get();if(n.exists)return n.data().uid===uid?{ok:true}:{taken:true};
+  await RT.db.doc("nombres/"+name).set({uid,creado:Date.now()});return{ok:true}}catch(e){return{error:e}}}
+const GOOGLE_G=`<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+const GOOGLE_ROW=`<div class="orrow"><span>o</span></div><button type="button" class="btn gbtn" id="gbtn">${GOOGLE_G}<span>Continuar con Google</span></button>`;
+const googleProvider=()=>{const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});return p};
+const isGoogleUser=u=>!!(u&&u.providerData&&u.providerData.some(p=>p.providerId==="google.com")&&!u.providerData.some(p=>p.providerId==="password"));
+async function googleSignIn(err){try{await RT.auth.signInWithPopup(googleProvider())}
+  catch(x){const c=x&&x.code;if(c==="auth/popup-closed-by-user"||c==="auth/cancelled-popup-request")return;
+    err(c==="auth/popup-blocked"?"El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para esta página y vuelve a intentarlo.":
+      c==="auth/operation-not-allowed"?"El acceso con Google no está activado en Firebase (Authentication → Método de acceso → Google). (código: "+c+")":
+      c==="auth/account-exists-with-different-credential"?"Ya hay una cuenta con ese email creada con contraseña. Entra con tu email y contraseña.":authMsg(x))}}
+/* primera entrada con Google: elegir nombre de usuario, avatar y aceptar la política */
+function completeAccount(u){return new Promise(res=>{const v=$("#view-auth");showView("auth");let av="coral";
+  const sug=((u.email||"").split("@")[0]||"").toLowerCase().replace(/[^a-z0-9_.]/g,"").slice(0,20);
+  v.innerHTML=`<div class="authwrap one"><form class="dialog" id="ca" novalidate><span class="eyebrow">Último paso</span><h2>Completa tu cuenta</h2>
+    <p class="muted">Entraste como ${esc(u.email||"")}.</p>
+    <div class="field"><label for="fu">Nombre de usuario</label><input id="fu" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" value="${esc(sug.length>=3?sug:"")}"><span class="tip">De 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo. Lo verá la administración de la plataforma.</span></div>
+    ${avatarPicker(av)}${consentBlock()}<p class="err" id="ferr" aria-live="polite"></p>
+    <div class="dlg-actions"><button class="btn primary" type="submit" id="fsub">Crear mi cuenta</button><button class="btn ghost" type="button" id="cano">Cancelar</button></div></form></div>`;
+  bindAvatar(v,a=>av=a);const err=t=>$("#ferr",v).textContent=t;
+  $("#cano",v).onclick=async()=>{res(false);RT.uid=null;await u.delete().catch(()=>{});await RT.auth.signOut().catch(()=>{})};
+  $("#ca",v).addEventListener("submit",async e=>{e.preventDefault();err("");const name=($("#fu",v).value||"").trim().toLowerCase();
+    if(!USER_RE.test(name)){err("El nombre de usuario debe tener de 3 a 20 caracteres: letras minúsculas, números, punto o guion bajo.");return}
+    const c=readConsent(v);if(!c.ok){err("Para crear la cuenta necesitas aceptar la política de datos y confirmar tu edad (las dos casillas obligatorias).");return}
+    $("#fsub",v).disabled=true;const rv=await reserveName(name,u.uid);
+    if(rv.error){err(dbMsg(rv.error));$("#fsub",v).disabled=false;return}
+    if(rv.taken){err("Ese nombre de usuario ya está en uso. Elige otro.");$("#fsub",v).disabled=false;return}
+    await u.updateProfile({displayName:name}).catch(()=>{});
+    S=freshState();S.nombre=name;S.avatar=av;S.consent=c.data;BIE=freshBie();await flush();res(true)});
+  setTimeout(()=>{const f=$("#fu",v);f&&f.focus()},30)})}
 function enterApp(isNew){$("#who").hidden=false;$("#tab-out").textContent=RT.guest?"Crear cuenta o entrar":"Salir";$("#tab-panel").hidden=!RT.teacher;$("#modal").hidden=true;showView("map");renderMap();if(isNew)openStart()}
 
 /* ============ arranque ============ */
@@ -553,11 +603,13 @@ function enterApp(isNew){$("#who").hidden=false;$("#tab-out").textContent=RT.gue
   firebase.initializeApp(FIREBASE_CONFIG);RT.auth=firebase.auth();RT.db=firebase.firestore();
   RT.auth.onAuthStateChanged(async u=>{if(RT.registering)return;
     if(!u){if(RT.guest)return;RT.uid=null;RT.email="";RT.teacher=false;S=freshState();BIE=freshBie();$("#who").hidden=true;$("#modal").hidden=true;showNotice("");showView("auth");renderAuth("login");return}
-    RT.guest=false;RT.uid=u.uid;RT.email=u.email||"";$("#view-auth").innerHTML=`<p class="muted">Abriendo tu plano…</p>`;
+    RT.guest=false;RT.uid=u.uid;RT.email=u.email||"";$("#view-auth").innerHTML=`<p class="muted">Abriendo tu plano…</p>`;let isNew=false;
     try{const snap=await RT.db.doc("progreso/"+u.uid).get();
-      if(snap.exists){const d=snap.data();delete d.email;delete d.uid;S={...freshState(),...d};if(!S.diags)S.diags={};if(S.diag){if(!S.diags.ent)S.diags.ent=S.diag;delete S.diag}}else{S=freshState();S.nombre=u.displayName||(u.email||"").split("@")[0];flush()}
+      if(snap.exists){const d=snap.data();delete d.email;delete d.uid;S={...freshState(),...d};if(!S.diags)S.diags={};if(S.diag){if(!S.diags.ent)S.diags.ent=S.diag;delete S.diag}}else{S=freshState();isNew=true}
       const b=await RT.db.doc("bienestar/"+u.uid).get();BIE=b.exists?{...freshBie(),...b.data()}:freshBie();
       showNotice("")}
     catch(e){RT.uid=null;showNotice("No se pudo cargar tu avance guardado; lo que hagas ahora no se guardará. "+dbMsg(e))}
+    if(RT.uid&&isNew){const ok=await completeAccount(u);if(!ok)return}
+    else if(RT.uid&&!hasConsent()){const ok=await consentGate();if(!ok)return}
     try{const d=await RT.db.doc("docentes/"+u.uid).get();RT.teacher=d.exists}catch(e){RT.teacher=false}
-    enterApp(false)})})();
+    enterApp(isNew)})})();

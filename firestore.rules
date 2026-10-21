@@ -9,41 +9,42 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Un docente es alguien cuyo uid aparece en la colección «docentes».
-    // Esos documentos se crean a mano desde la consola (ver la guía).
+    // La administración de la plataforma son las cuentas cuyo uid aparece en la colección
+    // «docentes» (el nombre se conserva por compatibilidad). Se crean a mano desde la consola.
     function isDocente() {
       return signedIn()
         && exists(/databases/$(database)/documents/docentes/$(request.auth.uid));
     }
 
-    // Progreso de cada estudiante: cada quien lee y escribe el suyo;
-    // los docentes pueden leer el de todos (panel del grupo).
+    // Progreso de cada usuario: cada quien lee, escribe y puede borrar el suyo;
+    // la administración puede leer el de todos (panel de administración).
     match /progreso/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isDocente());
       allow create, update: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.uid == uid
         && request.resource.size() < 50;
-      allow delete: if false;
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     // Respuestas de la estación de bienestar: privadas.
-    // Solo las lee y escribe su dueño; ni siquiera los docentes.
+    // Solo las lee, escribe y borra su dueño; ni siquiera la administración.
     match /bienestar/{uid} {
       allow read, write: if signedIn() && request.auth.uid == uid;
     }
 
-    // Nombres de usuario únicos. Se pueden crear una sola vez y nunca cambiar,
-    // así que intentar registrar un nombre que ya existe es rechazado.
+    // Nombres de usuario únicos. Se crean una sola vez y no se cambian;
+    // solo su dueño puede borrarlo (al borrar su cuenta).
     match /nombres/{nombre} {
       allow get: if signedIn();
       allow create: if signedIn()
         && nombre.matches('^[a-z0-9_.]{3,20}$')
         && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
-    // Lista de docentes: cada persona solo puede comprobar si ella misma es docente.
+    // Lista de la administración: cada persona solo puede comprobar si ella misma está en la lista.
     match /docentes/{uid} {
       allow get: if signedIn() && request.auth.uid == uid;
       allow write: if false;

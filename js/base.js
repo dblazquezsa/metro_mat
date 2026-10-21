@@ -85,5 +85,24 @@ function figBars(list,opt={}){const W=opt.w||360,h=26,gap=14,x0=opt.lab===false?
     if(opt.lab!==false)g+=`<text x="${x0-10}" y="${y+h/2+5}" text-anchor="end" style="font:700 14px var(--f-mono);fill:var(--ink)">${lab||(a+"/"+b)}</text>`;y+=h+gap});
   return`<svg viewBox="0 0 ${x0+W+12} ${y}" role="img" aria-label="Barras de fracciones">${g}</svg>`}
 
+/* Producto (para comprobar factorizaciones) e inecuaciones escritas por el estudiante */
+function isProduct(n){while(n&&n.op==="neg")n=n.a;return!!n&&(n.op==="*"||n.op==="^")}
+function parseIneq(src){let t=String(src).replace(/≤/g,"<=").replace(/≥/g,">=").replace(/[−–]/g,"-").replace(/\s+/g,"").toLowerCase();
+  const flip={"<":">",">":"<","<=":">=",">=":"<="};let m=t.match(/^x(<=|>=|<|>)(.+)$/),op,val;
+  if(m){op=m[1];val=m[2]}else{m=t.match(/^(.+?)(<=|>=|<|>)x$/);if(!m)return null;op=flip[m[2]];val=m[1]}
+  try{const a=parseExpr(val);if(varsOf(a).size)return null;return{op,val:evalAst(a,{})}}catch(e){return null}}
+const OPS={"<":"<",">":">","<=":"≤",">=":"≥"};
+const P=(b,e)=>`${b}<sup>${e}</sup>`;
+/* Recta con un intervalo dibujado: a o b pueden ser null (infinito) */
+function figInterval(a,b,ca,cb,min=-10,max=10){const X=v=>30+(v-min)/(max-min)*580;let g=`<svg viewBox="0 0 640 86" role="img" aria-label="Intervalo dibujado en la recta"><line x1="14" y1="44" x2="626" y2="44" stroke="var(--rule)" stroke-width="2"/>`;
+  for(let v=min;v<=max;v++)g+=`<line x1="${X(v)}" y1="39" x2="${X(v)}" y2="49" stroke="var(--muted)"/>`+(v%2===0||max-min<=12?`<text x="${X(v)}" y="70" text-anchor="middle" style="font:12px var(--f-mono);fill:var(--muted)">${fmt(v)}</text>`:"");
+  const xa=a==null?14:X(a),xb=b==null?626:X(b);g+=`<line x1="${xa}" y1="44" x2="${xb}" y2="44" stroke="var(--l-rec)" stroke-width="6"/>`;
+  if(a==null)g+=`<polygon points="10,44 22,37 22,51" fill="var(--l-rec)"/>`;if(b==null)g+=`<polygon points="630,44 618,37 618,51" fill="var(--l-rec)"/>`;
+  if(a!=null)g+=`<circle cx="${xa}" cy="44" r="7" fill="${ca?"var(--l-rec)":"var(--surface)"}" stroke="var(--l-rec)" stroke-width="3"/>`;
+  if(b!=null)g+=`<circle cx="${xb}" cy="44" r="7" fill="${cb?"var(--l-rec)":"var(--surface)"}" stroke="var(--l-rec)" stroke-width="3"/>`;return g+`</svg>`}
+const ivl=(a,b,ca,cb)=>`${a==null?"(":ca?"[":"("}${a==null?"−∞":fmt(a)}, ${b==null?"+∞":fmt(b)}${b==null?")":cb?"]":")"}`;
+/* Tabla sencilla para enunciados */
+function figTable(head,rows){return`<div class="tablewrap"><table class="mini"><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`}
+
 /* Registros que llenan los ficheros de cada línea (js/lineas/*.js) */
 const NODES={},RETO={},RECAP={},EXPLORE={};

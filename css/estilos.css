@@ -347,3 +347,57 @@ form.dialog{box-shadow:none;border:1px solid var(--rule);max-width:none}
 .paperrow{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px;align-items:start}
 .paperrow .svgwrap svg{max-width:260px}
 @media (max-width:560px){.paperrow{grid-template-columns:minmax(0,1fr)}.paperrow .svgwrap svg{max-width:240px;margin:0 auto}}
+
+/* Tablas en enunciados, parejas x/y y potencias */
+table.mini{min-width:0;width:auto;font-family:var(--f-mono);font-size:.95rem}
+table.mini th,table.mini td{padding:6px 14px;text-align:center;border:1px solid var(--rule)}
+table.mini th{font-family:var(--f-disp);text-transform:none;letter-spacing:0;font-size:.85rem;background:var(--surface-2)}
+.fillrow.pair label{font-family:var(--f-mono);font-weight:600;display:flex;align-items:center;gap:6px}
+.fillrow.pair input{width:7em;flex:0 0 auto}
+sup{font-size:.7em;line-height:0}
+/* recta real: restos de la división */
+.remrow{display:flex;flex-wrap:wrap;gap:6px}
+.remchip{display:grid;justify-items:center;min-width:54px;padding:6px 8px;border-radius:10px;background:var(--surface-2);border:1.5px solid var(--rule);font-family:var(--f-mono)}
+.remchip b{font-size:1.1rem}.remchip small{font-size:.68rem;color:var(--muted);font-family:var(--f-disp)}
+.remchip.per{border-color:var(--l-rec);background:color-mix(in srgb,var(--l-rec) 12%,var(--surface))}
+.remchip.again{border-style:dashed;border-color:var(--l-rec)}.remchip.end{border-color:var(--ok)}
+/* álgebra: palillos y escalera de potencias */
+.sticks{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin:6px 0}
+.sticks figure{margin:0;display:grid;justify-items:center;gap:4px}
+.sticks figcaption{font-family:var(--f-disp);font-size:.78rem;color:var(--muted)}
+.powlad{display:grid;gap:4px;font-family:var(--f-mono);font-size:1.05rem}
+.powrow{display:grid;grid-template-columns:80px 20px 80px auto;align-items:center;padding:4px 10px;border-radius:8px;background:var(--surface-2)}
+.powrow .arrow{font-size:.8rem;color:var(--muted)}
+.powrow.zero{outline:2px solid var(--l-alg)}
+.powrow.negx{background:color-mix(in srgb,var(--l-alg) 10%,var(--surface))}
+ol.hist{margin:0;padding-left:1.4em;font-family:var(--f-mono);font-size:.92rem;line-height:1.8}
+ol.hist:empty{display:none}
+.sys{display:block;width:max-content;max-width:100%;margin:8px 0 2px;padding:4px 12px;border-left:3px solid var(--l-ecu);font-family:var(--f-mono);line-height:1.8}
+/* datos personales */
+.authwrap.one{grid-template-columns:minmax(0,640px);justify-content:center}
+.authwrap.one .dialog{max-width:640px}
+.dialog.wide{max-width:680px;max-height:calc(100vh - 40px);overflow-y:auto}
+.consent{display:grid;gap:10px;border:1.5px solid var(--rule);border-radius:12px;padding:12px 14px;background:var(--surface-2)}
+.policybox{max-height:220px;overflow-y:auto;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:10px 12px}
+.policy{display:grid;gap:8px;font-size:.88rem;line-height:1.55}
+.policy h4{font-family:var(--f-disp);font-size:.9rem;font-weight:700;margin-top:6px}
+.policy ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.policy a{color:inherit}
+.chk{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:.9rem;line-height:1.45;cursor:pointer}
+.chk input{width:18px;height:18px;margin-top:2px;accent-color:var(--l-ent)}
+.req,.optl{display:inline-block;font-family:var(--f-disp);font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:5px;margin-left:4px;vertical-align:1px}
+.req{background:var(--warn-bg);color:var(--warn)}
+.optl{background:var(--surface);color:var(--muted);border:1px solid var(--rule)}
+.datacard{display:grid;gap:12px;border:1.5px solid var(--rule);border-radius:12px;padding:14px}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn.danger:hover{background:var(--bad-bg)}
+/* acceso con Google */
+.orrow{display:flex;align-items:center;gap:10px;color:var(--muted);font-family:var(--f-disp);font-size:.85rem}
+.orrow::before,.orrow::after{content:"";flex:1;border-top:1px solid var(--rule)}
+.gbtn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--surface);border:1.5px solid var(--rule)}
+/* pie de página y licencia */
+.foot{margin-top:28px;padding:16px 0 calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-family:var(--f-disp);font-size:.82rem;color:var(--muted)}
+.foot a{color:inherit}
+.foot .cc{display:inline-flex;align-items:center;gap:6px}
+.brand .subt{font-family:var(--f-disp);font-size:.85rem;color:var(--muted);font-weight:600}
+.foot .linkbtn{color:inherit;font-weight:600}

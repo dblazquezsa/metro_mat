@@ -11,3 +11,12 @@ const FIREBASE_CONFIG = {
   appId: "1:789792637232:web:87c80766daba0c4cc588f5"
 };
 
+
+/* Datos de quien responde por la plataforma ante los usuarios (Ley 1581 de 2012).
+   Aparecen en la política de tratamiento de datos que se acepta al crear la cuenta.
+   IMPORTANTE: completa los dos campos antes de abrir la plataforma a estudiantes. */
+const PLATAFORMA = {
+  responsable: "",   // persona o entidad responsable del tratamiento, por ejemplo: "Nombre Apellido"
+  contacto: "",      // correo para consultas, reclamos y solicitudes de borrado
+  ciudad: "Medellín, Colombia"
+};
