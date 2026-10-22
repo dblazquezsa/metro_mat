@@ -24,12 +24,15 @@ const LABS={ent:[["Sumando","y restando"],["Calcular","con economía"],["Diferen
 LABS.ecu.push(["Inecuaciones"]);
 const PREF={ent:"E",rac:"R",rec:"L",alg:"A",ecu:"Q",bie:"B"},DIAGID={ent:"Dent",rac:"Drac",rec:"Drec",alg:"Dalg",ecu:"Decu"};
 for(const l of Object.keys(COLX)){const x=COLX[l];
-  if(l==="bie")ST.push({id:"Bhub",line:"bie",x,y:HEADY,lab:[],hidden:true,built:true});
-  else ST.push({id:DIAGID[l],line:l,x,y:HEADY,lab:["Diagnóstico"],lp:"rtop",diag:true,built:true});
+  if(l==="bie"){
+    // Bienestar: «Creencias sobre las matemáticas» es la estación de salida, a la altura de los diagnósticos
+    LABS.bie.forEach((lab,k)=>ST.push(k===0?{id:"B1",line:l,x,y:HEADY,lab,lp:"rbot",start:true}:{id:"B"+(k+1),line:l,x,y:ST0+35+(k-1)*STEP,lab,lp:"right"}));
+    PATHS[l]=[[x,HEADY],[x,ST0+35+(LABS.bie.length-2)*STEP]];continue}
+  ST.push({id:DIAGID[l],line:l,x,y:HEADY,lab:["Diagnóstico"],lp:"rtop",diag:true,built:true});
   LABS[l].forEach((lab,k)=>ST.push({id:PREF[l]+(k+1),line:l,x,y:ST0+k*STEP,lab,lp:"right"}));
   PATHS[l]=[[x,HEADY],[x,ST0+(LABS[l].length-1)*STEP]]}
 const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
-const SEQS=[["Bhub","Dent","Drac","Drec","Dalg","Decu"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
+const SEQS=[["B1","Dent","Drac","Drec","Dalg","Decu"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
 const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
 // Una estación está construida cuando su línea la registró (js/lineas/*.js o js/bienestar.js)
 ST.forEach(s=>{if(s.diag||s.hidden)return;if(s.line==="bie")s.built=!!SOCIO[s.id];else s.built=!!NODES[s.id]});
@@ -59,7 +62,7 @@ function reflMsg(r,st){if(!r)return"";const m=[];
   return m.join(" ")}
 
 /* ============ estado y almacenamiento ============ */
-function freshState(){return{v:1,nombre:"",grupo:"",avatar:"coral",current:"Dent",nodes:{},diags:{},bie:{},updatedAt:0}}
+function freshState(){return{v:1,nombre:"",grupo:"",avatar:"coral",current:"B1",nodes:{},diags:{},bie:{},updatedAt:0}}
 let S=freshState();
 let BIE={ans:{},hist:{},notes:{},plan:[],goal:""};
 const RT={db:null,auth:null,uid:null,email:"",teacher:false,saving:false,dirty:false,unsubPanel:null,view:"auth",registering:false,guest:false};
@@ -136,12 +139,12 @@ function avatarSVG(id,still,left){const a=avOf(id),H=a.hair,st=a.style;
   ${a.glasses?`<rect x="2.1" y="-21.7" width="3.4" height="2.6" rx="1" fill="#fff" fill-opacity=".35" stroke="var(--ink)" stroke-width="0.55"/><path d="M2.1 -20.8 L-1.2 -21.6" stroke="var(--ink)" stroke-width="0.55" stroke-linecap="round"/>`:""}</g></g>`}
 
 // El viajero se para encima de su estación; la etiqueta de esa estación sube para dejarle sitio.
-function avPos(id){const s=STM[id]||STM.Dent;return `translate(${s.x}px,${s.y-20}px)`}
+function avPos(id){const s=STM[id]||STM.B1;return `translate(${s.x}px,${s.y-20}px)`}
 
 /* ============ plano ============ */
 const NS="http://www.w3.org/2000/svg";
 function stState(s){if(!s.built)return"soon";if(s.diag)return S.diags&&S.diags[s.line]?"done":"open";if(isDone(s.id))return"done";if(conv(s.id))return"conv";if(!unlocked(s.id))return"locked";const ns=S.nodes[s.id];return ns&&ns.max>0?"prog":"open"}
-function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="Dent";
+function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";
   const svg=$("#map");const col=l=>`var(${LINES[l]?LINES[l].c:"--ink"})`;let h="";
   // pasillo de transbordo entre cabeceras
   h+=`<polyline points="${PATHS.pas.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--rule)" stroke-width="7" stroke-linecap="round" stroke-dasharray="2 9"/>`;
@@ -154,9 +157,9 @@ function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="Dent";
   // estaciones
   const tgt=nextTarget();
   for(const s of ST){if(s.hidden)continue;const st=stState(s);const c=col(s.line);
-    const r=s.diag?13:9;
+    const r=s.diag||s.start?13:9;
     let lx=s.x,ly=s.y,anchor="middle",lines=s.lab;
-    if(s.lp==="rtop"){lx=s.x+20;anchor="start";ly=s.y-12}else if(s.lp==="top"){ly=s.y-22-(lines.length-1)*15-(s.id===S.current?40:0)}else if(s.lp==="bottom"){ly=s.y+28}else if(s.lp==="right"){lx=s.x+20;anchor="start";ly=s.y+4-(lines.length-1)*7.5}else{lx=s.x-20;anchor="end";ly=s.y+4-(lines.length-1)*7.5}
+    if(s.lp==="rtop"){lx=s.x+20;anchor="start";ly=s.y-12}else if(s.lp==="rbot"){lx=s.x+20;anchor="start";ly=s.y+30}else if(s.lp==="top"){ly=s.y-22-(lines.length-1)*15-(s.id===S.current?40:0)}else if(s.lp==="bottom"){ly=s.y+28}else if(s.lp==="right"){lx=s.x+20;anchor="start";ly=s.y+4-(lines.length-1)*7.5}else{lx=s.x-20;anchor="end";ly=s.y+4-(lines.length-1)*7.5}
     const ring=st==="soon"?"var(--l-off)":st==="locked"?"var(--l-off)":c;
     const fill=st==="done"||st==="conv"?c:"var(--surface)";
     const label=`${s.lab.join(" ")}. ${st==="soon"?"En construcción":st==="locked"?"Bloqueada":st==="done"?"Completada":st==="conv"?"Convalidada en el diagnóstico":st==="prog"?"En curso":"Disponible"}`;
@@ -164,6 +167,7 @@ function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="Dent";
     if(s.id===tgt&&!reduceMotion)h+=`<circle class="pulse" cx="${s.x}" cy="${s.y}" r="${r}" fill="none" stroke="${c}" stroke-width="3"/>`;
     h+=`<circle class="ring" cx="${s.x}" cy="${s.y}" r="${r+4}" fill="transparent" stroke="transparent"/>`;
     h+=`<circle class="dot" cx="${s.x}" cy="${s.y}" r="${st==="soon"?6:r}" fill="${fill}" stroke="${ring}" stroke-width="${st==="soon"?3:4}" ${st==="conv"?'stroke-dasharray="4 3"':""}/>`;
+    if(s.start){h+=`<text x="${s.x+20}" y="${s.y-12}" class="salida" style="fill:${c}">SALIDA</text>`;if(st!=="done")h+=`<path d="M${s.x-3.5} ${s.y-5.5} l9 5.5 l-9 5.5 z" fill="${c}"/>`}
     if(st==="done"&&!s.diag)h+=`<path d="M${s.x-4} ${s.y} l3 3.5 l5.5 -6.5" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
     if(st==="locked")h+=`<rect x="${s.x-3.5}" y="${s.y-1}" width="7" height="5.5" rx="1" fill="var(--l-off)"/><path d="M${s.x-2} ${s.y-1} v-1.8 a2 2 0 0 1 4 0 v1.8" fill="none" stroke="var(--l-off)" stroke-width="1.5"/>`;
     if(s.diag)h+=`<text x="${s.x}" y="${s.y+4.5}" text-anchor="middle" style="font-size:12px;font-weight:800;fill:${st==="done"?"var(--surface)":"var(--ink)"}">${st==="done"?"✓":"?"}</text>`;
@@ -183,7 +187,7 @@ function ptAt(l,s){const seg=LGEO[l];for(const g of seg)if(s<=g.s0+g.L+1e-6){con
 function edgePts(a,b){const A=STM[a],B=STM[b];for(const l of Object.keys(LGEO)){const pa=proj(l,A.x,A.y),pb=proj(l,B.x,B.y);
   if(pa.d<2&&pb.d<2){const lo=Math.min(pa.s,pb.s),hi=Math.max(pa.s,pb.s);let cs=LGEO[l].map(g=>g.s0).filter(v=>v>lo+.5&&v<hi-.5);if(pa.s>pb.s)cs=cs.reverse();return[pa.s,...cs,pb.s].map(v=>ptAt(l,v))}}
   return[[A.x,A.y],[B.x,B.y]]}
-async function moveAvatar(to){if(!STM[S.current]||STM[S.current].hidden)S.current="Dent";const av=$("#avatar");if(!av||S.current===to){S.current=to;save();return}
+async function moveAvatar(to){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";const av=$("#avatar");if(!av||S.current===to){S.current=to;save();return}
   const path=route(S.current,to);let pts=[];path.slice(1).forEach((id,k)=>{const e=edgePts(path[k],id);pts=pts.concat(k?e.slice(1):e)});
   moving=true;
   if(!reduceMotion&&pts.length>1){const segs=[];let L=0;for(let k=1;k<pts.length;k++){const d=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]);segs.push({a:pts[k-1],b:pts[k],d,s0:L});L+=d}
@@ -489,7 +493,7 @@ function openReset(){const m=$("#modal");
    <p class="muted">No se puede deshacer.</p>
    <div class="dlg-actions"><button class="btn danger" id="rsgo">Borrar mi progreso</button><button class="btn ghost" id="rsno">Cancelar</button></div></div>`;
   m.hidden=false;$("#rsno",m).onclick=()=>m.hidden=true;
-  $("#rsgo",m).onclick=async()=>{const alsoBie=$("#rsbie",m).checked;S.nodes={};S.diags={};S.current="Dent";if(alsoBie){S.bie={};await dropBie()}
+  $("#rsgo",m).onclick=async()=>{const alsoBie=$("#rsbie",m).checked;S.nodes={};S.diags={};S.current="B1";if(alsoBie){S.bie={};await dropBie()}
     save();await flush();m.hidden=true;renderMe();renderProg();toast("Tu progreso se borró. Puedes empezar de nuevo cuando quieras.")}}
 
 /* ============ panel de administración ============ */
@@ -527,9 +531,9 @@ const avatarPicker=av=>`<div class="field"><span style="font-family:var(--f-disp
 function bindAvatar(root,set){$$(".avs button",root).forEach(b=>b.onclick=()=>{set(b.dataset.a);$$(".avs button",root).forEach(x=>x.setAttribute("aria-pressed",x===b))})}
 function openStart(){const m=$("#modal");
   m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="st-t"><span class="eyebrow">Cuenta creada</span><h2 id="st-t">Hola, ${esc(S.nombre)}</h2>
-   <p>En cada estación lees una explicación, exploras, resuelves un reto y recibes retroalimentación. Si ya manejas algunos temas, el diagnóstico te permite saltarlos.</p>
-   <div class="dlg-actions"><button class="btn primary" id="sd">Empezar con el diagnóstico</button><button class="btn" id="sm">Ir directo al plano</button></div></div>`;
-  m.hidden=false;$("#sm",m).onclick=()=>m.hidden=true;$("#sd",m).onclick=()=>{m.hidden=true;clickStation("Dent")}}
+   <p>Tu viaje sale de la estación <b>Creencias sobre las matemáticas</b>: unos minutos para pensar qué crees que son las matemáticas y cómo se aprenden. Después, cada línea empieza con un diagnóstico opcional que te permite saltar lo que ya manejas.</p>
+   <div class="dlg-actions"><button class="btn primary" id="sd">Ir a la estación de salida</button><button class="btn" id="sm">Ir directo al plano</button></div></div>`;
+  m.hidden=false;$("#sm",m).onclick=()=>m.hidden=true;$("#sd",m).onclick=()=>{m.hidden=true;clickStation("B1")}}
 
 /* ============ cuentas ============ */
 const AUTH_ERR={"auth/email-already-in-use":"Ya existe una cuenta con ese email. Inicia sesión.","auth/invalid-email":"El email no es válido.","auth/weak-password":"La contraseña debe tener al menos 6 caracteres.",
