@@ -26,7 +26,7 @@ L8:{title:"El plano cartesiano",sub:"Dos rectas numéricas para ubicar cualquier
  ${figTable(["Cuadrante","I","II","III","IV"],[["Signo de x","+","−","−","+"],["Signo de y","+","+","−","−"]])}
  <p>Un punto con una coordenada igual a 0 está sobre un eje y no pertenece a ningún cuadrante: (0, 4) está en el eje y; (−2, 0), en el eje x.</p></div>
  <div class="ex-box"><span class="eyebrow">Simetrías</span><p>Cambiar el signo de una coordenada refleja el punto. El reflejo de (a, b) en el eje x es (a, −b); en el eje y, (−a, b); y respecto del origen, (−a, −b).</p></div>`,
- explore:{intro:"Arrastra el punto por el plano y mira cómo cambian sus coordenadas y su cuadrante. Activa los reflejos y prueba el reto rápido.",fn:"lPlano"},
+ explore:{intro:"Arrastra el punto por el plano y mira cómo cambian sus coordenadas, con dos decimales, y su cuadrante. Activa «Coordenadas enteras» para que salte de cruce en cruce. Prueba también los reflejos y el reto rápido.",fn:"lPlano"},
  key:"Un punto del plano es un par ordenado (x, y): primero el desplazamiento horizontal, después el vertical. Los signos de x e y dicen el cuadrante.",
  ojo:"(a, b) y (b, a) no son el mismo punto: primero va la x. Y un punto con una coordenada 0 está sobre un eje, no en un cuadrante."},
 
@@ -114,20 +114,26 @@ L9:{map:[0,1,2,1,3],pts:[
 });
 
 Object.assign(EXPLORE,{
-lPlano(host){const B={xmin:-6,xmax:6,ymin:-6,ymax:6},W=460;let p=[3,2],refl={x:false,y:false,o:false},goal=null,hits=0;
-  host.innerHTML=`<div class="xp"><div class="ctrl"><span class="seg" role="group" aria-label="Reflejos"><button class="btn sm" data-r="x" aria-pressed="false">Reflejo en el eje x</button><button class="btn sm" data-r="y" aria-pressed="false">Reflejo en el eje y</button><button class="btn sm" data-r="o" aria-pressed="false">Respecto del origen</button></span><button class="btn sm" id="pgo">Reto rápido</button></div>
-   <div class="svgwrap gridpick" id="psvg" tabindex="0" aria-label="Plano: arrastra el punto o muévelo con las flechas"></div><div class="readout" id="prr"></div></div>`;
+lPlano(host){const B={xmin:-6,xmax:6,ymin:-6,ymax:6},W=460;let p=[3.25,1.8],ent=false,refl={x:false,y:false,o:false},goal=null,hits=0;
+  /* Modo suave: coordenadas con 2 decimales. Modo «coordenadas enteras»: el punto salta de cruce en cruce. */
+  const r2=v=>Math.round(v*100)/100,cf=v=>ent?fmt(v):(v<0?"−":"")+Math.abs(v).toFixed(2).replace(".",","),CP=(x,y)=>`(${cf(x)}, ${cf(y)})`;
+  host.innerHTML=`<div class="xp"><div class="ctrl"><button class="btn sm" id="pent" aria-pressed="false">Coordenadas enteras</button><span class="seg" role="group" aria-label="Reflejos"><button class="btn sm" data-r="x" aria-pressed="false">Reflejo en el eje x</button><button class="btn sm" data-r="y" aria-pressed="false">Reflejo en el eje y</button><button class="btn sm" data-r="o" aria-pressed="false">Respecto del origen</button></span><button class="btn sm" id="pgo">Reto rápido</button></div>
+   <div class="svgwrap gridpick" id="psvg" tabindex="0" aria-label="Plano: arrastra el punto o muévelo con las flechas" style="cursor:grab"></div><div class="readout" id="prr"></div></div>`;
   const wrap=$("#psvg",host);
-  const draw=()=>{const [x,y]=p,q=quad(x,y),G=[];if(refl.x)G.push({x,y:-y,color:"var(--l-ent)",label:"("+fmt(x)+", "+fmt(-y)+")",open:true});if(refl.y)G.push({x:-x,y,color:"var(--l-rac)",label:"("+fmt(-x)+", "+fmt(y)+")",open:true});if(refl.o)G.push({x:-x,y:-y,color:"var(--l-alg)",label:"("+fmt(-x)+", "+fmt(-y)+")",open:true});
+  const draw=()=>{const [x,y]=p,q=quad(x,y),G=[];if(refl.x)G.push({x,y:-y,color:"var(--l-ent)",label:CP(x,-y),open:true});if(refl.y)G.push({x:-x,y,color:"var(--l-rac)",label:CP(-x,y),open:true});if(refl.o)G.push({x:-x,y:-y,color:"var(--l-alg)",label:CP(-x,-y),open:true});
     const lbl=[[3,3,"I"],[-3,3,"II"],[-3,-3,"III"],[3,-3,"IV"]].map(([a,b,t])=>({x:a-.25,y:b,text:t,color:"var(--muted)"}));
     wrap.innerHTML=plot({...B,w:W,equal:true,xstep:1,ystep:1,axes:true,labels:lbl,segs:[{x1:0,y1:0,x2:x,y2:0,color:"var(--l-rec)",dash:"5 4",width:2},{x1:x,y1:0,x2:x,y2:y,color:"var(--l-rec)",dash:"5 4",width:2}],
-      pts:[...(goal?[{x:goal[0],y:goal[1],open:true,color:"var(--l-ecu)",r:9}]:[]),...G,{x,y,color:"var(--l-rec)",r:8,label:PT(x,y)}],aria:"Plano cartesiano con un punto que se puede mover"});
+      pts:[...(goal?[{x:goal[0],y:goal[1],open:true,color:"var(--l-ecu)",r:9}]:[]),...G,{x,y,color:"var(--l-rec)",r:8,label:CP(x,y)}],aria:"Plano cartesiano con un punto que se puede mover"});
     const sx=x>0?"positiva (a la derecha)":x<0?"negativa (a la izquierda)":"cero",sy=y>0?"positiva (hacia arriba)":y<0?"negativa (hacia abajo)":"cero";
-    $("#prr",host).innerHTML=`<span class="k">Punto</span>${PT(x,y)}<br><span class="k">x</span>${sx}<br><span class="k">y</span>${sy}<br><span class="k">Dónde está</span>${q?"cuadrante "+QN[q]:x===0&&y===0?"es el origen":"sobre el eje "+(x===0?"y":"x")+": en ningún cuadrante"}`+
-      (goal?`<br><span class="k">Reto</span>${goal[0]===x&&goal[1]===y?`¡Llegaste a ${PT(...goal)}! Pulsa «Reto rápido» para otro (${hits} logrados).`:`lleva el punto al círculo rojo y comprueba que es ${PT(...goal)}`}`:"")};
-  const set=q=>{p=q;if(goal&&q[0]===goal[0]&&q[1]===goal[1]&&!goal.hit){goal.hit=true;hits++}draw()};
-  gridPointer(wrap,B,W,q=>set(q));
-  wrap.addEventListener("keydown",e=>{const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;e.preventDefault();set([Math.max(-6,Math.min(6,p[0]+d[0])),Math.max(-6,Math.min(6,p[1]+d[1]))])});
+    $("#prr",host).innerHTML=`<span class="k">Punto</span>${CP(x,y)}<br><span class="k">x</span>${sx}<br><span class="k">y</span>${sy}<br><span class="k">Dónde está</span>${q?"cuadrante "+QN[q]:x===0&&y===0?"es el origen":"sobre el eje "+(x===0?"y":"x")+": en ningún cuadrante"}`+
+      (!ent&&q?`<br><span class="k">Ojo</span>las coordenadas no tienen que ser enteras: entre dos cruces de la cuadrícula hay infinitos puntos`:"")+
+      (goal?`<br><span class="k">Reto</span>${goal.hit&&goal[0]===x&&goal[1]===y?`¡Llegaste a ${PT(goal[0],goal[1])}! Pulsa «Reto rápido» para otro (${hits} logrados).`:`lleva el punto al círculo rojo y comprueba que es ${PT(goal[0],goal[1])}`}`:"")};
+  const set=q=>{let [x,y]=q.map(v=>Math.max(-6,Math.min(6,ent?Math.round(v):r2(v))));
+    if(goal&&Math.abs(x-goal[0])<.15&&Math.abs(y-goal[1])<.15){x=goal[0];y=goal[1];if(!goal.hit){goal.hit=true;hits++}}
+    p=[x,y];draw()};
+  gridPointer(wrap,B,W,q=>set(q),0.01);
+  wrap.addEventListener("keydown",e=>{const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;e.preventDefault();const st=ent?1:.1;set([p[0]+d[0]*st,p[1]+d[1]*st])});
+  $("#pent",host).onclick=e=>{ent=!ent;e.target.setAttribute("aria-pressed",ent);if(ent)p=p.map(Math.round);draw()};
   $$("[data-r]",host).forEach(b=>b.onclick=()=>{refl[b.dataset.r]=!refl[b.dataset.r];b.setAttribute("aria-pressed",refl[b.dataset.r]);draw()});
   $("#pgo",host).onclick=()=>{let g;do{g=[Math.floor(Math.random()*11)-5,Math.floor(Math.random()*11)-5]}while(quad(...g)===0||(g[0]===p[0]&&g[1]===p[1]));goal=g;draw()};
   draw()},

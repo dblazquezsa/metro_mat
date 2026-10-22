@@ -120,7 +120,8 @@ const NODES={},RETO={},RECAP={},EXPLORE={};
        hl:[{y,color,dash,label}],vl:[{x,color,dash,label}],xstep,ystep,xlab,ylab} */
 function plot(o){const w=o.w||560,pad=34,h=o.equal?Math.round(2*pad+(w-2*pad)*(o.ymax-o.ymin)/(o.xmax-o.xmin)):(o.h||340),X=x=>pad+(x-o.xmin)/(o.xmax-o.xmin)*(w-2*pad),Y=y=>h-pad-(y-o.ymin)/(o.ymax-o.ymin)*(h-2*pad);
   const xs=o.xstep||niceStep(o.xmax-o.xmin),ys=o.ystep||niceStep(o.ymax-o.ymin);let g=`<rect x="${pad}" y="${pad}" width="${w-2*pad}" height="${h-2*pad}" fill="var(--surface)" stroke="var(--rule)"/>`;
-  for(let x=Math.ceil(o.xmin/xs)*xs;x<=o.xmax+1e-9;x+=xs){const px=X(x);g+=`<line x1="${px}" y1="${pad}" x2="${px}" y2="${h-pad}" stroke="var(--rule)" stroke-width="${Math.abs(x)<1e-9?1.6:.6}"/><text x="${px}" y="${h-pad+15}" text-anchor="middle" style="font:11px var(--f-mono);fill:var(--muted)">${decs(x,2)}</text>`}
+  const XT=o.xticks||(()=>{const a=[];for(let x=Math.ceil(o.xmin/xs)*xs;x<=o.xmax+1e-9;x+=xs)a.push([x,decs(x,2)]);return a})();
+  XT.forEach(([x,lab])=>{const px=X(x);g+=`<line x1="${px}" y1="${pad}" x2="${px}" y2="${h-pad}" stroke="var(--rule)" stroke-width="${Math.abs(x)<1e-9?1.6:.6}"/><text x="${px}" y="${h-pad+15}" text-anchor="middle" style="font:11px var(--f-mono);fill:var(--muted)">${lab}</text>`});
   for(let y=Math.ceil(o.ymin/ys)*ys;y<=o.ymax+1e-9;y+=ys){const py=Y(y);g+=`<line x1="${pad}" y1="${py}" x2="${w-pad}" y2="${py}" stroke="var(--rule)" stroke-width="${Math.abs(y)<1e-9?1.6:.6}"/><text x="${pad-5}" y="${py+4}" text-anchor="end" style="font:11px var(--f-mono);fill:var(--muted)">${decs(y,2)}</text>`}
   if(o.xmin<0&&o.xmax>0)g+=`<line x1="${X(0)}" y1="${pad}" x2="${X(0)}" y2="${h-pad}" stroke="var(--ink)" stroke-width="1.4" opacity=".6"/>`;
   if(o.ymin<0&&o.ymax>0)g+=`<line x1="${pad}" y1="${Y(0)}" x2="${w-pad}" y2="${Y(0)}" stroke="var(--ink)" stroke-width="1.4" opacity=".6"/>`;

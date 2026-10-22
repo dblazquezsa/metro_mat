@@ -7,27 +7,31 @@ const LINES={
   rec:{name:"La recta real",short:"Recta real",c:"--l-rec"},
   alg:{name:"Álgebra básica",short:"Álgebra",c:"--l-alg"},
   ecu:{name:"Ecuaciones",short:"Ecuaciones",c:"--l-ecu"},
+  fun:{name:"Funciones de variable real",short:"Funciones",c:"--l-fun"},
+  tri:{name:"Trigonometría",short:"Trigonometría",c:"--l-tri"},
   bie:{name:"Bienestar y aprendizaje",short:"Bienestar",c:"--l-bie"},
   con:{name:"Conjuntos",short:"Conjuntos",c:"--l-con"}};
 /* Plano: cinco líneas de matemáticas en columnas, numeradas en el orden recomendado (1 Enteros → 5 Ecuaciones),
    más Bienestar. Cada línea empieza en su propia estación de diagnóstico. Un pasillo de transbordo une las cabeceras
    para que el viajero pueda caminar de una línea a otra; las líneas no forman una secuencia. */
-const LNUM={ent:1,rac:2,rec:3,alg:4,ecu:5};
+const LNUM={ent:1,rac:2,rec:3,alg:4,ecu:5,fun:6,tri:7};
 /* Conjuntos es una línea alternativa, sin número: queda a la izquierda de la salida, paralela a las demás. */
 const LBADGE={bie:"♥",con:"∩"};
 const lineTitle=l=>LNUM[l]?`Línea ${LNUM[l]} · ${LINES[l].short}`:`Línea alternativa · ${LINES[l].short}`;
-const COLX={con:60,bie:235,ent:410,rac:585,rec:760,alg:935,ecu:1110},HEADY=110,ST0=185,STEP=62,MAPW=1290;
-const PATHS={pas:[[COLX.con,HEADY],[COLX.ecu,HEADY]]};
+const COLX={con:50,bie:210,ent:370,rac:530,rec:690,alg:850,ecu:1010,fun:1170,tri:1330},HEADY=110,ST0=185,STEP=62,MAPW=1500;
+const PATHS={pas:[[COLX.con,HEADY],[COLX.tri,HEADY]]};
 const ST=[];
 /* Estaciones de cada línea, en orden de recorrido: [id, etiqueta]. Los id no cambian aunque cambie el orden. */
 const LABS={ent:[["E1",["Sumando","y restando"]],["E2",["Calcular","con economía"]],["E3",["Diferencias","y paréntesis"]],["E4",["Las caras","del menos"]],["E5",["Una sola","fórmula"]],["E6",["Productos","con signo"]]],
   rac:[["R1",["Repartir","y medir"]],["R2",["Fracciones","equivalentes"]],["R3",["Comparar","y ordenar"]],["R4",["Sumar y restar","fracciones"]],["R5",["Multiplicar","y dividir"]],["R6",["Decimales y","porcentajes"]]],
-  rec:[["L1",["Decimales","periódicos"]],["L2",["Números","irracionales"]],["L3",["Densidad","y orden"]],["L4",["Valor","absoluto"]],["L5",["Intervalos"]],["L8",["El plano","cartesiano"]],["L9",["Distancias","en el plano"]],["L6",["La función","exponencial"]],["L7",["Logaritmos"]]],
+  rec:[["L1",["Decimales","periódicos"]],["L2",["Números","irracionales"]],["L3",["Densidad","y orden"]],["L10",["Notación","científica"]],["L4",["Valor","absoluto"]],["L5",["Intervalos"]],["L8",["El plano","cartesiano"]],["L9",["Distancias","en el plano"]]],
   alg:[["A1",["Fórmulas","y patrones"]],["A2",["Potencias"]],["A6",["Polinomios"]],["A3",["Productos","notables"]],["A4",["Factorización"]],["A7",["División de","polinomios"]],["A8",["Residuo","y raíces"]],["A5",["Fracciones","algebraicas"]]],
   ecu:[["Q1",["Igualdad y","equivalencia"]],["Q2",["Primer grado"]],["Q3",["Problemas con","ecuaciones"]],["Q11",["La ecuación","de la recta"]],["Q4",["Sistemas 2 × 2"]],["Q12",["La ecuación de la","circunferencia"]],["Q5",["Inecuaciones"]],["Q6",["Segundo grado:","factorizar"]],["Q7",["La fórmula","general"]],["Q8",["Con valor","absoluto"]],["Q9",["Con fracciones"]],["Q10",["Con radicales"]]],
+  fun:[["F1",["¿Qué es una","función?"]],["F2",["Dominio","y rango"]],["F3",["La gráfica de","una función"]],["F4",["Funciones","lineales"]],["F5",["Por tramos y","valor absoluto"]],["F6",["Funciones","de potencia"]],["F7",["Composición"]],["F8",["Función","inversa"]],["F9",["La función","exponencial"]],["F10",["El logaritmo"]]],
+  tri:[["T1",["Triángulos","rectángulos"]],["T2",["Ángulos","y radianes"]],["T3",["Circunferencia","trigonométrica"]],["T4",["Seno","y coseno"]],["T5",["Tangente y","cotangente"]],["T6",["Identidades"]]],
   con:[["C1",["Elementos y","pertenencia"]],["C2",["Extensión y","comprensión"]],["C3",["Subconjuntos","e inclusión"]],["C4",["Operaciones y","diagramas de Venn"]],["C5",["Contar con","inclusión-exclusión"]]],
   bie:[["B1",["Creencias sobre","las matemáticas"]],["B2",["Cómo me veo","como estudiante"]],["B3",["Cómo organizo","mi estudio"]],["B4",["Ansiedad ante","las matemáticas"]]]};
-const DIAGID={ent:"Dent",rac:"Drac",rec:"Drec",alg:"Dalg",ecu:"Decu",con:"Dcon"};
+const DIAGID={ent:"Dent",rac:"Drac",rec:"Drec",alg:"Dalg",ecu:"Decu",fun:"Dfun",tri:"Dtri",con:"Dcon"};
 for(const l of Object.keys(COLX)){const x=COLX[l];
   if(l==="bie"){
     // Bienestar: «Creencias sobre las matemáticas» es la estación de salida, a la altura de los diagnósticos
@@ -38,11 +42,11 @@ for(const l of Object.keys(COLX)){const x=COLX[l];
   PATHS[l]=[[x,HEADY],[x,ST0+(LABS[l].length-1)*STEP]]}
 const MAPH=Math.max(...ST.map(s=>s.y))+45;
 const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
-const SEQS=[["Dcon","B1","Dent","Drac","Drec","Dalg","Decu"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
+const SEQS=[["Dcon","B1","Dent","Drac","Drec","Dalg","Decu","Dfun","Dtri"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
 const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
 // Una estación está construida cuando su línea la registró (js/lineas/*.js o js/bienestar.js)
 ST.forEach(s=>{if(s.diag||s.hidden)return;if(s.line==="bie")s.built=!!SOCIO[s.id];else s.built=!!NODES[s.id]});
-const MLINES=["ent","rac","rec","alg","ecu","con"];
+const MLINES=["ent","rac","rec","alg","ecu","fun","tri","con"];
 const LSEQ={};MLINES.forEach(l=>LSEQ[l]=ST.filter(s=>s.line===l&&s.built&&!s.diag).map(s=>s.id));
 const ACTIVE=MLINES.filter(l=>LSEQ[l].length);
 const MATH=ACTIVE.flatMap(l=>LSEQ[l]);

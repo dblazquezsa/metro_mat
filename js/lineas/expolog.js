@@ -1,5 +1,5 @@
 "use strict";
-/* ============ Línea: La recta real · L6 La función exponencial y L7 Logaritmos ============ */
+/* ============ Línea 6: Funciones · F9 La función exponencial y F10 El logaritmo ============ */
 
 const SUBD="₀₁₂₃₄₅₆₇₈₉",SUPD="⁰¹²³⁴⁵⁶⁷⁸⁹";
 const sub_=n=>String(n).replace(/\d/g,d=>SUBD[d]);
@@ -8,7 +8,7 @@ const LOG=(b,y)=>`log${b===10?"":`<sub>${b}</sub>`} ${y}`;          // HTML
 const LOGt=(b,y)=>`log${b===10?"":sub_(b)} ${y}`;                    // texto plano (fichas)
 
 Object.assign(NODES,{
-L6:{title:"La función exponencial",sub:"Cuando algo crece multiplicándose, no sumándose.",
+F9:{title:"La función exponencial",sub:"Cuando algo crece multiplicándose, no sumándose.",
  info:`<p class="lead">Si una cantidad se <b>multiplica</b> por el mismo número en cada paso, crece de forma <b>exponencial</b>. La fórmula es ${M(`y = C · ${P("a","x")}`)}: C es la cantidad inicial y a, la base.</p>
  <div class="ex-box"><span class="eyebrow">Ejemplo</span><p>Un cultivo empieza con 100 bacterias y se duplica cada hora. Tras x horas hay ${M(`100 · ${P(2,"x")}`)}: 100, 200, 400, 800, 1600… En 10 horas ya son 102 400.</p></div>
  <div class="ex-box"><span class="eyebrow">Exponentes que no son enteros</span><p>Las reglas de las potencias permiten dar sentido a cualquier exponente real:</p>
@@ -20,7 +20,7 @@ L6:{title:"La función exponencial",sub:"Cuando algo crece multiplicándose, no 
  key:"Una exponencial multiplica por la base en cada paso: y = C · aˣ. Pasa por (0, C), nunca es negativa, crece si a > 1 y decrece si 0 < a < 1. Los exponentes fraccionarios son raíces.",
  ojo:"2ˣ no es x²: en la exponencial la cantidad Variable está en el exponente, y a la larga crece mucho más."},
 
-L7:{title:"Logaritmos",sub:"El logaritmo es un exponente.",
+F10:{title:"El logaritmo",sub:"El logaritmo es un exponente, y la función logaritmo deshace la exponencial.",
  info:`<p class="lead">El <b>logaritmo</b> responde a la pregunta: ¿a qué exponente hay que elevar la base para obtener un número?</p>
  <p class="calc">${LOG(2,8)} = 3  porque  ${P(2,3)} = 8          ${LOG(10,1000)} = 3  porque  ${P(10,3)} = 1000</p>
  <div class="ex-box"><span class="eyebrow">En general</span><p class="calc">${LOG("a","y")} = x   significa   ${P("a","x")} = y</p>
@@ -29,14 +29,16 @@ L7:{title:"Logaritmos",sub:"El logaritmo es un exponente.",
  <p class="calc">log(x · y) = log x + log y    log(x / y) = log x − log y    log(${P("x","n")}) = n · log x</p></div>
  <div class="ex-box"><span class="eyebrow">Resolver ecuaciones exponenciales</span><p>Si las dos partes se pueden escribir con la misma base, se igualan los exponentes: ${P(2,"x+1")} = 32 = ${P(2,5)}, así que x + 1 = 5 y x = 4.</p>
  <p>Si no, se toman logaritmos: ${P(2,"x")} = 20 → x = log 20 / log 2 ≈ 4,32.</p></div>
+ <div class="ex-box"><span class="eyebrow">La función logaritmo</span><p>${M(`f(x) = ${LOG("a","x")}`)} es la <b>inversa</b> de ${M(`g(x) = ${P("a","x")}`)}: lo que una hace, la otra lo deshace. ${M(`${LOG(2,P(2,5))} = 5`)} y ${M(`${P(2,`${LOGt(2,32)}`)} = 32`)}. Por eso su gráfica es el reflejo de la exponencial respecto de la recta y = x: pasa por (1, 0), crece si a &gt; 1 y se acerca al eje y sin tocarlo.</p>
+ <p>Su dominio es (0, +∞), que es el rango de la exponencial; y su rango es todo ℝ.</p></div>
  <div class="callout"><span class="eyebrow">Solo números positivos</span><p>No existe el logaritmo de 0 ni de un número negativo: ninguna potencia de base positiva da 0 o un número negativo.</p></div>`,
  explore:{intro:"Mueve el punto por la curva de la exponencial y mira su reflejo en la del logaritmo: lo que en una es x, en la otra es y.",fn:"lLog"},
- key:"logₐ y = x significa aˣ = y: el logaritmo es un exponente. Convierte productos en sumas y potencias en productos, y sirve para despejar exponentes.",
+ key:"logₐ y = x significa aˣ = y: el logaritmo es un exponente. La función logaritmo es la inversa de la exponencial, con dominio (0, +∞). Convierte productos en sumas y sirve para despejar exponentes.",
  ojo:"log(x + y) no es log x + log y: la propiedad es para el producto, log(x · y)."}
 });
 
 Object.assign(RETO,{
-L6:[
+F9:[
  R=>{const C=R.p([50,100,200,300,500]),t=R.i(3,7),k=R.p([2,3]);
   return{type:"fill",kind:"num",answer:C*Math.pow(k,t),q:`Un cultivo empieza con ${C} bacterias y se ${k===2?"duplica":"triplica"} cada hora. ¿Cuántas bacterias hay después de ${t} horas?`,hint:`Cada hora se multiplica por ${k}: ${C} · ${P(k,t)}.`,
    explain:`${C} · ${P(k,t)} = ${C} · ${Math.pow(k,t)} = ${C*Math.pow(k,t)}.`}},
@@ -48,7 +50,7 @@ L6:[
   return{type:"fill",kind:"num",answer:v,q:`Calcula ${M(P(b,e))}`,hint:`El denominador del exponente es una raíz: ${P(b,"1/"+e.split("/")[1])} es la raíz ${e.split("/")[1]==="2"?"cuadrada":e.split("/")[1]==="3"?"cúbica":"cuarta"} de ${b}.`,
    explain:`${P(b,e)}: raíz ${e.split("/")[1]==="2"?"cuadrada":e.split("/")[1]==="3"?"cúbica":"cuarta"} de ${b}${e.split("/")[0]!=="1"?`, elevada a ${e.split("/")[0]}`:""} = ${v}.`}},
  R=>{const x=R.p([8,9,10]),c=R.i(3,6)*10,vals=[["x²",x*x],["2ˣ",Math.pow(2,x)],["10x",10*x],[`3x + ${c}`,3*x+c]].filter((v,i,a)=>a.findIndex(w=>w[1]===v[1])===i);
-  const sorted=vals.slice().sort((p,q)=>p[1]-q[1]);if(sorted.length<4)return RETO.L6[3](R);
+  const sorted=vals.slice().sort((p,q)=>p[1]-q[1]);if(sorted.length<4)return RETO.F9[3](R);
   return{type:"order",noEval:true,q:`Ordena de menor a mayor el valor de estas expresiones cuando ${M("x = "+x)}.`,items:R.sh(vals.map(v=>v[0])),correct:sorted.map(v=>v[0]),hint:"Calcula cada una con ese valor de x.",
    explain:`Con x = ${x}: ${sorted.map(v=>`${v[0]} = ${v[1]}`).join(" < ")}. La exponencial ya va muy por delante.`}},
  R=>{const C=R.p([100,200,500]),N=C*Math.pow(2,R.i(4,7))-R.i(1,C-1),ans=Math.ceil(Math.log2(N/C));
@@ -56,7 +58,7 @@ L6:[
    q:`Una población de ${C} bacterias se duplica cada hora. Ajusta las horas hasta el <b>primer</b> momento en que haya más de ${N}.`,hint:`Ve duplicando: ${C}, ${2*C}, ${4*C}…`,explain:`${C} · ${P(2,ans-1)} = ${C*Math.pow(2,ans-1)} todavía no pasa de ${N}; ${C} · ${P(2,ans)} = ${C*Math.pow(2,ans)} sí.`,
    render:(k,ok)=>plot({xmin:0,xmax:10,ymin:0,ymax:Math.max(N*1.3,C*Math.pow(2,Math.min(k,10))*1.05),w:540,h:300,fns:[{f:x=>C*Math.pow(2,x),color:"var(--l-rec)"}],hl:[{y:N,color:"var(--l-ecu)",dash:"6 4"}],
      vl:[{x:k,color:ok?"var(--ok)":"var(--ink)",dash:"3 3",width:1.5}],pts:[{x:k,y:C*Math.pow(2,k),color:ok?"var(--ok)":"var(--l-rec)",label:String(C*Math.pow(2,k))}],labels:[{x:0.3,y:N,text:"meta: "+N,color:"var(--l-ecu)"}],aria:"Crecimiento de la población"})}}],
-L7:[
+F10:[
  R=>{const [b,y,v]=R.p([[2,32,5],[2,64,6],[3,81,4],[3,27,3],[5,125,3],[10,1000,3],[10,"0,01",-2],[2,"1/8",-3],[4,64,3],[5,"1/25",-2],[10,10000,4],[7,49,2]]);
   return{type:"fill",kind:"num",answer:v,q:`Calcula ${M(LOG(b,y))}`,hint:`¿A qué exponente hay que elevar ${b} para obtener ${y}?`,explain:`${P(b,fmt(v))} = ${y}, así que ${LOG(b,y)} = ${fmt(v)}.`}},
  R=>{const [b,y,p,q]=R.p([[4,2,1,2],[8,2,1,3],[9,3,1,2],[27,3,1,3],[16,2,1,4],[16,8,3,4],[8,4,2,3],[25,5,1,2],[4,8,3,2]]);
@@ -65,7 +67,7 @@ L7:[
  R=>{const t=R.p([["log 20 + log 5","2",["log 25","100","1"]],["log 2 + log 50","2",["log 52","100","3"]],["log 500 − log 5","2",["log 495","100","1"]],["3 · log 10","3",["30","log 30","1"]],["log 8 − log 4 + log 50","2",["log 54","100","log 2"]]]);
   return{type:"choice",q:`¿Cuánto vale ${M(t[0])}? (log es el logaritmo en base 10)`,opts:[M(t[1]),...t[2].map(M)],hint:"Usa log x + log y = log(x · y) y log x − log y = log(x / y).",
    explain:`${t[0]} = log ${t[0].includes("3 ·")?"1000":"100"} = ${t[1]}, porque ${P(10,t[1])} = ${Math.pow(10,+t[1])}.`}},
- R=>{const b=R.p([2,3]),m=R.i(1,3),c=R.i(-2,3),x=R.i(1,4),e=m*x+c;if(e<2||e>6||(m===1&&c===0))return RETO.L7[3](R);const V=Math.pow(b,e);
+ R=>{const b=R.p([2,3]),m=R.i(1,3),c=R.i(-2,3),x=R.i(1,4),e=m*x+c;if(e<2||e>6||(m===1&&c===0))return RETO.F10[3](R);const V=Math.pow(b,e);
   return{type:"fill",kind:"num",answer:x,q:`Resuelve ${M(`${P(b,`${m===1?"":m}x${c?sgA(c).replace(/ /g,""):""}`)} = ${V}`)}`,hint:`Escribe ${V} como potencia de ${b} e iguala los exponentes.`,
    explain:`${V} = ${P(b,e)}, así que ${m===1?"":m}x${c?sgA(c):""} = ${e} y x = ${x}.`}},
  R=>{const all=R.sh([[2,3],[3,2],[2,5],[10,2],[5,2],[2,4],[3,3],[10,3]]),pick=[];for(const p of all){if(pick.length<4&&!pick.some(q=>Math.pow(q[0],q[1])===Math.pow(p[0],p[1])))pick.push(p)}
@@ -76,12 +78,12 @@ L7:[
 });
 
 Object.assign(RECAP,{
-L6:{map:[0,1,2,3,0],pts:[
+F9:{map:[0,1,2,3,0],pts:[
   {s:"Multiplicar en cada paso",t:"Una exponencial multiplica por la base en cada paso: y = C · aˣ.",ex:"100, 200, 400, 800…"},
   {s:"La forma de la gráfica",t:"Pasa por (0, C), nunca toca el eje x; crece si a > 1 y decrece si 0 < a < 1.",ex:"(1/2)ˣ decrece"},
   {s:"Exponentes fraccionarios",t:"El denominador del exponente es una raíz; el numerador, una potencia.",ex:"8^(2/3) = (∛8)² = 4"},
   {s:"Exponencial frente a potencia",t:"2ˣ no es x²; a la larga, la exponencial crece mucho más.",ex:"2¹⁰ = 1024; 10² = 100"}]},
-L7:{map:[0,1,2,3,0],pts:[
+F10:{map:[0,1,2,3,0],pts:[
   {s:"El logaritmo es un exponente",t:"logₐ y = x significa aˣ = y.",ex:"log₂ 32 = 5"},
   {s:"Logaritmos fraccionarios y negativos",t:"Si y no es una potencia entera de la base, el logaritmo puede ser una fracción; si y < 1, es negativo.",ex:"log₄ 2 = 1/2; log₂ (1/8) = −3"},
   {s:"Propiedades",t:"El logaritmo de un producto es la suma de los logaritmos; el de una potencia, el exponente por el logaritmo.",ex:"log 20 + log 5 = log 100 = 2"},
