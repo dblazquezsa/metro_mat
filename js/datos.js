@@ -8,7 +8,7 @@ const RESP=()=>PLATAFORMA.responsable?esc(PLATAFORMA.responsable):"la administra
 const CONT=()=>PLATAFORMA.contacto?`<a href="mailto:${esc(PLATAFORMA.contacto)}">${esc(PLATAFORMA.contacto)}</a>`:"<b>[correo de contacto pendiente de publicar]</b>";
 
 function policyHTML(){return`<div class="policy">
- <p><b>Política de tratamiento de datos personales de la Caja de herramientas</b> · versión del ${fdate(new Date(DATA_V+"T12:00:00").getTime())}</p>
+ <p><b>Política de tratamiento de datos personales de MetroMat</b> · versión del ${fdate(new Date(DATA_V+"T12:00:00").getTime())}</p>
  <h4>1. Quién trata tus datos</h4>
  <p>El responsable del tratamiento es ${RESP()} (${esc(PLATAFORMA.ciudad||"Colombia")}). Contacto para consultas, reclamos y solicitudes: ${CONT()}.
  La plataforma no tiene profesores ni grupos: solo la administración de la plataforma tiene acceso a los datos de los usuarios.</p>

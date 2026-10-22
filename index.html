@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Caja de herramientas: desarrollo del pensamiento matemático para educación media y superior. Un plano de estaciones con explicaciones, exploraciones, retos y retroalimentación.">
-<title>Caja de herramientas · Desarrollo del pensamiento matemático</title>
+<meta name="description" content="MetroMat: desarrollo del pensamiento matemático para educación media y superior. Un plano de estaciones con explicaciones, exploraciones, retos y retroalimentación.">
+<title>MetroMat · Desarrollo del pensamiento matemático</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
@@ -15,7 +15,7 @@
 <div class="app">
   <header class="top">
     <div class="brand">
-      <h1>Caja de herramientas</h1>
+      <h1>MetroMat</h1>
       <span class="subt">Desarrollo del pensamiento matemático para educación media y superior</span>
     </div>
     <div class="who" id="who" hidden>
@@ -34,16 +34,22 @@
     <div class="mapcard">
       <div class="maphead">
         <h2 id="greet">Elige una estación</h2>
-        <span class="tip">Toca una estación para viajar. El avatar te lleva hasta ella.</span>
+        <span class="tip">Toca una estación para viajar. Arrastra para recorrer el valle; acerca con la rueda o pellizcando.</span>
+        <button class="btn sm" id="zfit" type="button">Ver todo</button>
       </div>
-      <div class="mapscroll"><svg id="map" viewBox="0 0 1290 900" role="img" aria-label="Plano de líneas y estaciones de aprendizaje"></svg></div>
+      <div class="mapbox" id="mapbox">
+        <svg id="map" viewBox="0 0 1716 1663" role="img" aria-label="Plano de MetroMat sobre el valle de Aburrá: líneas y estaciones de aprendizaje"></svg>
+        <div class="zctl" role="group" aria-label="Zoom"><button type="button" id="zin" aria-label="Acercar" title="Acercar">+</button><button type="button" id="zout" aria-label="Alejar" title="Alejar">−</button></div>
+      </div>
+      <div class="maplegend" id="maplegend" role="group" aria-label="Resaltar una línea"></div>
+      <p class="mapnote">Plano esquemático del valle de Aburrá. La salida está en la Biblioteca Efe Gómez; los recintos punteados son los campus de la Universidad Nacional, sede Medellín. Se viaja en metro por las líneas 1 a 5 y por el corredor del río, en cable por las líneas 6 y 7, y en bus por Bienestar y Conjuntos.</p>
     </div>
   </section>
 
   <section id="view-node" hidden></section>
   <section id="view-me" hidden></section>
   <section id="view-panel" hidden></section>
-  <section id="view-auth"><p class="muted">Abriendo la caja de herramientas…</p></section>
+  <section id="view-auth"><p class="muted">Abriendo MetroMat…</p></section>
   <footer class="foot">
     <span class="cc"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6"/><text x="12" y="15.6" text-anchor="middle" style="font:700 9.5px var(--f-disp);fill:currentColor">cc</text></svg>
     <span>© 2026 David Blázquez Sanz. <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)</a>.</span></span>
@@ -77,6 +83,8 @@
 <script src="js/desafios.js"></script>
 <script src="js/bienestar.js"></script>
 <script src="js/datos.js"></script>
+<script src="js/relieve.js"></script>
+<script src="js/mapa.js"></script>
 <script src="js/app.js"></script>
 <script>document.getElementById("foot-pol").onclick=()=>openPolicy();</script>
 </body>

@@ -1,6 +1,6 @@
 # Licencia
 
-**Caja de herramientas · Desarrollo del pensamiento matemático para educación media y superior**
+**MetroMat · Desarrollo del pensamiento matemático para educación media y superior**
 © 2026 David Blázquez Sanz
 
 Esta obra (textos, explicaciones, ejercicios, exploraciones interactivas, diseño y código) está bajo una licencia
@@ -9,7 +9,7 @@ Texto de la licencia: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es
 
 Puedes copiar, redistribuir y adaptar el material siempre que:
 
-- **Atribución:** reconozcas la autoría («Caja de herramientas, David Blázquez Sanz»), enlaces la licencia e indiques si hiciste cambios.
+- **Atribución:** reconozcas la autoría («MetroMat, David Blázquez Sanz»), enlaces la licencia e indiques si hiciste cambios.
 - **NoComercial:** no lo uses con fines comerciales.
 - **CompartirIgual:** si lo adaptas, distribuyas tu versión con la misma licencia.
 

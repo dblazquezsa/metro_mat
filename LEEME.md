@@ -1,4 +1,4 @@
-# Caja de herramientas: cómo publicarla en internet
+# MetroMat: cómo publicarlo en internet
 
 ## Qué hay en la carpeta
 
@@ -26,20 +26,22 @@ js/graficos.js           retos con deslizador y dibujo (uno más en diez estacio
 js/desafios.js           desafíos opcionales al final de algunas exploraciones (tareas adaptadas de Liljedahl)
 js/bienestar.js          línea Bienestar: autodiagnósticos y retroalimentación
 js/datos.js              política de datos personales, autorización y borrado de la cuenta
-js/app.js                plano, motor de ejercicios, vistas, cuentas y arranque
+js/relieve.js            relieve del valle de Aburrá (curvas de nivel precalculadas)
+js/mapa.js               plano sobre el valle: río, barrios, recintos UNAL, trazado de las líneas y vehículos
+js/app.js                estados del plano, viajes, motor de ejercicios, vistas, cuentas y arranque
 firestore.rules          reglas de seguridad de la base de datos (no se sube a la web)
 LICENCIA.md              licencia Creative Commons BY-NC-SA 4.0
 ```
 
 Para publicar hay que subir **toda la carpeta**, manteniendo las subcarpetas `css` y `js`. Si solo subes `index.html`, la página no funciona.
 
-Cada línea vive en su propio fichero dentro de `js/lineas/`. Para corregir un texto de una explicación o de un reto, basta con editar ese fichero. Las siete líneas numeradas tienen 57 estaciones y la línea alternativa Conjuntos, 5; con Bienestar son 66. El orden de las estaciones de cada línea se define en la lista LABS de js/app.js. Si en el futuro quitas una estación de su fichero, el plano la mostrará en gris como «en construcción».
+Cada línea vive en su propio fichero dentro de `js/lineas/`. Para corregir un texto de una explicación o de un reto, basta con editar ese fichero. Las siete líneas numeradas tienen 57 estaciones y la línea alternativa Conjuntos, 5; con Bienestar son 66. El orden de las estaciones de cada línea se define en la lista LABS de js/app.js; el trazado de cada línea sobre el valle, en ROUTES de js/mapa.js (las estaciones se reparten solas a lo largo del trazado). Si en el futuro quitas una estación de su fichero, el plano la mostrará en gris como «en construcción».
 
 Las cuentas y el progreso se guardan en **Firebase** (de Google), que tiene un plan gratuito suficiente para varios grupos. La puesta en marcha toma unos 20 minutos.
 
 ## 1. Crear el proyecto de Firebase
 
-1. Entra en <https://console.firebase.google.com> con tu cuenta de Google y pulsa **Crear un proyecto**. Ponle un nombre, por ejemplo `caja-herramientas`. Google Analytics no hace falta.
+1. Entra en <https://console.firebase.google.com> con tu cuenta de Google y pulsa **Crear un proyecto**. Ponle un nombre, por ejemplo `metro_mat`. Google Analytics no hace falta.
 2. En el menú lateral, abre **Compilación → Authentication → Comenzar**. En la pestaña **Método de acceso**, activa **Correo electrónico/contraseña** (solo la primera opción) y guarda.
 3. Abre **Compilación → Firestore Database → Crear base de datos**. Elige una ubicación cercana (por ejemplo `southamerica-east1`) y empieza en **modo de producción**.
 4. En Firestore, pestaña **Reglas**, borra lo que haya, pega el contenido de `firestore.rules` y pulsa **Publicar**.
@@ -66,9 +68,9 @@ La primera vez que alguien entra con Google, la página le pide un nombre de usu
 
 Con **GitHub Pages**:
 
-1. Crea un repositorio nuevo (por ejemplo `caja-herramientas`) y sube `index.html` junto con las carpetas `css` y `js`. Si ya tenías la versión de un solo fichero, reemplaza `index.html` y añade las dos carpetas.
+1. Crea un repositorio nuevo (por ejemplo `metro_mat`) y sube `index.html` junto con las carpetas `css` y `js`. Si ya tenías la versión de un solo fichero, reemplaza `index.html` y añade las dos carpetas.
 2. En el repositorio: **Settings → Pages → Source: Deploy from a branch**, rama `main`, carpeta `/ (root)`. Guarda.
-3. En un par de minutos la página queda en `https://TU-USUARIO.github.io/caja-herramientas/`.
+3. En un par de minutos la página queda en `https://TU-USUARIO.github.io/metro_mat/`.
 
 Después, en Firebase: **Authentication → Configuración → Dominios autorizados → Agregar dominio**, y escribe `TU-USUARIO.github.io`. Sin este paso, el registro y el inicio de sesión fallan desde tu dominio.
 

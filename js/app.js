@@ -11,16 +11,13 @@ const LINES={
   tri:{name:"Trigonometría",short:"Trigonometría",c:"--l-tri"},
   bie:{name:"Bienestar y aprendizaje",short:"Bienestar",c:"--l-bie"},
   con:{name:"Conjuntos",short:"Conjuntos",c:"--l-con"}};
-/* Plano: cinco líneas de matemáticas en columnas, numeradas en el orden recomendado (1 Enteros → 5 Ecuaciones),
-   más Bienestar. Cada línea empieza en su propia estación de diagnóstico. Un pasillo de transbordo une las cabeceras
-   para que el viajero pueda caminar de una línea a otra; las líneas no forman una secuencia. */
+/* Plano: las líneas de matemáticas están numeradas en el orden recomendado (1 Enteros → 7 Trigonometría); Bienestar y
+   Conjuntos llevan insignia. Cada línea empieza en su estación de diagnóstico. El trazado sobre el valle de Aburrá está en
+   js/mapa.js: el corredor del río une las cabeceras para pasar de una línea a otra. */
 const LNUM={ent:1,rac:2,rec:3,alg:4,ecu:5,fun:6,tri:7};
-/* Conjuntos es una línea alternativa, sin número: queda a la izquierda de la salida, paralela a las demás. */
+/* Conjuntos es una línea alternativa, sin número. */
 const LBADGE={bie:"♥",con:"∩"};
 const lineTitle=l=>LNUM[l]?`Línea ${LNUM[l]} · ${LINES[l].short}`:`Línea alternativa · ${LINES[l].short}`;
-const COLX={con:50,bie:210,ent:370,rac:530,rec:690,alg:850,ecu:1010,fun:1170,tri:1330},HEADY=110,ST0=185,STEP=62,MAPW=1500;
-const PATHS={pas:[[COLX.con,HEADY],[COLX.tri,HEADY]]};
-const ST=[];
 /* Estaciones de cada línea, en orden de recorrido: [id, etiqueta]. Los id no cambian aunque cambie el orden. */
 const LABS={ent:[["E1",["Sumando","y restando"]],["E2",["Calcular","con economía"]],["E3",["Diferencias","y paréntesis"]],["E4",["Las caras","del menos"]],["E5",["Una sola","fórmula"]],["E6",["Productos","con signo"]]],
   rac:[["R1",["Repartir","y medir"]],["R2",["Fracciones","equivalentes"]],["R3",["Comparar","y ordenar"]],["R4",["Sumar y restar","fracciones"]],["R5",["Multiplicar","y dividir"]],["R6",["Decimales y","porcentajes"]]],
@@ -32,18 +29,8 @@ const LABS={ent:[["E1",["Sumando","y restando"]],["E2",["Calcular","con economí
   con:[["C1",["Elementos y","pertenencia"]],["C2",["Extensión y","comprensión"]],["C3",["Subconjuntos","e inclusión"]],["C4",["Operaciones y","diagramas de Venn"]],["C5",["Contar con","inclusión-exclusión"]]],
   bie:[["B1",["Creencias sobre","las matemáticas"]],["B2",["Cómo me veo","como estudiante"]],["B3",["Cómo organizo","mi estudio"]],["B4",["Ansiedad ante","las matemáticas"]]]};
 const DIAGID={ent:"Dent",rac:"Drac",rec:"Drec",alg:"Dalg",ecu:"Decu",fun:"Dfun",tri:"Dtri",con:"Dcon"};
-for(const l of Object.keys(COLX)){const x=COLX[l];
-  if(l==="bie"){
-    // Bienestar: «Creencias sobre las matemáticas» es la estación de salida, a la altura de los diagnósticos
-    LABS.bie.forEach(([id,lab],k)=>ST.push(k===0?{id,line:l,x,y:HEADY,lab,lp:"rbot",start:true}:{id,line:l,x,y:ST0+35+(k-1)*70,lab,lp:"right"}));
-    PATHS[l]=[[x,HEADY],[x,ST0+35+(LABS.bie.length-2)*70]];continue}
-  ST.push({id:DIAGID[l],line:l,x,y:HEADY,lab:["Diagnóstico"],lp:"rtop",diag:true,built:true});
-  LABS[l].forEach(([id,lab],k)=>ST.push({id,line:l,x,y:ST0+k*STEP,lab,lp:"right"}));
-  PATHS[l]=[[x,HEADY],[x,ST0+(LABS[l].length-1)*STEP]]}
-const MAPH=Math.max(...ST.map(s=>s.y))+45;
+const ST=MAPA.build(LABS);ST.forEach(s=>{if(s.diag){s.built=true;s.lab=["Diagnóstico"]}});
 const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
-const SEQS=[["Dcon","B1","Dent","Drac","Drec","Dalg","Decu","Dfun","Dtri"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
-const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
 // Una estación está construida cuando su línea la registró (js/lineas/*.js o js/bienestar.js)
 ST.forEach(s=>{if(s.diag||s.hidden)return;if(s.line==="bie")s.built=!!SOCIO[s.id];else s.built=!!NODES[s.id]});
 const MLINES=["ent","rac","rec","alg","ecu","fun","tri","con"];
@@ -148,65 +135,81 @@ function avatarSVG(id,still,left){const a=avOf(id),H=a.hair,st=a.style;
   <circle cx="3.5" cy="-20.2" r="0.95" fill="var(--ink)"/>
   ${a.glasses?`<rect x="2.1" y="-21.7" width="3.4" height="2.6" rx="1" fill="#fff" fill-opacity=".35" stroke="var(--ink)" stroke-width="0.55"/><path d="M2.1 -20.8 L-1.2 -21.6" stroke="var(--ink)" stroke-width="0.55" stroke-linecap="round"/>`:""}</g></g>`}
 
-// El viajero se para encima de su estación; la etiqueta de esa estación sube para dejarle sitio.
-function avPos(id){const s=STM[id]||STM.B1;return `translate(${s.x}px,${s.y-20}px)`}
-
-/* ============ plano ============ */
+/* ============ plano (geometría y dibujo en js/mapa.js) ============ */
 const NS="http://www.w3.org/2000/svg";
+const MV={vb:null,moved:false,focus:null};
+const lcol=l=>`var(${LINES[l]?LINES[l].c:"--ink"})`;
+const MAPORDER=["bie","fun","ent","con","rac","rec","alg","ecu","tri"];
 function stState(s){if(!s.built)return"soon";if(s.diag)return S.diags&&S.diags[s.line]?"done":"open";if(isDone(s.id))return"done";if(conv(s.id))return"conv";if(!unlocked(s.id))return"locked";const ns=S.nodes[s.id];return ns&&ns.max>0?"prog":"open"}
+const lineIds=l=>ST.filter(s=>s.line===l&&s.built&&!s.diag&&!s.hidden).map(s=>s.id);
 function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";
-  const svg=$("#map");const col=l=>`var(${LINES[l]?LINES[l].c:"--ink"})`;let h="";
-  // pasillo de transbordo entre cabeceras
-  h+=`<polyline points="${PATHS.pas.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--rule)" stroke-width="7" stroke-linecap="round" stroke-dasharray="2 9"/>`;
-  // líneas y sus cabeceras numeradas
-  for(const l of Object.keys(COLX)){const pts=PATHS[l],built=l==="bie"||ACTIVE.includes(l),x=COLX[l];
-    h+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${col(l)}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" ${built?"":'stroke-opacity=".32"'}/>`;
-    const ids=ST.filter(s=>s.line===l&&s.built&&!s.diag&&!s.hidden).map(s=>s.id),done=ids.filter(id=>isDone(id)||conv(id)).length;
-    h+=`<g class="lhead"><circle cx="${x+30}" cy="40" r="13" fill="${col(l)}"/><text x="${x+30}" y="45" text-anchor="middle" class="lnum">${LNUM[l]||LBADGE[l]}</text>
-      <text x="${x+50}" y="38" class="lname" fill="${col(l)}">${LINES[l].short}</text><text x="${x+50}" y="54" class="lcount">${done} de ${ids.length}${l==="con"?" · alternativa":""}</text></g>`}
+  const svg=$("#map");if(!$("#mapbase",svg))svg.innerHTML=`<g id="mapbase">${MAPA.base()}</g><g id="maplayer"></g>`;
+  const F=MV.focus;let h="";
+  // líneas
+  for(const l of MAPORDER){const built=l==="bie"||ACTIVE.includes(l),op=F&&F!==l?.18:built?1:.35;
+    h+=`<g opacity="${op}">${MAPA.lineSVG(l,lcol(l),ST.filter(s=>s.line===l).map(s=>s.s))}</g>`}
   // estaciones
   const tgt=nextTarget();
-  for(const s of ST){if(s.hidden)continue;const st=stState(s);const c=col(s.line);
-    const r=s.diag||s.start?13:9;
-    let lx=s.x,ly=s.y,anchor="middle",lines=s.lab;
-    if(s.lp==="rtop"){lx=s.x+20;anchor="start";ly=s.y-12}else if(s.lp==="rbot"){lx=s.x+20;anchor="start";ly=s.y+30}else if(s.lp==="top"){ly=s.y-22-(lines.length-1)*15-(s.id===S.current?40:0)}else if(s.lp==="bottom"){ly=s.y+28}else if(s.lp==="right"){lx=s.x+20;anchor="start";ly=s.y+4-(lines.length-1)*7.5}else{lx=s.x-20;anchor="end";ly=s.y+4-(lines.length-1)*7.5}
-    const ring=st==="soon"?"var(--l-off)":st==="locked"?"var(--l-off)":c;
-    const fill=st==="done"||st==="conv"?c:"var(--surface)";
-    const label=`${s.lab.join(" ")}. ${st==="soon"?"En construcción":st==="locked"?"Bloqueada":st==="done"?"Completada":st==="conv"?"Convalidada en el diagnóstico":st==="prog"?"En curso":"Disponible"}`;
-    h+=`<g class="st ${st}" data-id="${s.id}" tabindex="0" role="button" aria-label="${esc(label)}">`;
-    if(s.id===tgt&&!reduceMotion)h+=`<circle class="pulse" cx="${s.x}" cy="${s.y}" r="${r}" fill="none" stroke="${c}" stroke-width="3"/>`;
-    h+=`<circle class="ring" cx="${s.x}" cy="${s.y}" r="${r+4}" fill="transparent" stroke="transparent"/>`;
-    h+=`<circle class="dot" cx="${s.x}" cy="${s.y}" r="${st==="soon"?6:r}" fill="${fill}" stroke="${ring}" stroke-width="${st==="soon"?3:4}" ${st==="conv"?'stroke-dasharray="4 3"':""}/>`;
-    if(s.start){h+=`<text x="${s.x+20}" y="${s.y-12}" class="salida" style="fill:${c}">SALIDA</text>`;if(st!=="done")h+=`<path d="M${s.x-3.5} ${s.y-5.5} l9 5.5 l-9 5.5 z" fill="${c}"/>`}
-    if(st==="done"&&!s.diag)h+=`<path d="M${s.x-4} ${s.y} l3 3.5 l5.5 -6.5" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
-    if(st==="locked")h+=`<rect x="${s.x-3.5}" y="${s.y-1}" width="7" height="5.5" rx="1" fill="var(--l-off)"/><path d="M${s.x-2} ${s.y-1} v-1.8 a2 2 0 0 1 4 0 v1.8" fill="none" stroke="var(--l-off)" stroke-width="1.5"/>`;
-    if(s.diag)h+=`<text x="${s.x}" y="${s.y+4.5}" text-anchor="middle" style="font-size:12px;font-weight:800;fill:${st==="done"?"var(--surface)":"var(--ink)"}">${st==="done"?"✓":"?"}</text>`;
-    h+=`<text text-anchor="${anchor}" x="${lx}" y="${ly}">${lines.map((t,i)=>`<tspan x="${lx}" dy="${i?15:0}">${esc(t)}</tspan>`).join("")}</text></g>`}
-  // avatar
-  h+=`<g id="avatar" style="transform:${avPos(S.current)}" aria-hidden="true"><g transform="scale(1.3)">${avatarSVG(S.avatar,false,RT.faceLeft)}</g></g>`;
-  svg.setAttribute("viewBox",`0 0 ${MAPW} ${MAPH}`);svg.innerHTML=h;
-  $$(".st",svg).forEach(g=>{const go=()=>clickStation(g.dataset.id);g.addEventListener("click",go);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
-  renderProg()}
-function route(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];
-  while(q.length){const x=q.shift();for(const y of ADJ[x]||[]){if(!(y in prev)){prev[y]=x;if(y===b){const r=[b];let z=b;while(prev[z]){z=prev[z];r.unshift(z)}return r}q.push(y)}}}return[a,b]}
+  for(const s of ST){if(s.hidden)continue;const st=stState(s),c=lcol(s.line),r=s.diag||s.start?12:8,cable=MAPA.ROUTES[s.line].cable&&!s.diag;
+    const ring=st==="soon"||st==="locked"?"var(--l-off)":c,fill=st==="done"||st==="conv"?c:"var(--surface)",rr=st==="soon"?6:r,dash=st==="conv"?' stroke-dasharray="4 3"':"";
+    const label=`${s.diag?"Diagnóstico de "+LINES[s.line].short:s.lab.join(" ")} (${lineTitle(s.line)}). ${st==="soon"?"En construcción":st==="locked"?"Bloqueada":st==="done"?"Completada":st==="conv"?"Convalidada en el diagnóstico":st==="prog"?"En curso":"Disponible"}${s.start?". Estación de salida":""}`;
+    h+=`<g class="st ${st}" data-id="${s.id}" tabindex="0" role="button" aria-label="${esc(label)}" opacity="${F&&F!==s.line?.25:1}">`;
+    if(s.id===tgt&&!reduceMotion)h+=`<circle class="pulse" cx="${s.x.toFixed(1)}" cy="${s.y.toFixed(1)}" r="${r}" fill="none" stroke="${c}" stroke-width="3"/>`;
+    h+=`<circle class="ring" cx="${s.x.toFixed(1)}" cy="${s.y.toFixed(1)}" r="${r+8}" fill="transparent" stroke="transparent"/>`;
+    h+=cable?`<rect class="dot" x="${(s.x-rr).toFixed(1)}" y="${(s.y-rr).toFixed(1)}" width="${2*rr}" height="${2*rr}" rx="3" fill="${fill}" stroke="${ring}" stroke-width="3.5"${dash}/>`
+      :`<circle class="dot" cx="${s.x.toFixed(1)}" cy="${s.y.toFixed(1)}" r="${rr}" fill="${fill}" stroke="${ring}" stroke-width="3.5"${dash}/>`;
+    if(s.diag)h+=`<text class="dg" x="${s.x.toFixed(1)}" y="${(s.y+4.5).toFixed(1)}" text-anchor="middle" style="fill:${st==="done"?"var(--surface)":"var(--ink)"}">${st==="done"?"✓":"?"}</text>`;
+    else if(st==="done")h+=`<path d="M${s.x-4} ${s.y} l3 3.5 l5.5 -6.5" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+    if(st==="locked")h+=`<rect x="${s.x-3.2}" y="${s.y-.8}" width="6.4" height="5" rx="1" fill="var(--l-off)"/><path d="M${s.x-1.9} ${s.y-.8} v-1.6 a1.9 1.9 0 0 1 3.8 0 v1.6" fill="none" stroke="var(--l-off)" stroke-width="1.4"/>`;
+    if(!s.diag)h+=MAPA.label(s,s.lab.map(esc));
+    h+=`</g>`}
+  // insignias al final de cada línea
+  for(const l of MAPORDER){const ids=lineIds(l),done=ids.filter(id=>isDone(id)||conv(id)).length;
+    h+=`<g class="lhead" opacity="${F&&F!==l?.25:1}"><title>${esc(lineTitle(l))}: ${done} de ${ids.length}</title>${MAPA.badge(l,lcol(l),LNUM[l]||LBADGE[l])}</g>`}
+  // viajero
+  const cs=STM[S.current];h+=`<g id="avatar" transform="translate(${cs.x.toFixed(1)} ${(cs.y-20).toFixed(1)}) scale(1.35)" aria-hidden="true">${avatarSVG(S.avatar,false,RT.faceLeft)}</g>`;
+  $("#maplayer",svg).innerHTML=h;
+  $$(".st",svg).forEach(g=>{const go=()=>clickStation(g.dataset.id);g.addEventListener("click",()=>{if(!MV.moved)go()});g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
+  renderLegend();mapInit();renderProg()}
+function renderLegend(){const lg=$("#maplegend");if(!lg)return;
+  lg.innerHTML=["bie","con",...MLINES.filter(l=>l!=="con")].map(l=>{const ids=lineIds(l),done=ids.filter(id=>isDone(id)||conv(id)).length;
+    return`<button class="lg" data-l="${l}" aria-pressed="${MV.focus===l}"><span class="badge" style="background:${lcol(l)}">${LNUM[l]||LBADGE[l]}</span>${LINES[l].short}<small>${done} de ${ids.length}${l==="con"?" · alternativa":""}</small></button>`}).join("");
+  $$(".lg",lg).forEach(b=>b.onclick=()=>{MV.focus=MV.focus===b.dataset.l?null:b.dataset.l;renderMap()})}
+/* acercar y desplazar: rueda, botones +/−, arrastre y pellizco */
+function mapApply(){const v=MV.vb;$("#map").setAttribute("viewBox",`${v.x.toFixed(1)} ${v.y.toFixed(1)} ${v.w.toFixed(1)} ${v.h.toFixed(1)}`)}
+function mapFit(around){const box=$("#mapbox"),r=box.getBoundingClientRect();if(!r.width||!r.height)return false;const F=MAPA.FULL,ar=r.width/r.height;
+  if(around){const s=STM[S.current]||STM.B1,w=F.w*.36;MV.vb={x:s.x-w/2,y:s.y-w/ar/2,w,h:w/ar}}
+  else MV.vb=ar>F.w/F.h?{w:F.h*ar,h:F.h,x:F.x-(F.h*ar-F.w)/2,y:F.y}:{w:F.w,h:F.w/ar,x:F.x,y:F.y-(F.w/ar-F.h)/2};
+  mapApply();return true}
+function mapZoom(k,cx,cy){const v=MV.vb,r=$("#mapbox").getBoundingClientRect(),px=v.x+(cx-r.left)/r.width*v.w,py=v.y+(cy-r.top)/r.height*v.h;
+  const nw=Math.max(260,Math.min(MAPA.FULL.w*1.6,v.w*k)),f=nw/v.w;MV.vb={x:px-(px-v.x)*f,y:py-(py-v.y)*f,w:nw,h:v.h*f};mapApply()}
+let mapReady=false;
+function mapInit(){const box=$("#mapbox");if(!MV.vb){if(!mapFit(box.getBoundingClientRect().width<700))return}else mapApply();if(mapReady)return;mapReady=true;
+  box.addEventListener("wheel",e=>{e.preventDefault();mapZoom(e.deltaY>0?1.12:1/1.12,e.clientX,e.clientY)},{passive:false});
+  const P=new Map();let last=null,pinch=null;
+  box.addEventListener("pointerdown",e=>{if(e.target.closest(".zctl"))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});MV.moved=false;last={x:e.clientX,y:e.clientY};if(P.size===2){const [p,q]=[...P.values()];pinch=Math.hypot(p.x-q.x,p.y-q.y)}});
+  box.addEventListener("pointermove",e=>{if(!P.has(e.pointerId))return;const prev=P.get(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});const r=box.getBoundingClientRect();
+    if(P.size===2){const [p,q]=[...P.values()],dd=Math.hypot(p.x-q.x,p.y-q.y);if(pinch){mapZoom(pinch/dd,(p.x+q.x)/2,(p.y+q.y)/2);MV.moved=true}pinch=dd;return}
+    if(!MV.moved&&Math.abs(e.clientX-last.x)+Math.abs(e.clientY-last.y)>4){MV.moved=true;box.classList.add("drag");try{box.setPointerCapture(e.pointerId)}catch(x){}}
+    if(MV.moved){MV.vb.x-=(e.clientX-prev.x)/r.width*MV.vb.w;MV.vb.y-=(e.clientY-prev.y)/r.height*MV.vb.h;mapApply()}});
+  const up=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null;box.classList.remove("drag");setTimeout(()=>{if(!P.size)MV.moved=false},0)};
+  box.addEventListener("pointerup",up);box.addEventListener("pointercancel",up);
+  const mid=k=>{const r=box.getBoundingClientRect();mapZoom(k,r.left+r.width/2,r.top+r.height/2)};
+  $("#zin").onclick=()=>mid(1/1.3);$("#zout").onclick=()=>mid(1.3);$("#zfit").onclick=()=>mapFit(false)}
+/* viaje: metro por las líneas 1 a 5 y el corredor del río, cable por las líneas 6 y 7, bus por Bienestar y Conjuntos */
 let moving=false;
-// Geometría de las líneas para que el viajero camine por el trazado, curvas incluidas
-const LGEO={};for(const [l,pts] of Object.entries(PATHS)){let acc=0;const seg=[];for(let k=1;k<pts.length;k++){const [x0,y0]=pts[k-1],[x1,y1]=pts[k],L=Math.hypot(x1-x0,y1-y0);seg.push({x0,y0,x1,y1,L,s0:acc});acc+=L}LGEO[l]=seg}
-function proj(l,x,y){let best=null;for(const g of LGEO[l]){const t=Math.max(0,Math.min(1,((x-g.x0)*(g.x1-g.x0)+(y-g.y0)*(g.y1-g.y0))/(g.L*g.L)));const px=g.x0+t*(g.x1-g.x0),py=g.y0+t*(g.y1-g.y0),d=Math.hypot(px-x,py-y);if(!best||d<best.d)best={d,s:g.s0+t*g.L}}return best}
-function ptAt(l,s){const seg=LGEO[l];for(const g of seg)if(s<=g.s0+g.L+1e-6){const t=g.L?(s-g.s0)/g.L:0;return[g.x0+t*(g.x1-g.x0),g.y0+t*(g.y1-g.y0)]}const g=seg[seg.length-1];return[g.x1,g.y1]}
-function edgePts(a,b){const A=STM[a],B=STM[b];for(const l of Object.keys(LGEO)){const pa=proj(l,A.x,A.y),pb=proj(l,B.x,B.y);
-  if(pa.d<2&&pb.d<2){const lo=Math.min(pa.s,pb.s),hi=Math.max(pa.s,pb.s);let cs=LGEO[l].map(g=>g.s0).filter(v=>v>lo+.5&&v<hi-.5);if(pa.s>pb.s)cs=cs.reverse();return[pa.s,...cs,pb.s].map(v=>ptAt(l,v))}}
-  return[[A.x,A.y],[B.x,B.y]]}
-async function moveAvatar(to){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";const av=$("#avatar");if(!av||S.current===to){S.current=to;save();return}
-  const path=route(S.current,to);let pts=[];path.slice(1).forEach((id,k)=>{const e=edgePts(path[k],id);pts=pts.concat(k?e.slice(1):e)});
-  moving=true;
-  if(!reduceMotion&&pts.length>1){const segs=[];let L=0;for(let k=1;k<pts.length;k++){const d=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]);segs.push({a:pts[k-1],b:pts[k],d,s0:L});L+=d}
-    const speed=Math.max(150,L/3.5),fig=$(".fig",av);av.classList.add("walking");
-    await new Promise(res=>{const t0=performance.now();const step=t=>{const sd=Math.min(L,(t-t0)/1000*speed);const g=segs.find(q=>sd<=q.s0+q.d)||segs[segs.length-1];const u=g.d?(sd-g.s0)/g.d:1;
-      const x=g.a[0]+u*(g.b[0]-g.a[0]),y=g.a[1]+u*(g.b[1]-g.a[1]);const dx=g.b[0]-g.a[0];if(Math.abs(dx)>.5){RT.faceLeft=dx<0;if(fig)fig.setAttribute("transform",RT.faceLeft?"scale(-1,1)":"")}
-      av.style.transform=`translate(${x}px,${y-20}px)`;if(sd<L)requestAnimationFrame(step);else res()};requestAnimationFrame(step)});
-    av.classList.remove("walking")}
-  S.current=to;moving=false;save();if(RT.view==="map")renderMap()}
+const mapTween=(ms,fn)=>new Promise(res=>{const t0=performance.now();const f=t=>{const u=Math.min(1,(t-t0)/ms);fn(u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2);if(u<1)requestAnimationFrame(f);else res()};requestAnimationFrame(f)});
+function follow(p){const v=MV.vb;if(!v)return;const mx=v.w*.15,my=v.h*.15;let ch=false;
+  if(p.x<v.x+mx){v.x=p.x-mx;ch=true}else if(p.x>v.x+v.w-mx){v.x=p.x+mx-v.w;ch=true}
+  if(p.y<v.y+my){v.y=p.y-my;ch=true}else if(p.y>v.y+v.h-my){v.y=p.y+my-v.h;ch=true}if(ch)mapApply()}
+async function moveAvatar(to){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";const a=STM[S.current],b=STM[to],av=$("#avatar");
+  if(!b||a.id===b.id||reduceMotion||RT.view!=="map"||!av){S.current=to;save();if(RT.view==="map")renderMap();return}
+  moving=true;av.style.opacity=0;const veh=document.createElementNS(NS,"g");$("#maplayer").appendChild(veh);
+  const A=avOf(S.avatar),head=MAPA.headSVG(A.skin,A.hair);
+  try{for(const L of MAPA.legs(a,b)){const m=MAPA.measure(L.pts),kind=MAPA.RIDE[L.line],c=L.line==="rio"?"var(--muted)":lcol(L.line);
+      await mapTween(Math.min(2400,Math.max(650,m.len*(kind==="cable"?3.2:2.2))),e=>{veh.innerHTML=MAPA.vehicle(kind,c,m,e*m.len,head);follow(MAPA.at(m,e*m.len))});
+      await sleep(180)}}
+  finally{veh.remove();S.current=to;moving=false;save();if(RT.view==="map")renderMap()}}
 function lineAdvice(id){const l=lineOf(id),n=LNUM[l];if(!n||n===1||RT.guest)return"";const prev=MLINES[n-2],started=LSEQ[prev].some(x=>isDone(x)||conv(x))||(S.diags&&S.diags[prev]);
   return started?"":`Te recomendamos empezar por la línea ${n-1} (${LINES[prev].short}): las líneas están numeradas en el orden en que se apoyan unas en otras.`}
 async function clickStation(id){if(moving)return;const s=STM[id];if(!s||s.hidden)return;
@@ -553,7 +556,7 @@ function openReset(){const m=$("#modal");
 /* ============ panel de administración ============ */
 function renderPanel(){const v=$("#view-panel");
   v.innerHTML=`<div class="panel"><div><span class="eyebrow">Solo visible para la administración</span><h2 style="font-size:1.6rem;font-weight:800">Panel de administración</h2></div>
-   <p class="muted">Aquí aparece cada persona que crea una cuenta en la caja. Las respuestas de la línea Bienestar son privadas: solo ves si completaron cada estación. Usa estos datos únicamente para las finalidades de la política de tratamiento de datos.</p>
+   <p class="muted">Aquí aparece cada persona que crea una cuenta en MetroMat. Las respuestas de la línea Bienestar son privadas: solo ves si completaron cada estación. Usa estos datos únicamente para las finalidades de la política de tratamiento de datos.</p>
    <div class="tablewrap"><table><thead><tr><th>Usuario</th><th>Diagnóstico</th><th>Estaciones</th><th>Bienestar</th><th>Estrellas</th><th>Última actividad</th></tr></thead><tbody id="pt"><tr><td colspan="6" class="muted">Cargando el avance de los usuarios…</td></tr></tbody></table></div>
    <p class="tip">Cuadros: lleno = completada · rayado = convalidada en el diagnóstico · borde = en curso.</p><h3>Cómo vivieron las estaciones</h3><p class="muted">Respuestas de los usuarios a las preguntas de reflexión al final de cada estación.</p><div class="tablewrap"><table><thead><tr><th>Estación</th><th>Respuestas</th><th>Cómo se sintieron</th><th>La encontraron difícil</th><th>Aprendieron algo nuevo</th></tr></thead><tbody id="pr"><tr><td colspan="5" class="muted">Sin respuestas todavía.</td></tr></tbody></table></div></div>`;
   if(!RT.db){$("#pt",v).innerHTML=`<tr><td colspan="6" class="muted">El avance compartido no está disponible en esta vista.</td></tr>`;return}
@@ -593,8 +596,8 @@ function openStart(){const m=$("#modal");
 const AUTH_ERR={"auth/email-already-in-use":"Ya existe una cuenta con ese email. Inicia sesión.","auth/invalid-email":"El email no es válido.","auth/weak-password":"La contraseña debe tener al menos 6 caracteres.",
   "auth/user-not-found":"Email o contraseña incorrectos.","auth/wrong-password":"Email o contraseña incorrectos.","auth/invalid-credential":"Email o contraseña incorrectos.","auth/invalid-login-credentials":"Email o contraseña incorrectos.",
   "auth/too-many-requests":"Demasiados intentos seguidos. Espera unos minutos y vuelve a probar.","auth/network-request-failed":"No hay conexión. Revisa tu internet.","auth/operation-not-allowed":"El registro con correo y contraseña no está activado en Firebase (Authentication → Método de acceso).","auth/unauthorized-domain":"Este dominio no está autorizado en Firebase (Authentication → Configuración → Dominios autorizados).","auth/api-key-not-valid.-please-pass-a-valid-api-key.":"La clave de Firebase de la página no es válida. Revisa FIREBASE_CONFIG.","auth/configuration-not-found":"Authentication no está activado en el proyecto de Firebase. Ábrelo y pulsa «Comenzar».","auth/admin-restricted-operation":"El proyecto no permite crear cuentas desde la página. Revisa la configuración de Authentication."};
-const authMsg=e=>{console.error("[Caja] Error de Firebase:",e&&e.code,e&&e.message);return(AUTH_ERR[e&&e.code]||"Algo salió mal. Inténtalo de nuevo.")+(e&&e.code?` (código: ${e.code})`:"")};
-const dbMsg=e=>{console.error("[Caja] Error de Firestore:",e&&e.code,e&&e.message);const c=e&&e.code;
+const authMsg=e=>{console.error("[MetroMat] Error de Firebase:",e&&e.code,e&&e.message);return(AUTH_ERR[e&&e.code]||"Algo salió mal. Inténtalo de nuevo.")+(e&&e.code?` (código: ${e.code})`:"")};
+const dbMsg=e=>{console.error("[MetroMat] Error de Firestore:",e&&e.code,e&&e.message);const c=e&&e.code;
   return(c==="permission-denied"?"Firestore rechazó la escritura: revisa que las reglas de firestore.rules estén publicadas (Firestore → Reglas).":c==="not-found"||c==="failed-precondition"?"No se encontró la base de datos Firestore: créala con el ID (default).":c==="unavailable"?"No hay conexión con Firestore. Revisa tu internet.":"No se pudo guardar en Firestore.")+(c?` (código: ${c})`:"")};
 const USER_RE=/^[a-z0-9_.]{3,20}$/;
 const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)">${avatarSVG("sol")}</g></svg>`;
