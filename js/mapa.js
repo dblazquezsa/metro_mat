@@ -60,7 +60,7 @@ const rx=y=>{y/=SC;for(let i=1;i<RIVER0.length;i++){const [x0,y0]=RIVER0[i-1],[x
 const riverM=measure(catmull(RIVER,10)),trunkM=measure(catmull(TRUNK,10));
 /* Bienestar sale de la biblioteca, cruza al corredor del río (transbordo en «Cómo me veo como estudiante») y sigue al oriente */
 {let tp=null;for(const p of trunkM.pts)if(p[1]<=383&&(!tp||p[1]>tp[1]))tp=p;const L=LIB.c,[tx,ty]=tp;
-  Object.assign(ROUTES.bie,{pts:[L,[L[0]+70,L[1]+40],[tx-70,ty-6],[tx,ty],[tx+95,ty+22],[tx+185,ty+58]],stops:[0,3,4,5],head:3})}
+  Object.assign(ROUTES.bie,{pts:[L,[L[0]+70,L[1]+40],[tx-70,ty-6],[tx,ty],[tx+160,ty+30],[tx+320,ty+78],[tx+372,ty+96]],stops:[0,3,4,5],head:3})}
 
 /* ---------- estaciones colocadas a lo largo de cada línea ---------- */
 const GEO={},HEADS={};
