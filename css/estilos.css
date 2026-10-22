@@ -445,3 +445,39 @@ tr.hl td{background:var(--ok-bg);font-weight:700}
 .lhead .lname{font-family:var(--f-disp);font-size:16px;font-weight:800}
 .lhead .lcount{font-family:var(--f-disp);font-size:12px;fill:var(--muted)}
 .ovl{text-decoration:overline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+/* tarjeta de la cuenta en Mi progreso */
+.acctcard{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;border:1.5px solid var(--rule);border-radius:14px;padding:14px 18px;background:var(--surface-2)}
+.acc-av{width:72px;height:72px;border-radius:50%;background:var(--surface);display:grid;place-items:center;overflow:hidden}
+.acc-body{display:grid;gap:6px}
+@media (max-width:520px){.acctcard{grid-template-columns:1fr}.acc-av{margin:0 auto}}
+/* ===== Exploraciones: aspecto de mesa de laboratorio ===== */
+.xp-host{position:relative;border:1.5px solid var(--rule);border-top:5px solid var(--linec,var(--ink));border-radius:16px;background:var(--surface);padding:20px clamp(12px,3vw,24px) 22px;box-shadow:0 6px 22px rgb(17 27 39 / .06)}
+.xp-host::before{content:"Laboratorio";position:absolute;top:-14px;left:18px;background:var(--linec,var(--ink));color:var(--on-accent);font-family:var(--f-disp);font-weight:800;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.xp{gap:16px}
+.xp .ctrl{background:var(--surface-2);border-radius:12px;padding:10px 14px}
+.xp .ctrl + .ctrl{margin-top:-8px}
+.xp h4{font-family:var(--f-disp);font-size:1rem;font-weight:800;margin-top:4px}
+.xp .tip{margin-top:-6px}
+.xp .svgwrap{background-color:var(--surface);background-image:radial-gradient(color-mix(in srgb,var(--muted) 22%,transparent) 1px,transparent 1.2px);background-size:18px 18px;border:1px solid var(--rule);border-radius:12px;padding:12px}
+.xp .svgwrap svg{margin:0 auto}
+.xp .readout,.dz-body .readout{font-family:var(--f-disp);font-size:1rem;line-height:1.55;background:color-mix(in srgb,var(--linec,var(--ink)) 6%,var(--surface));border-left:4px solid var(--linec,var(--ink));border-radius:4px 12px 12px 4px;padding:12px 16px;display:block}
+.xp .readout .k,.dz-body .readout .k{margin-top:10px;margin-bottom:1px;color:color-mix(in srgb,var(--linec,var(--ink)) 70%,var(--ink))}
+.xp .readout .k:first-child,.dz-body .readout .k:first-child{margin-top:0}
+.xp .readout .fr{font-family:var(--f-mono)}
+/* deslizadores con el color de la línea */
+input[type=range]{-webkit-appearance:none;appearance:none;height:28px;background:transparent;cursor:pointer;width:180px;max-width:100%}
+input[type=range]:focus-visible{outline:2px solid var(--linec,var(--ink));outline-offset:3px;border-radius:6px}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:color-mix(in srgb,var(--linec,var(--ink)) 22%,var(--surface-2))}
+input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:color-mix(in srgb,var(--linec,var(--ink)) 22%,var(--surface-2))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;margin-top:-7px;background:var(--surface);border:4px solid var(--linec,var(--ink));box-shadow:0 1px 4px rgb(0 0 0 / .2)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--surface);border:4px solid var(--linec,var(--ink));box-shadow:0 1px 4px rgb(0 0 0 / .2)}
+.ctrl output.m{display:inline-block;min-width:2.2em;text-align:center;background:var(--surface);border:1.5px solid var(--rule);border-radius:7px;padding:1px 6px;font-weight:700}
+.xp .seg .btn[aria-current="page"],.dz-body .seg .btn[aria-current="page"]{background:var(--linec,var(--ink));border-color:var(--linec,var(--ink));color:var(--on-accent)}
+.desafio{background:color-mix(in srgb,var(--linec,var(--ink)) 3%,var(--surface))}
+/* retos con deslizador */
+.sldfig{background-color:var(--surface);background-image:radial-gradient(color-mix(in srgb,var(--muted) 22%,transparent) 1px,transparent 1.2px);background-size:18px 18px;border:1px solid var(--rule);border-radius:12px;padding:10px;overflow-x:auto}
+.sldfig svg{display:block;width:100%;height:auto;max-width:560px;margin:0 auto}
+.sldrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:10px;background:var(--surface-2);border-radius:12px;padding:10px 14px}
+.sldrow input[type=range]{flex:1 1 200px;width:auto}
+.sldname{font-family:var(--f-disp);font-weight:700}
+.sldval{display:inline-block;min-width:3em;text-align:center;background:var(--surface);border:1.5px solid var(--rule);border-radius:7px;padding:2px 8px;font-weight:700}

@@ -96,8 +96,9 @@ A1:[
  R=>{const p=pickPat(R),N=R.i(12,60),T=p.a*N+p.b;
   return{type:"fill",kind:"num",answer:N,fig:patFig(p),q:`${patIntro(p)} La figura n tiene ${M(`${p.a}n + ${p.b}`)}. ¿Qué figura tiene ${T}?`,hint:`Resuelve ${p.a}n + ${p.b} = ${T}: primero quita ${p.b} y luego divide entre ${p.a}.`,
    explain:`${p.a}n + ${p.b} = ${T} → ${p.a}n = ${T-p.b} → n = ${N}.`}},
- R=>{const seen=new Set(),pairs=[];while(pairs.length<4){const a=R.i(2,6),b=R.i(-2,5);const key=a+"|"+b;if(seen.has(key)||[1,2,3,4].some(n=>a*n+b<0))continue;seen.add(key);pairs.push([[1,2,3,4].map(n=>a*n+b).join(", ")+"…",b===0?`${a}n`:`${a}n ${b<0?"−":"+"} ${Math.abs(b)}`])}
-  return{type:"match",q:"Arrastra cada fórmula junto a la sucesión que describe (n = 1, 2, 3, 4).",pairs,hint:"Mira cuánto se suma de un término al siguiente: es el número que multiplica a n. Luego comprueba con n = 1.",
+ R=>{const a=R.i(3,6),bs=R.sh([-2,-1,0,1,2,3,4,5].filter(b=>a+b>0)).slice(0,6),fm=b=>b===0?`${a}n`:`${a}n ${b<0?"−":"+"} ${Math.abs(b)}`;
+  const pairs=bs.slice(0,4).map(b=>[[1,2,3,4].map(n=>a*n+b).join(", ")+"…",fm(b)]);
+  return{type:"match",q:`Las cuatro sucesiones crecen de ${a} en ${a}. Arrastra cada fórmula junto a la suya (n = 1, 2, 3, 4). Sobran dos fichas.`,pairs,extra:bs.slice(4,6).map(fm),hint:"Mira cuánto se suma de un término al siguiente: es el número que multiplica a n. Luego comprueba con n = 1.",
    explain:"Lo que se suma en cada paso multiplica a n; el término independiente se ajusta para que n = 1 dé el primer número."}}],
 A2:[
  R=>{const b=R.i(3,9);

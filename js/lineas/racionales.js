@@ -111,8 +111,10 @@ R2:[
  R=>{const b=R.i(2,9),k=R.i(2,7);let a=R.i(1,b-1);while(gcd(a,b)!==1)a=R.i(1,b-1);
   return{type:"fill",kind:"num",answer:a*k,q:`Completa la igualdad: ${F(a,b)} = ${FQ("?",b*k)}`,hint:`¿Por qué número se multiplicó el denominador ${b} para llegar a ${b*k}?`,
    explain:`El denominador se multiplicó por ${k}; el numerador también: ${a} · ${k} = ${a*k}. Así ${F(a,b)} = ${F(a*k,b*k)}.`}},
- R=>{const pool=R.sh([[1,2],[1,3],[2,3],[1,4],[3,4],[2,5],[3,5],[5,6],[1,5],[4,5]]).slice(0,4);
-  return{type:"match",q:"Arrastra cada fracción junto a su equivalente.",pairs:pool.map(([a,b])=>{const k=R.i(2,5);return[`${a}/${b}`,`${a*k}/${b*k}`]}),
+ R=>{const pool=R.sh([[1,2],[1,3],[2,3],[1,4],[3,4],[2,5],[3,5],[5,6],[1,5],[4,5]]).slice(0,4),pairs=pool.map(([a,b])=>{const k=R.i(2,5);return[`${a}/${b}`,`${a*k}/${b*k}`]});
+  const extra=[];pool.forEach(([a,b])=>{if(extra.length>=2)return;const k=R.i(2,5),n=R.f()<.5?a*k+1:a+k,d=R.f()<.5?b*k:b+k,t=`${n}/${d}`;
+    if(!pool.some(([x,y])=>x*d===y*n)&&!pairs.some(p=>p[1]===t)&&!extra.includes(t))extra.push(t)});
+  return{type:"match",q:"Arrastra cada fracción junto a su equivalente. Sobran fichas que parecen equivalentes, pero no lo son.",pairs,extra,
    hint:"Busca por qué número se multiplicaron a la vez el numerador y el denominador.",explain:"En cada pareja, el numerador y el denominador se multiplicaron por el mismo número."}},
  R=>{const b=R.i(3,8);let a=R.i(1,b-1);while(gcd(a,b)!==1)a=R.i(1,b-1);const ks=R.sh([2,3,4,5]).slice(0,3);
   return{type:"choice",q:`¿Cuál de estas fracciones <b>no</b> es equivalente a ${F(a,b)}?`,opts:[F(a+2,b+2),...ks.map(k=>F(a*k,b*k))],

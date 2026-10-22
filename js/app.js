@@ -12,8 +12,8 @@ const LINES={
    más Bienestar. Cada línea empieza en su propia estación de diagnóstico. Un pasillo de transbordo une las cabeceras
    para que el viajero pueda caminar de una línea a otra; las líneas no forman una secuencia. */
 const LNUM={ent:1,rac:2,rec:3,alg:4,ecu:5};
-const COLX={ent:70,rac:250,rec:430,alg:610,ecu:790,bie:960},HEADY=110,ST0=185,STEP=70;
-const PATHS={pas:[[COLX.ent,HEADY],[COLX.bie,HEADY]]};
+const COLX={bie:60,ent:235,rac:410,rec:585,alg:760,ecu:935},HEADY=110,ST0=185,STEP=70;
+const PATHS={pas:[[COLX.bie,HEADY],[COLX.ecu,HEADY]]};
 const ST=[];
 const LABS={ent:[["Sumando","y restando"],["Calcular","con economía"],["Diferencias","y paréntesis"],["Las caras","del menos"],["Una sola","fórmula"],["Productos","con signo"]],
   rac:[["Repartir","y medir"],["Fracciones","equivalentes"],["Comparar","y ordenar"],["Sumar y restar","fracciones"],["Multiplicar","y dividir"],["Decimales y","porcentajes"]],
@@ -29,7 +29,7 @@ for(const l of Object.keys(COLX)){const x=COLX[l];
   LABS[l].forEach((lab,k)=>ST.push({id:PREF[l]+(k+1),line:l,x,y:ST0+k*STEP,lab,lp:"right"}));
   PATHS[l]=[[x,HEADY],[x,ST0+(LABS[l].length-1)*STEP]]}
 const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
-const SEQS=[["Dent","Drac","Drec","Dalg","Decu","Bhub"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
+const SEQS=[["Bhub","Dent","Drac","Drec","Dalg","Decu"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
 const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
 // Una estación está construida cuando su línea la registró (js/lineas/*.js o js/bienestar.js)
 ST.forEach(s=>{if(s.diag||s.hidden)return;if(s.line==="bie")s.built=!!SOCIO[s.id];else s.built=!!NODES[s.id]});
@@ -232,7 +232,7 @@ function mountItem(box,item,opts){
     if(attempts===1){fb("hint","Todavía no. Pista:",(extra?extra+" ":"")+(item.hint||"Revisa con calma cada paso."));return false}
     finish("shown");return true}
   function correctText(){if(item.type==="choice")return item.opts[0].replace(/<[^>]+>/g,"");if(item.type==="fill")return item.kind==="pair"?`x = ${fmt(item.answer[0])}, y = ${fmt(item.answer[1])}`:item.kind==="num"?(item.show||fmt(item.answer)):item.show;
-    if(item.type==="order")return item.correct.join("  <  ");if(item.type==="line")return item.den>1?frs(Math.round(item.answer*item.den),item.den):fmt(item.answer);if(item.type==="shade")return item.show||"";if(item.type==="bins")return item.bins.join(" · ");if(item.type==="cancel")return "tachar "+item.pairsIdx.length+" términos";if(item.type==="match")return item.pairs.map(p=>p[0]+" → "+p[1]).join(";  ");return""}
+    if(item.type==="order")return item.correct.join("  <  ");if(item.type==="line")return item.den>1?frs(Math.round(item.answer*item.den),item.den):fmt(item.answer);if(item.type==="shade"||item.type==="slider")return item.show||"";if(item.type==="bins")return item.bins.join(" · ");if(item.type==="cancel")return "tachar "+item.pairsIdx.length+" términos";if(item.type==="match")return item.pairs.map(p=>p[0]+" → "+p[1]).join(";  ");return""}
 
   if(item.type==="choice"){
     const order=shuffle(item.opts.map((t,i)=>({t,i})),opts.key);
@@ -297,7 +297,7 @@ function mountItem(box,item,opts){
     if(opts.prev){build(item.correct);lockAll();finish(opts.prev,true)}}
 
   else if(item.type==="match"){
-    const rights=shuffle(item.pairs.map(p=>p[1]),opts.key+"m");
+    const rights=shuffle([...item.pairs.map(p=>p[1]),...(item.extra||[])],opts.key+"m");
     area.innerHTML=`<div class="mrows">${item.pairs.map((p,i)=>`<div class="mrow"><span class="left">${esc(p[0])}</span><span aria-hidden="true">=</span><div class="slot" data-drop="slot" data-i="${i}" tabindex="0" aria-label="Casilla para ${esc(p[0])}"></div></div>`).join("")}</div>
       <div class="chips" data-drop="bank">${rights.map(t=>`<button class="chip" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div>
       <div class="fillrow"><button class="btn primary chk">Comprobar</button><span class="tip">Arrastra cada ficha a su casilla, o toca una ficha y después la casilla.</span></div>`;
@@ -329,6 +329,16 @@ function mountItem(box,item,opts){
     const lock=()=>{val=item.answer;btn.disabled=true;draw(true)};
     btn.onclick=()=>{if(finished)return;if(val==null){fb("info","Marca primero un número en la recta.","");return}
       if(Math.abs(val-item.answer)<1e-9){lock();finish(attempts===0?"first":"hint")}else if(wrong())lock()};
+    draw();if(opts.prev){lock();finish(opts.prev,true)}}
+
+  else if(item.type==="slider"){let v=item.start??item.min;const lab=k=>item.label?item.label(k):fmt(k);
+    area.innerHTML=`<div class="sldfig"></div><div class="sldrow"><span class="sldname">${item.name||"Valor"}</span><input type="range" min="${item.min}" max="${item.max}" step="1" value="${v}" aria-label="${esc(item.name||"Valor")}">${item.hideValue?"":`<output class="m sldval"></output>`}<button class="btn primary">Comprobar</button></div><span class="tip">${item.tip||"Mueve el deslizador y pulsa «Comprobar». Con el teclado, usa las flechas."}</span>`;
+    const fig=$(".sldfig",area),rg=$("input",area),out=$(".sldval",area),btn=$(".btn",area);
+    const draw=ok=>{fig.innerHTML=item.render(v,ok);if(out)out.textContent=lab(v)};
+    rg.oninput=()=>{if(finished)return;v=+rg.value;fbz.innerHTML="";draw()};
+    const lock=()=>{v=item.answer;rg.value=v;rg.disabled=true;btn.disabled=true;draw(true)};
+    btn.onclick=()=>{if(finished)return;const ok=item.check?item.check(v):v===item.answer;
+      if(ok){lock();finish(attempts===0?"first":"hint")}else if(wrong(item.why?item.why(v):""))lock()};
     draw();if(opts.prev){lock();finish(opts.prev,true)}}
 
   else if(item.type==="bins"){const order=shuffle(item.items.map((it,i)=>({...it,i})),opts.key+"b");
@@ -461,12 +471,26 @@ function renderMe(){const v=$("#view-me");
   const row=(id,line,name,state)=>`<div class="stitem" style="--linec:var(${LINES[line].c})"><span class="dotl ${state==="Completada"||state.startsWith("Convalidada")?"d":""}"></span><span>${name}</span><span class="state">${state}</span></div>`;
   const stTxt=id=>{if(isDone(id)){const s=S.nodes[id]&&S.nodes[id].stars;return"Completada"+(id[0]!=="B"&&s?" · "+"★".repeat(s):"")}if(conv(id))return"Convalidada en el diagnóstico";if(!unlocked(id))return"Bloqueada";return S.nodes[id]&&S.nodes[id].max>0?"En curso":"Disponible"};
   v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||(RT.guest?"Recorrido sin cuenta":"Tu recorrido"))}</h2>${RT.guest?"":`<p class="muted">${esc(RT.email)}</p>`}</div>
-    ${ACTIVE.map(l=>`<h3>Línea ${LINES[l].short}</h3><p class="muted">${S.diags[l]?`Diagnóstico: ${S.diags[l].score} de ${diagN(l)} aciertos.`:"Diagnóstico opcional sin hacer: es la primera estación de la línea."}</p><div class="stlist">${LSEQ[l].map(id=>row(id,l,NODES[id].title,stTxt(id))).join("")}</div>`).join("")}
     <h3>Línea Bienestar</h3><div class="stlist">${BIE_IDS.map(id=>row(id,"bie",SOCIO[id].title,stTxt(id)+(isDone(id)&&BIE.ans[id]&&SOCIO[id].items.every((_,i)=>BIE.ans[id][i])?" · "+bandName(id,bieScore(id).band).toLowerCase():""))).join("")}</div>
+    ${ACTIVE.map(l=>`<h3>Línea ${LNUM[l]} · ${LINES[l].short}</h3><p class="muted">${S.diags[l]?`Diagnóstico: ${S.diags[l].score} de ${diagN(l)} aciertos.`:"Diagnóstico opcional sin hacer: es la primera estación de la línea."}</p><div class="stlist">${LSEQ[l].map(id=>row(id,l,NODES[id].title,stTxt(id))).join("")}</div>`).join("")}
     ${MLINES.filter(l=>!ACTIVE.includes(l)).length?`<p class="muted">En construcción: ${MLINES.filter(l=>!ACTIVE.includes(l)).map(l=>LINES[l].name.toLowerCase()).join(", ")}.</p>`:""}
-    ${RT.guest?`<div class="callout"><span class="eyebrow">Sin cuenta</span><p>Este recorrido no se guarda: al cerrar o recargar la página empiezas de cero. Crea una cuenta si quieres conservar tu avance.</p></div><div class="fillrow"><button class="btn primary" id="mkacc">Crear una cuenta</button></div>`:`<div class="fillrow"><button class="btn" id="edit">Cambiar mi avatar</button></div>`}
+    ${RT.guest?`<div class="callout"><span class="eyebrow">Sin cuenta</span><p>Este recorrido no se guarda: al cerrar o recargar la página empiezas de cero. Crea una cuenta si quieres conservar tu avance.</p></div><div class="fillrow"><button class="btn primary" id="mkacc">Crear una cuenta</button></div>`:""}
     ${dataSection()}</div>`;
-  if(RT.guest)$("#mkacc",v).onclick=leaveGuest;else $("#edit",v).onclick=openProfile;bindDataSection(v)}
+  const acc=document.createElement("div");acc.className="acctcard";
+  acc.innerHTML=`<div class="acc-av"><svg viewBox="-13 -31 26 45" width="52" height="84" aria-hidden="true">${avatarSVG(S.avatar,true)}</svg></div>
+    <div class="acc-body"><span class="eyebrow">${RT.guest?"Tu recorrido":"Tu cuenta"}</span><p class="muted">${RT.guest?"Puedes cambiar de viajero o empezar de cero cuando quieras.":"Puedes cambiar de viajero, empezar de cero o borrar tu cuenta cuando quieras."}</p>
+    <div class="fillrow"><button class="btn" id="edit">Cambiar mi avatar</button><button class="btn" id="reset">Borrar mi progreso</button>${RT.guest?"":`<button class="btn danger" id="ddel">Borrar mi cuenta</button>`}</div></div>`;
+  $(".panel",v).insertBefore(acc,$(".panel",v).children[1]);
+  $("#edit",v).onclick=openProfile;$("#reset",v).onclick=openReset;if(RT.guest)$("#mkacc",v).onclick=leaveGuest;bindDataSection(v)}
+function openReset(){const m=$("#modal");
+  m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rs-t"><span class="eyebrow">Empezar de cero</span><h2 id="rs-t">¿Borrar tu progreso?</h2>
+   <p>Se borran las estaciones completadas, las estrellas, los diagnósticos y tus reflexiones. Tu ${RT.guest?"viajero":"cuenta, tu nombre de usuario y tu viajero"} se conservan.</p>
+   <label class="chk"><input type="checkbox" id="rsbie"> <span>Borrar también mis respuestas de la línea Bienestar y su historial.</span></label>
+   <p class="muted">No se puede deshacer.</p>
+   <div class="dlg-actions"><button class="btn danger" id="rsgo">Borrar mi progreso</button><button class="btn ghost" id="rsno">Cancelar</button></div></div>`;
+  m.hidden=false;$("#rsno",m).onclick=()=>m.hidden=true;
+  $("#rsgo",m).onclick=async()=>{const alsoBie=$("#rsbie",m).checked;S.nodes={};S.diags={};S.current="Dent";if(alsoBie){S.bie={};await dropBie()}
+    save();await flush();m.hidden=true;renderMe();renderProg();toast("Tu progreso se borró. Puedes empezar de nuevo cuando quieras.")}}
 
 /* ============ panel de administración ============ */
 function renderPanel(){const v=$("#view-panel");
@@ -493,7 +517,7 @@ function renderRefl(rows){const tb=$("#pr");if(!tb)return;
   tb.innerHTML=out||`<tr><td colspan="5" class="muted">Sin respuestas todavía.</td></tr>`}
 /* ============ perfil ============ */
 function openProfile(){const m=$("#modal");let av=S.avatar;
-  m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pt-t"><span class="eyebrow">Tu cuenta</span><h2 id="pt-t">${esc(S.nombre)}</h2><p class="muted">${esc(RT.email)}</p>
+  m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pt-t"><span class="eyebrow">${RT.guest?"Tu viajero":"Tu cuenta"}</span><h2 id="pt-t">${esc(S.nombre||"Elige tu viajero")}</h2>${RT.email?`<p class="muted">${esc(RT.email)}</p>`:""}
    ${avatarPicker(av)}
    <div class="dlg-actions"><button class="btn primary" id="psave">Guardar</button><button class="btn ghost" id="pcancel">Cancelar</button></div></div>`;
   m.hidden=false;bindAvatar(m,a=>av=a);

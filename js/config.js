@@ -16,7 +16,7 @@ const FIREBASE_CONFIG = {
    Aparecen en la política de tratamiento de datos que se acepta al crear la cuenta.
    IMPORTANTE: completa los dos campos antes de abrir la plataforma a estudiantes. */
 const PLATAFORMA = {
-  responsable: "",   // persona o entidad responsable del tratamiento, por ejemplo: "Nombre Apellido"
+  responsable: "David Blázquez Sanz",   // persona o entidad responsable del tratamiento, por ejemplo: "Nombre Apellido"
   contacto: "dblazquezsa@unal.edu.co",      // correo para consultas, reclamos y solicitudes de borrado
   ciudad: "Medellín, Colombia"
 };

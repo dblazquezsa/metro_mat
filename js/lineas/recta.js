@@ -134,8 +134,9 @@ L5:[
   const right=ivl(a,b,ca,cb),w=[ivl(a,b,!ca,cb),b==null?`[${fmt(a)}, +∞]`:ivl(a,b,ca,!cb),b==null?`(−∞, ${fmt(a)}${ca?"]":")"}`:ivl(a,b,!ca,!cb)];
   return{type:"choice",fig:figInterval(a,b,ca,cb),q:"¿Qué intervalo está dibujado en la recta?",opts:[right,...w],hint:"Punto relleno: extremo incluido, con corchete. Punto vacío: excluido, con paréntesis. El infinito siempre va con paréntesis.",
    explain:`${right}: ${ca?"el "+fmt(a)+" está incluido":"el "+fmt(a)+" no está incluido"}${b==null?" y el intervalo sigue sin fin hacia la derecha":cb?", y el "+fmt(b)+" también":", y el "+fmt(b)+" no"}.`}},
- R=>{const a=R.i(-9,-4),b=R.i(-2,2),c=R.i(3,6),d=R.i(-7,-1),e=R.i(4,6),f=R.i(7,9);
-  return{type:"match",q:"Arrastra cada intervalo junto a su desigualdad.",pairs:[[`${fmt(a)} ≤ x < ${fmt(b)}`,`[${fmt(a)}, ${fmt(b)})`],[`x > ${c}`,`(${c}, +∞)`],[`x ≤ ${fmt(d)}`,`(−∞, ${fmt(d)}]`],[`${e} < x < ${f}`,`(${e}, ${f})`]],
+ R=>{const a=R.i(-6,2),b=R.i(a+2,a+7),A=fmt(a),B=fmt(b);
+  const all=R.sh([[`${A} ≤ x < ${B}`,`[${A}, ${B})`],[`${A} < x ≤ ${B}`,`(${A}, ${B}]`],[`${A} < x < ${B}`,`(${A}, ${B})`],[`${A} ≤ x ≤ ${B}`,`[${A}, ${B}]`],[`x ≥ ${A}`,`[${A}, +∞)`],[`x > ${A}`,`(${A}, +∞)`],[`x ≤ ${B}`,`(−∞, ${B}]`],[`x < ${B}`,`(−∞, ${B})`]]);
+  return{type:"match",q:"Arrastra cada intervalo junto a su desigualdad. Sobran dos fichas: fíjate bien en los corchetes.",pairs:all.slice(0,4),extra:all.slice(4,6).map(p=>p[1]),
    hint:"≤ y ≥ incluyen el extremo (corchete); < y > lo excluyen (paréntesis).",explain:"Cada desigualdad dice qué extremos se incluyen; los intervalos sin límite llevan ∞ con paréntesis."}},
  R=>{const a=R.i(-6,2),b=R.i(a+2,8),ca=R.f()<.5,cb=R.f()<.5,pick=R.p(["a","b","in"]);const t=pick==="a"?a:pick==="b"?b:R.i(a+1,b-1);const yes=pick==="in"||(pick==="a"&&ca)||(pick==="b"&&cb);
   return{type:"choice",q:`¿Pertenece el número ${M(fmt(t))} al intervalo ${M(ivl(a,b,ca,cb))}?`,opts:yes?["Sí","No"]:["No","Sí"],hint:"Fíjate en si el número es un extremo y, en ese caso, en si el extremo está incluido.",

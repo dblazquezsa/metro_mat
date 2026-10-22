@@ -80,7 +80,8 @@ Q1:[
   return{type:"fill",kind:"num",answer:b-a,q:`Resuelve ${M(`x${sgA(a)} = ${fmt(b)}`)}. ¿Cuánto vale x?`,hint:`${a>0?"Resta "+a:"Suma "+(-a)} a los dos lados.`,explain:`x = ${fmt(b)} ${a>0?"−":"+"} ${Math.abs(a)} = ${fmt(b-a)}.`}},
  R=>{const sols=R.sh([-6,-5,-4,-3,-2,2,3,4,5,6,7,8]).slice(0,4);const a=R.i(2,5),b=R.i(2,9),c=R.i(2,4),d=R.i(1,6);
   const eqs=[`x + ${b} = ${fmt(sols[0]+b)}`,`x − ${d} = ${fmt(sols[1]-d)}`,`${a}x = ${fmt(a*sols[2])}`,`x / ${c} = ${frs(sols[3],c)}`];
-  return{type:"match",q:"Arrastra cada solución junto a su ecuación.",pairs:eqs.map((e,i)=>[e,xs(sols[i])]),hint:"Deshaz la operación que acompaña a la x, haciendo la contraria en los dos lados.",
+  const wrongs=[sols[0]+2*b,sols[1]-2*d,a*a*sols[2],-sols[0],-sols[1]].filter(v=>!sols.includes(v)).filter((v,i,ar)=>ar.indexOf(v)===i).slice(0,2);
+  return{type:"match",q:"Arrastra cada solución junto a su ecuación. Sobran fichas: comprueba antes de soltar.",pairs:eqs.map((e,i)=>[e,xs(sols[i])]),extra:wrongs.map(xs),hint:"Deshaz la operación que acompaña a la x, haciendo la contraria en los dos lados.",
    explain:"Sumar se deshace restando, restar sumando, multiplicar dividiendo y dividir multiplicando."}}],
 Q2:[
  R=>{const a=R.nz(-9,9),s=R.i(-8,8),b=R.nz(-15,15),c=a*s+b;if(a===1||a===-1)return RETO.Q2[0](R);
@@ -180,18 +181,18 @@ Q5:{map:[0,1,3,2,1],pts:[
 /* ---------- exploraciones ---------- */
 Object.assign(EXPLORE,{
 qBalanza(host){let st,sol,hist;
-  host.innerHTML=`<div class="xp"><div class="svgwrap"><svg id="bsv" viewBox="0 0 600 270" role="img" aria-label="Balanza con cajas x y unidades" style="max-width:560px"></svg></div>
+  host.innerHTML=`<div class="xp"><div class="svgwrap"><svg id="bsv" viewBox="0 0 680 300" role="img" aria-label="Balanza con cajas x y unidades" style="max-width:640px"></svg></div>
    <div class="readout" id="brr"></div><div class="ctrl"><button class="btn sm" id="bx">Quitar una x de cada plato</button><button class="btn sm" id="bu">Quitar una unidad de cada plato</button><button class="btn sm" id="bd">Dividir entre 2</button></div>
    <div class="ctrl"><button class="btn sm ghost" id="b1">Quitar una unidad solo a la izquierda</button><button class="btn sm ghost" id="bn">Nueva ecuación</button></div><ol class="hist" id="bh"></ol></div>`;
   const fresh=()=>{sol=R0.i(1,4);const d=R0.i(0,2),a=d+R0.i(1,3),b=R0.i(0,5);st={L:{x:a,u:b},R:{x:d,u:(a-d)*sol+b}};hist=[]};
   const R0=rng(newSeed());
   const side=s=>poly([[s.x,"x"],[s.u,""]]);
   const draw=()=>{const wL=st.L.x*sol+st.L.u,wR=st.R.x*sol+st.R.u,ang=Math.max(-12,Math.min(12,(wR-wL)*3));
-    const cx=300,cy=70,arm=200,r=ang*Math.PI/180,lx=cx-arm*Math.cos(r),ly=cy-arm*Math.sin(r),rx=cx+arm*Math.cos(r),ry=cy+arm*Math.sin(r);
-    const pan=(px,py,s)=>{let g=`<line x1="${px}" y1="${py}" x2="${px-70}" y2="${py+80}" stroke="var(--muted)"/><line x1="${px}" y1="${py}" x2="${px+70}" y2="${py+80}" stroke="var(--muted)"/><path d="M${px-80} ${py+80} h160 l-14 16 h-132 z" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.5"/>`;
-      const items=[...Array(s.x).fill("x"),...Array(s.u).fill("u")];items.forEach((t,i)=>{const col=i%8,row=Math.floor(i/8),x=px-76+col*19,y=py+61-row*20;
-        g+=t==="x"?`<rect x="${x}" y="${y}" width="17" height="17" rx="3" fill="var(--l-ecu)"/><text x="${x+8.5}" y="${y+13}" text-anchor="middle" style="font:700 11px var(--f-mono);fill:var(--surface)">x</text>`:`<circle cx="${x+8.5}" cy="${y+8.5}" r="7.5" fill="var(--av-sol)" stroke="var(--ink)" stroke-width="1"/>`});return g};
-    let g=`<path d="M${cx-30} 250 L${cx} ${cy} L${cx+30} 250 Z" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.5"/><line x1="${lx}" y1="${ly}" x2="${rx}" y2="${ry}" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--ink)"/>`;
+    const cx=340,cy=70,arm=215,r=ang*Math.PI/180,lx=cx-arm*Math.cos(r),ly=cy-arm*Math.sin(r),rx=cx+arm*Math.cos(r),ry=cy+arm*Math.sin(r);
+    const pan=(px,py,s)=>{let g=`<line x1="${px}" y1="${py}" x2="${px-92}" y2="${py+92}" stroke="var(--muted)" stroke-width="1.5"/><line x1="${px}" y1="${py}" x2="${px+92}" y2="${py+92}" stroke="var(--muted)" stroke-width="1.5"/><path d="M${px-104} ${py+92} h208 l-16 18 h-176 z" fill="color-mix(in srgb,var(--linec) 12%,var(--surface))" stroke="var(--ink)" stroke-width="1.8"/>`;
+      const items=[...Array(s.x).fill("x"),...Array(s.u).fill("u")];items.forEach((t,i)=>{const col=i%8,row=Math.floor(i/8),x=px-98+col*24.5,y=py+68-row*24;
+        g+=t==="x"?`<rect x="${x}" y="${y}" width="22" height="22" rx="4" fill="var(--l-ecu)" stroke="var(--surface)" stroke-width="1"/><text x="${x+11}" y="${y+16}" text-anchor="middle" style="font:700 14px var(--f-mono);fill:#fff">x</text>`:`<circle cx="${x+11}" cy="${y+11}" r="10" fill="var(--av-sol)" stroke="var(--ink)" stroke-width="1.2"/><text x="${x+11}" y="${y+15}" text-anchor="middle" style="font:700 11px var(--f-mono);fill:var(--ink)">1</text>`});return g};
+    let g=`<rect x="${cx-70}" y="276" width="140" height="12" rx="6" fill="var(--ink)" opacity=".8"/><path d="M${cx-26} 278 L${cx} ${cy} L${cx+26} 278 Z" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.8"/><line x1="${lx}" y1="${ly}" x2="${rx}" y2="${ry}" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--ink)"/>`;
     g+=pan(lx,ly,st.L)+pan(rx,ry,st.R);$("#bsv",host).innerHTML=g;
     const bal=wL===wR,done=st.L.x===1&&st.L.u===0&&st.R.x===0;
     $("#brr",host).innerHTML=`<span class="k">Ecuación</span>${side(st.L)} = ${side(st.R)}<br><span class="k">Balanza</span>${bal?"en equilibrio":"¡desequilibrada! Cambiaste solo un lado: esta ecuación ya no tiene la misma solución"}${done&&bal?`<br><span class="k">Resuelta</span>x = ${st.R.u}. Comprueba en la ecuación de partida`:""}`;

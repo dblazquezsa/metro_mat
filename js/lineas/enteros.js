@@ -123,10 +123,11 @@ E1:[
  R=>{const T=R.p([100,120,150,200]),p1=R.i(2,6)*10,p3=R.i(10,25),q=T-p1-p3,left=R.i(5,Math.min(40,q-5));const show=`${q} − z`;
   return{type:"fill",kind:"expr",q:`María sale de compras con ${T} mil pesos. Compra un pantalón de ${p1} mil, unos zapatos de ${M("z")} mil y un libro de ${p3} mil. Escribe, simplificada, la fórmula de lo que le queda (en miles).`,answer:show,show,maxTerms:2,
    hint:`Escribe primero ${T} − ${p1} − z − ${p3} y luego junta los números.`,explain:`${T} − ${p1} − z − ${p3} = ${show}. Si le quedan ${left} mil, los zapatos costaron ${q-left} mil.`}},
- R=>{const a=R.i(4,9),b=R.i(2,6),c=a+b+R.p([-3,-2,-1,1,2,3]),K=R.i(20,35),a2=R.i(5,9),K3=R.i(14,25),a3=R.i(3,8),b3=R.i(3,8),a4=R.i(30,60),b4=R.i(10,25);
-  const pairs=[[lin("d",[-a,-b,c]),poly([[1,"d"],[c-a-b,""]])],[`${K} − q − ${a2} − ${a2}`,poly([[K-2*a2,""],[-1,"q"]])],[`${K3} − ${a3} + x + ${a3} − ${b3}`,poly([[1,"x"],[K3-b3,""]])],[lin("m",[-a4,a4-1,-b4,b4+1]),"m"]];
-  return{type:"match",q:"Arrastra cada forma simplificada junto a su expresión.",pairs,hint:"Calcula el efecto neto de todos los números de cada expresión.",
-   explain:`En la primera, ${lin(fmt(-a),[-b,c])} = ${fmt(c-a-b)}; en la segunda, ${K} − ${a2} − ${a2} = ${K-2*a2}; en la tercera, −${a3} y +${a3} se anulan; en la cuarta, todos los números juntos dan 0.`}},
+ R=>{const L=R.p(["a","b","x"]),nets=R.sh([-7,-5,-4,-3,-2,-1,1,2,3,4,5,7]).slice(0,4),ex=[],extra=[];
+  nets.forEach(n=>{let t1,t2,t3;do{t1=R.nz(-14,14);t2=R.nz(-14,14);t3=n-t1-t2}while(t3===0||Math.abs(t3)>16||t1===-t2);ex.push([lin(L,[t1,t2,t3]),poly([[1,L],[n,""]])]);
+    const w=t1-t2+t3;if(!nets.includes(w)&&w!==0&&extra.length<2&&!extra.includes(poly([[1,L],[w,""]])))extra.push(poly([[1,L],[w,""]]))});
+  return{type:"match",q:"Arrastra cada forma simplificada junto a su expresión. Sobran fichas: calcula antes de soltar.",pairs:ex,extra,hint:"Calcula el efecto neto de los tres números de cada expresión, cada uno con su signo.",
+   explain:`Cada expresión se reduce a ${L} más el efecto neto de sus números: ${ex.map(p=>`${p[0]} = ${p[1]}`).join("; ")}.`}},
  R=>{const b1=R.i(10,25),s1=R.i(5,20),b2=R.i(20,45);let s2=R.i(15,50);if(-b1+s1-b2+s2===0)s2++;const net=-b1+s1-b2+s2,N=R.i(300,900);
   return{type:"fill",kind:"num",fig:figTrain(b1,s1,b2,s2,N),q:`Un tren sale con ${M("b")} pasajeros. En la primera parada bajan ${b1} y suben ${s1}; en la segunda bajan ${b2} y suben ${s2}. Si llegan ${N} pasajeros, ¿con cuántos salió?`,answer:N-net,
    hint:`Primero simplifica la fórmula ${lin("b",[-b1,s1,-b2,s2])}.`,explain:`La fórmula es ${poly([[1,"b"],[net,""]])}. Si llegan ${N}, salieron ${N-net}.`}}],
@@ -160,9 +161,11 @@ E3:[
  R=>{const [P,Q]=R.sh(["Clara","Laura","Andrés","Sofía","Mateo","Valentina"]),n=R.i(20,80);
   return{type:"choice",q:`Si la diferencia (dinero de ${P}) − (dinero de ${Q}) da ${M("−"+n)}, quiere decir que…`,opts:[`${P} tiene ${n} menos que ${Q}`,`${P} tiene una deuda de ${n}`,"hubo un error: una diferencia no puede ser negativa",`${Q} tiene ${n} menos que ${P}`],
    hint:"El signo de una diferencia dice cuál de los dos términos es mayor.",explain:`−${n} indica que el primer término (${P}) es ${n} unidades menor que el segundo (${Q}). Nadie debe nada.`}},
- R=>{const offs=R.sh([-25,-20,-12,-5,0,8,15,35]).slice(0,4);const lab=k=>k===0?"a":"a"+sg(k);const sorted=offs.slice().sort((x,y)=>x-y).map(lab);
-  return{type:"order",q:`Ordena de menor a mayor. El orden sirve para cualquier valor de ${M("a")}.`,items:offs.map(lab),correct:sorted,hint:"Compara cada expresión con a: ¿cuánto se le suma o se le resta?",
-   explain:`De menor a mayor: ${sorted.join(" < ")}. Restar más deja menos; sumar más deja más.`}}],
+ R=>{const offs=R.sh([-12,-9,-7,-4,-2,3,6,10]).slice(0,5),forms=R.sh([0,1,2,3,1]);
+  const lab=(k,f)=>{if(f===1){const m=R.i(3,9);return`(a${sg(k-m)})${sg(m)}`}if(f===2)return k>0?`a − (${fmt(-k)})`:`a + (${fmt(k)})`;if(f===3)return`${fmt(k)} + a`;return"a"+sg(k)};
+  const labs=offs.map((k,i)=>lab(k,forms[i])),order=offs.map((k,i)=>[k,labs[i]]).sort((x,y)=>x[0]-y[0]),sorted=order.map(x=>x[1]);
+  return{type:"order",q:`Ordena de menor a mayor. El orden sirve para cualquier valor de ${M("a")}.`,items:labs,correct:sorted,hint:"Escribe cada expresión como a más o menos un número, y después compara esos números.",
+   explain:`Cada una equivale a: ${order.map(x=>`${x[1]} = a${sg(x[0])}`).join("; ")}. De menor a mayor: ${sorted.join(" < ")}.`}}],
 E4:[
  R=>{const a=R.i(3,9),b=R.i(2,8);
   return{type:"choice",q:`En ${M(`${a} − (−${b})`)}, ¿qué trabajo hace cada signo menos?`,opts:[`El primero resta; el segundo indica que el ${b} es negativo`,"Los dos restan","Los dos indican números negativos","El primero toma el opuesto; el segundo resta"],
@@ -189,7 +192,7 @@ E5:[
   return{type:"choice",fig:figThermo(t1,t2),q:`En una ciudad hay ${fmt(t1)} °C y en otra ${fmt(t2)} °C. Si viajas de la primera a la segunda, la temperatura…`,
    opts:[`${up?"sube":"baja"} ${Math.abs(d)} grados`,`${up?"baja":"sube"} ${Math.abs(d)} grados`,`${up?"sube":"baja"} ${alt} grados`,`${up?"baja":"sube"} ${alt} grados`],
    hint:`Calcula llegada menos salida: ${fmt(t2)} − ${fmtP(t1)}.`,explain:`${fmt(t2)} − ${fmtP(t1)} = ${fmt(d)}. Es ${up?"positivo: sube":"negativo: baja"}. Calcular con los números sin signo lleva a errores.`}},
- R=>{const vals=[...R.sh([-15,-12,-9,-8,-6,-4,-3,-1]).slice(0,3),...R.sh([0,2,5,7,-2]).slice(0,2)];const sorted=vals.slice().sort((a,b)=>a-b).map(fmt);
+ R=>{const vals=[...R.sh([-15,-14,-12,-11,-9,-8,-6,-4,-3,-1]).slice(0,4),...R.sh([0,2,5,7]).slice(0,2)];const sorted=vals.slice().sort((a,b)=>a-b).map(fmt);
   return{type:"order",q:"Ordena de menor a mayor.",items:R.sh(vals).map(fmt),correct:sorted,hint:"Entre dos negativos, el menor es el que está más lejos del cero.",explain:`${sorted.join(" < ")}. Entre dos negativos, el de cifra más grande es el menor.`}},
  R=>{const k=R.i(2,9),up=R.f()<.6,ans=up?-k+1:-k-1;
   return{type:"line",q:`Marca en la recta el número que es una unidad ${up?"mayor":"menor"} que ${M("−"+k)}.`,min:-10,max:10,marks:[{v:-k,label:"−"+k}],answer:ans,hint:`${up?"Mayor":"Menor"} quiere decir más a la ${up?"derecha":"izquierda"} en la recta.`,
@@ -253,7 +256,7 @@ xTraslaciones(host){let a=30,steps=[-9,7],geo=null,playing=false;
   host.innerHTML=`<div class="xp"><div class="ctrl"><label for="xa">Valor inicial de <span class="m">a</span>: <output class="m" id="xao">30</output></label><input type="range" id="xa" min="0" max="60" value="30"></div>
    <div class="ctrl"><label for="xamt">Cantidad</label><input type="number" id="xamt" min="1" max="40" value="5"><button class="btn sm" data-s="1">Sumar</button><button class="btn sm" data-s="-1">Restar</button><button class="btn sm ghost" id="xundo">Quitar el último</button><button class="btn sm ghost" id="xreset">Empezar de nuevo</button></div>
    <div class="readout" id="xr"></div><div class="fillrow"><button class="btn sm primary" id="xplay">Ver el recorrido</button><span class="tip">Una ficha recorre los saltos uno a uno y después aparece el movimiento equivalente.</span></div>
-   <div class="svgwrap nl"><svg id="xsvg" viewBox="0 0 640 176" role="img" aria-label="Saltos sobre la recta numérica"></svg></div></div>`;
+   <div class="svgwrap nl"><svg id="xsvg" viewBox="0 -40 640 216" role="img" aria-label="Saltos sobre la recta numérica"></svg></div></div>`;
   const draw=()=>{const net=sum(steps);const parts=[a];steps.forEach(s=>parts.push(parts[parts.length-1]+s));
     const ex="a"+steps.map(sg).join(""),simp=net===0?"a":"a"+sg(net);
     $("#xr",host).innerHTML=`<span class="k">Programa</span>${ex}<br><span class="k">Un solo movimiento</span>= ${simp}<br><span class="k">Con a = ${a}</span>${a}${steps.map(sg).join("")} = ${fmt(parts[parts.length-1])}`;
@@ -261,8 +264,8 @@ xTraslaciones(host){let a=30,steps=[-9,7],geo=null,playing=false;
     let g=`<line x1="20" y1="90" x2="620" y2="90" stroke="var(--rule)" stroke-width="2"/>`;
     for(let v=Math.ceil(lo);v<=hi;v++)g+=`<circle cx="${X(v)}" cy="90" r="${sp>9?2.6:1.8}" fill="var(--muted)"/>`;
     const stp=(hi-lo)>60?10:5;for(let v=Math.ceil(lo/stp)*stp;v<=hi;v+=stp)g+=`<text x="${X(v)}" y="110" text-anchor="middle" style="font:12px var(--f-mono);fill:var(--muted)">${fmt(v)}</text>`;
-    const hops=[];parts.slice(0,-1).forEach((p,i)=>{const x1=X(p),x2=X(parts[i+1]),h=18+(i%2)*14,c=steps[i]>0?"var(--ok)":"var(--bad)",d=x2>x1?1:-1;hops.push({x1,x2,h});
-      g+=`<g class="hop" data-i="${i}"><path d="M${x1} 88 Q${(x1+x2)/2} ${88-h*2} ${x2} 88" fill="none" stroke="${c}" stroke-width="2.2"/><polygon points="${x2},88 ${x2-7*d},82 ${x2-3*d},92" fill="${c}"/><text x="${(x1+x2)/2}" y="${88-h-6}" text-anchor="middle" style="paint-order:stroke;stroke:var(--surface);stroke-width:4px;font:600 12px var(--f-mono);fill:${c}">${steps[i]>0?"+":"−"}${Math.abs(steps[i])}</text></g>`});
+    const hops=[];let labs="";parts.slice(0,-1).forEach((p,i)=>{const x1=X(p),x2=X(parts[i+1]),h=20+i*12,c=steps[i]>0?"var(--ok)":"var(--bad)",d=x2>x1?1:-1;hops.push({x1,x2,h});
+      g+=`<g class="hop" data-i="${i}"><path d="M${x1} 88 Q${(x1+x2)/2} ${88-h*2} ${x2} 88" fill="none" stroke="${c}" stroke-width="2.2"/><polygon points="${x2},88 ${x2-7*d},82 ${x2-3*d},92" fill="${c}"/></g>`;labs+=`<text x="${(x1+x2)/2}" y="${88-h-4}" text-anchor="middle" style="paint-order:stroke;stroke:var(--surface);stroke-width:7px;stroke-linejoin:round;font:700 13px var(--f-mono);fill:${c}">${steps[i]>0?"+":"−"}${Math.abs(steps[i])}</text>`});g+=labs;
     const x0=X(a),xn=X(parts[parts.length-1]);
     g+=`<g id="xnet"><line x1="${x0}" y1="142" x2="${xn}" y2="142" stroke="var(--linec)" stroke-width="4"/>${net?`<polygon points="${xn},142 ${xn-9*Math.sign(xn-x0)},136 ${xn-9*Math.sign(xn-x0)},148" fill="var(--linec)"/>`:""}<text x="${(x0+xn)/2}" y="166" text-anchor="middle" style="font:700 12px var(--f-disp);fill:var(--linec)">un solo movimiento: ${net===0?"no se mueve":(net>0?"+":"−")+Math.abs(net)}</text></g>`;
     parts.forEach((p,i)=>g+=`<circle cx="${X(p)}" cy="90" r="${i===0?6:4}" fill="${i===0?"var(--ink)":"var(--surface)"}" stroke="var(--ink)" stroke-width="1.5"/>`);

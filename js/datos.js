@@ -69,11 +69,11 @@ function dataSection(){if(RT.guest)return`<h3>Tus datos</h3><p class="muted">Sin
   return`<h3>Tus datos</h3><div class="datacard">
    <p>${c.at?`Autorizaste el tratamiento de tus datos el ${fdate(c.at)}.`:"Todavía no consta tu autorización."} <button class="linkbtn" id="dpol">Ver la política</button></p>
    <label class="chk"><input type="checkbox" id="dbie" ${c.bie?"checked":""}> <span>Guardar mis respuestas de la línea Bienestar. Si lo desmarcas, se borran las que hay guardadas.</span></label>
-   <div class="fillrow"><button class="btn danger" id="ddel">Borrar mi cuenta y todos mis datos</button></div></div>`}
+   <p class="muted">Para borrar tu cuenta y todos tus datos usa «Borrar mi cuenta», arriba.</p></div>`}
 function bindDataSection(v){$("#dpol",v).onclick=openPolicy;if(RT.guest)return;
   $("#dbie",v).onchange=async e=>{if(e.target.checked){S.consent={...(S.consent||{v:DATA_V,at:Date.now()}),bie:true,bieAt:Date.now()};flush();saveBie();toast("Tus respuestas de Bienestar se guardarán.")}
     else{S.consent={...S.consent,bie:false,bieAt:Date.now()};flush();await dropBie();toast("Se borraron tus respuestas de Bienestar guardadas.")}};
-  $("#ddel",v).onclick=openDelete}
+  const dd=$("#ddel",v);if(dd)dd.onclick=openDelete}
 async function dropBie(){clearTimeout(bieT);BIE=freshBie();if(RT.uid)try{await RT.db.doc("bienestar/"+RT.uid).delete()}catch(e){toast("No se pudieron borrar tus respuestas de Bienestar. Inténtalo de nuevo.")}}
 
 function openDelete(){const m=$("#modal");
