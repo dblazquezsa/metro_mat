@@ -114,3 +114,73 @@ function figTable(head,rows){return`<div class="tablewrap"><table class="mini"><
 
 /* Registros que llenan los ficheros de cada línea (js/lineas/*.js) */
 const NODES={},RETO={},RECAP={},EXPLORE={};
+
+/* Plano cartesiano en SVG para exploraciones y retos.
+   o: {xmin,xmax,ymin,ymax,w,h,grid,fns:[{f,color,width,dash,from,to}],pts:[{x,y,color,open,label,r}],
+       hl:[{y,color,dash,label}],vl:[{x,color,dash,label}],xstep,ystep,xlab,ylab} */
+function plot(o){const w=o.w||560,pad=34,h=o.equal?Math.round(2*pad+(w-2*pad)*(o.ymax-o.ymin)/(o.xmax-o.xmin)):(o.h||340),X=x=>pad+(x-o.xmin)/(o.xmax-o.xmin)*(w-2*pad),Y=y=>h-pad-(y-o.ymin)/(o.ymax-o.ymin)*(h-2*pad);
+  const xs=o.xstep||niceStep(o.xmax-o.xmin),ys=o.ystep||niceStep(o.ymax-o.ymin);let g=`<rect x="${pad}" y="${pad}" width="${w-2*pad}" height="${h-2*pad}" fill="var(--surface)" stroke="var(--rule)"/>`;
+  for(let x=Math.ceil(o.xmin/xs)*xs;x<=o.xmax+1e-9;x+=xs){const px=X(x);g+=`<line x1="${px}" y1="${pad}" x2="${px}" y2="${h-pad}" stroke="var(--rule)" stroke-width="${Math.abs(x)<1e-9?1.6:.6}"/><text x="${px}" y="${h-pad+15}" text-anchor="middle" style="font:11px var(--f-mono);fill:var(--muted)">${decs(x,2)}</text>`}
+  for(let y=Math.ceil(o.ymin/ys)*ys;y<=o.ymax+1e-9;y+=ys){const py=Y(y);g+=`<line x1="${pad}" y1="${py}" x2="${w-pad}" y2="${py}" stroke="var(--rule)" stroke-width="${Math.abs(y)<1e-9?1.6:.6}"/><text x="${pad-5}" y="${py+4}" text-anchor="end" style="font:11px var(--f-mono);fill:var(--muted)">${decs(y,2)}</text>`}
+  if(o.xmin<0&&o.xmax>0)g+=`<line x1="${X(0)}" y1="${pad}" x2="${X(0)}" y2="${h-pad}" stroke="var(--ink)" stroke-width="1.4" opacity=".6"/>`;
+  if(o.ymin<0&&o.ymax>0)g+=`<line x1="${pad}" y1="${Y(0)}" x2="${w-pad}" y2="${Y(0)}" stroke="var(--ink)" stroke-width="1.4" opacity=".6"/>`;
+  g+=`<defs><clipPath id="pc${w}${h}"><rect x="${pad}" y="${pad}" width="${w-2*pad}" height="${h-2*pad}"/></clipPath></defs><g clip-path="url(#pc${w}${h})">`;
+  const sx=(w-2*pad)/(o.xmax-o.xmin),sy=(h-2*pad)/(o.ymax-o.ymin),stl=e=>`fill="${e.fill||"none"}" stroke="${e.color||"var(--ink)"}" stroke-width="${e.width||2.5}" ${e.dash?`stroke-dasharray="${e.dash}"`:""} ${e.op!=null?`opacity="${e.op}"`:""}`;
+  (o.polys||[]).forEach(e=>g+=`<polygon points="${e.pts.map(([x,y])=>X(x).toFixed(1)+","+Y(y).toFixed(1)).join(" ")}" ${stl(e)} stroke-linejoin="round"/>`);
+  (o.circs||[]).forEach(e=>g+=`<ellipse cx="${X(e.cx)}" cy="${Y(e.cy)}" rx="${(e.r*sx).toFixed(1)}" ry="${(e.r*sy).toFixed(1)}" ${stl(e)}/>`);
+  (o.segs||[]).forEach(e=>g+=`<line x1="${X(e.x1)}" y1="${Y(e.y1)}" x2="${X(e.x2)}" y2="${Y(e.y2)}" ${stl(e)} stroke-linecap="round"/>`);
+  if(o.raw)g+=o.raw(X,Y);
+  (o.hl||[]).forEach(l=>g+=`<line x1="${pad}" y1="${Y(l.y)}" x2="${w-pad}" y2="${Y(l.y)}" stroke="${l.color||"var(--muted)"}" stroke-width="${l.width||2}" ${l.dash?`stroke-dasharray="${l.dash}"`:""}/>`);
+  (o.vl||[]).forEach(l=>g+=`<line x1="${X(l.x)}" y1="${pad}" x2="${X(l.x)}" y2="${h-pad}" stroke="${l.color||"var(--muted)"}" stroke-width="${l.width||2}" ${l.dash?`stroke-dasharray="${l.dash}"`:""}/>`);
+  (o.fns||[]).forEach(F_=>{const a=F_.from??o.xmin,b=F_.to??o.xmax,N=400;let d="",pen=false;
+    for(let i=0;i<=N;i++){const x=a+(b-a)*i/N,y=F_.f(x);if(!isFinite(y)||Math.abs(y)>1e4||y>o.ymax+(o.ymax-o.ymin)*2||y<o.ymin-(o.ymax-o.ymin)*2){pen=false;continue}d+=(pen?"L":"M")+X(x).toFixed(1)+" "+Y(y).toFixed(1);pen=true}
+    g+=`<path d="${d}" fill="none" stroke="${F_.color||"var(--linec)"}" stroke-width="${F_.width||3}" ${F_.dash?`stroke-dasharray="${F_.dash}"`:""} stroke-linejoin="round"/>`});
+  g+=`</g>`;
+  (o.pts||[]).forEach(p=>{if(p.x<o.xmin||p.x>o.xmax||p.y<o.ymin||p.y>o.ymax)return;g+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${p.r||6}" fill="${p.open?"var(--surface)":p.color||"var(--ink)"}" stroke="${p.color||"var(--ink)"}" stroke-width="2.5"/>`+(p.label?`<text x="${X(p.x)+(p.dx??8)}" y="${Y(p.y)-(p.dy??10)}" style="paint-order:stroke;stroke:var(--surface);stroke-width:4px;font:700 12px var(--f-mono);fill:${p.color||"var(--ink)"}">${p.label}</text>`:"")});
+  if(o.axes){if(o.ymin<0&&o.ymax>0)g+=`<text x="${w-pad-4}" y="${Y(0)-8}" text-anchor="end" style="font:italic 700 14px var(--f-body);fill:var(--ink)">x</text>`;if(o.xmin<0&&o.xmax>0)g+=`<text x="${X(0)+8}" y="${pad+14}" style="font:italic 700 14px var(--f-body);fill:var(--ink)">y</text>`}
+  (o.labels||[]).forEach(t=>g+=`<text x="${X(t.x)}" y="${Y(t.y)}" style="paint-order:stroke;stroke:var(--surface);stroke-width:4px;font:700 13px var(--f-mono);fill:${t.color||"var(--ink)"}">${t.text}</text>`);
+  return`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${o.aria||"Gráfica"}" style="max-width:${w}px">${g}</svg>`}
+function niceStep(range){const raw=range/8,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return(m<1.5?1:m<3?2:m<7?5:10)*p}
+
+/* Diagramas de Venn de 2 o 3 conjuntos dentro de un universo U.
+   Regiones: letras de los conjuntos a los que pertenece (a, ab, abc…) y «o» para la de fuera. */
+const VENN={
+  2:{W:400,H:250,U:[10,10,380,230],c:[[160,130,85],[240,130,85]],nm:[[92,52],[308,52]],
+     at:{a:[118,135],ab:[200,135],b:[282,135],o:[40,225]},regs:["a","ab","b","o"]},
+  3:{W:400,H:310,U:[10,10,380,290],c:[[160,125,80],[240,125,80],[200,195,80]],nm:[[85,52],[315,52],[300,290]],
+     at:{a:[128,105],b:[272,105],c:[200,240],ab:[200,95],ac:[155,175],bc:[245,175],abc:[200,150],o:[40,285]},regs:["a","b","c","ab","ac","bc","abc","o"]}};
+const VL="abc";
+function vennRegion(n,x,y){const V=VENN[n],[ux,uy,uw,uh]=V.U;if(x<ux||y<uy||x>ux+uw||y>uy+uh)return null;
+  const k=V.c.map(([cx,cy,r],i)=>Math.hypot(x-cx,y-cy)<r?VL[i]:"").join("");return k||"o"}
+function vennName(code,names){const N=names.length,ins=[...code].filter(c=>c!=="o").map(c=>names[VL.indexOf(c)]);
+  if(code==="o")return N===2?`Fuera de ${names[0]} y de ${names[1]}`:"Fuera de los tres";
+  if(ins.length===1)return"Solo "+ins[0];if(ins.length===N)return N===2?`${names[0]} y ${names[1]}`:`${names[0]}, ${names[1]} y ${names[2]}`;
+  const out=names.filter(nm=>!ins.includes(nm));return`${ins.join(" y ")}, no ${out[0]}`}
+/* o: {n, names, shade:[códigos], color, texts:{código:texto}, uid, hide:[índices de círculos sin nombre]} */
+function vennSVG(o){const n=o.n||2,V=VENN[n],names=o.names||["A","B","C"].slice(0,n),uid=o.uid||("v"+Math.random().toString(36).slice(2,8)),[ux,uy,uw,uh]=V.U,col=o.color||"var(--linec)";
+  let defs="",g=`<rect x="${ux}" y="${uy}" width="${uw}" height="${uh}" rx="10" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.6"/>`;
+  V.c.forEach(([cx,cy,r],i)=>defs+=`<clipPath id="${uid}c${i}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath>`);
+  (o.shade||[]).forEach(code=>{const inc=[],exc=[];V.c.forEach((_,i)=>(code.includes(VL[i])?inc:exc).push(i));
+    defs+=`<mask id="${uid}m${code}"><rect x="0" y="0" width="${V.W}" height="${V.H}" fill="#fff"/>${exc.map(i=>`<circle cx="${V.c[i][0]}" cy="${V.c[i][1]}" r="${V.c[i][2]}" fill="#000"/>`).join("")}</mask>`;
+    let sh=`<rect x="${ux}" y="${uy}" width="${uw}" height="${uh}" rx="10" fill="${col}" fill-opacity=".42" mask="url(#${uid}m${code})"/>`;
+    inc.forEach(i=>sh=`<g clip-path="url(#${uid}c${i})">${sh}</g>`);g+=sh});
+  V.c.forEach(([cx,cy,r],i)=>g+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--ink)" stroke-width="2.2"/>`);
+  names.forEach((nm,i)=>g+=`<text x="${V.nm[i][0]}" y="${V.nm[i][1]}" text-anchor="middle" style="font:italic 700 20px var(--f-body);fill:var(--ink)">${nm}</text>`);
+  g+=`<text x="${ux+12}" y="${uy+24}" style="font:italic 700 16px var(--f-body);fill:var(--muted)">${o.uname||"U"}</text>`;
+  Object.entries(o.texts||{}).forEach(([code,t])=>{const [x,y]=V.at[code];g+=`<text x="${x}" y="${y+6}" text-anchor="middle" style="paint-order:stroke;stroke:var(--surface);stroke-width:4px;font:700 ${o.fs||17}px var(--f-mono);fill:var(--ink)">${t}</text>`});
+  if(o.extra)g+=o.extra;
+  return`<svg viewBox="0 0 ${V.W} ${V.H}" role="img" aria-label="${o.aria||"Diagrama de Venn"}" style="max-width:${o.w||V.W}px;width:100%"><defs>${defs}</defs>${g}</svg>`}
+/* Puntos libres dentro de cada región, para colocar elementos sueltos */
+function vennSlots(n,step=24){const V=VENN[n],[ux,uy,uw,uh]=V.U,out={};
+  for(let y=uy+18;y<uy+uh-8;y+=step)for(let x=ux+18;x<ux+uw-8;x+=step){if(V.c.some(([cx,cy,r])=>Math.abs(Math.hypot(x-cx,y-cy)-r)<11))continue;const k=vennRegion(n,x,y);if(k==="o"&&x<ux+40&&y<uy+36)continue;(out[k]=out[k]||[]).push([x,y])}
+  for(const k in out){const [ax,ay]=V.at[k];out[k].sort((p,q)=>Math.hypot(p[0]-ax,p[1]-ay)-Math.hypot(q[0]-ax,q[1]-ay))}return out}
+/* Arrastrar sobre un plano dibujado con plot({equal:true}): devuelve coordenadas redondeadas al paso */
+function gridPointer(wrap,B,W,cb,step=1){const H=Math.round(68+(W-68)*(B.ymax-B.ymin)/(B.xmax-B.xmin));let on=false;wrap.style.touchAction="none";
+  const at=e=>{const svg=wrap.querySelector("svg");if(!svg)return null;const p=svgPt(svg,e);
+    let x=Math.round((B.xmin+(p.x-34)/(W-68)*(B.xmax-B.xmin))/step)*step,y=Math.round((B.ymax-(p.y-34)/(H-68)*(B.ymax-B.ymin))/step)*step;
+    return[Math.max(B.xmin,Math.min(B.xmax,x)),Math.max(B.ymin,Math.min(B.ymax,y))]};
+  wrap.addEventListener("pointerdown",e=>{const q=at(e);if(!q)return;on=true;try{wrap.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault();cb(q,"down")});
+  wrap.addEventListener("pointermove",e=>{if(!on)return;const q=at(e);if(q)cb(q,"move")});
+  const end=()=>{on=false};wrap.addEventListener("pointerup",end);wrap.addEventListener("pointercancel",end)}
+/* Coeficientes como texto: cx(2,3) → "2/3", cx(-1,1) → "−"; tx(p,q) → número o fracción con signo */
+const tx=(p,q=1)=>frs(p,q);

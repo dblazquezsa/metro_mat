@@ -1,7 +1,7 @@
 /* Layout: un plano de metro como portada; cada estación abre una ficha de cuatro momentos (información, exploración, reto, retroalimentación) */
 :root{
   --bg:#F2F5F9; --surface:#FFFFFF; --surface-2:#E8EDF3; --ink:#111B27; --muted:#536274; --rule:#D2DAE4;
-  --l-ent:#2557C7; --l-rac:#D26A14; --l-rec:#157F4F; --l-alg:#86399A; --l-ecu:#BD3627; --l-bie:#0F8695; --l-off:#B9C3CF;
+  --l-ent:#2557C7; --l-rac:#D26A14; --l-rec:#157F4F; --l-alg:#86399A; --l-ecu:#BD3627; --l-bie:#0F8695; --l-con:#8A6A00; --l-off:#B9C3CF;
   --on-accent:#FFFFFF;
   --ok:#1B7443; --ok-bg:#E2F2E8; --bad:#AE2A20; --bad-bg:#FBE6E3; --warn:#7D5200; --warn-bg:#FFF1D2; --star:#D99A00;
   --add:#BFE3CC; --rem:#F3C4BE; --twice:#D9776B; --corner:#F5D98A;
@@ -13,7 +13,7 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0D131B; --surface:#151F2A; --surface-2:#1D2935; --ink:#E4EBF3; --muted:#92A1B3; --rule:#2A3847;
-  --l-ent:#6A97F2; --l-rac:#F09A52; --l-rec:#45BE84; --l-alg:#BD7BD0; --l-ecu:#EE7264; --l-bie:#41C3D1; --l-off:#3A4857;
+  --l-ent:#6A97F2; --l-rac:#F09A52; --l-rec:#45BE84; --l-alg:#BD7BD0; --l-ecu:#EE7264; --l-bie:#41C3D1; --l-con:#E0B83E; --l-off:#3A4857;
   --on-accent:#0B1119;
   --ok:#5ACB8C; --ok-bg:#13301F; --bad:#F27D72; --bad-bg:#3A1613; --warn:#F2C25A; --warn-bg:#332609; --star:#F2C25A;
   --add:#1F5A39; --rem:#6A2A24; --twice:#A2453B; --corner:#6E5A1C;
@@ -22,7 +22,7 @@
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0D131B; --surface:#151F2A; --surface-2:#1D2935; --ink:#E4EBF3; --muted:#92A1B3; --rule:#2A3847;
-  --l-ent:#6A97F2; --l-rac:#F09A52; --l-rec:#45BE84; --l-alg:#BD7BD0; --l-ecu:#EE7264; --l-bie:#41C3D1; --l-off:#3A4857;
+  --l-ent:#6A97F2; --l-rac:#F09A52; --l-rec:#45BE84; --l-alg:#BD7BD0; --l-ecu:#EE7264; --l-bie:#41C3D1; --l-con:#E0B83E; --l-off:#3A4857;
   --on-accent:#0B1119;
   --ok:#5ACB8C; --ok-bg:#13301F; --bad:#F27D72; --bad-bg:#3A1613; --warn:#F2C25A; --warn-bg:#332609; --star:#F2C25A;
   --add:#1F5A39; --rem:#6A2A24; --twice:#A2453B; --corner:#6E5A1C;
@@ -72,7 +72,7 @@ nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
 .maphead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;padding:14px 18px 0}
 .maphead h2{font-size:1.15rem;font-weight:800}
 .mapscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.mapscroll svg{display:block;width:100%;min-width:860px;height:auto;
+.mapscroll svg{display:block;width:100%;min-width:1000px;height:auto;
   background-image:radial-gradient(var(--rule) 1px,transparent 1.2px);background-size:20px 20px}
 .st{cursor:pointer}
 .st text{font-family:var(--f-disp);font-size:13px;font-weight:600;fill:var(--ink)}
@@ -482,3 +482,22 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .sldname{font-family:var(--f-disp);font-weight:700}
 .sldval{display:inline-block;min-width:3em;text-align:center;background:var(--surface);border:1.5px solid var(--rule);border-radius:7px;padding:2px 8px;font-weight:700}
 .st text.salida{font-family:var(--f-disp);font-size:11px;font-weight:800;letter-spacing:.08em}
+
+/* Plano cartesiano para marcar puntos y diagramas de Venn para sombrear */
+.gridpick{cursor:crosshair;touch-action:none;border-radius:10px}
+.gridpick:focus-visible,.vennpick:focus-visible{outline:3px solid var(--linec);outline-offset:3px}
+.gridpick svg{display:block;margin:0 auto;width:100%}
+.vennpick{cursor:pointer}
+.vennpick svg{display:block;margin:0 auto}
+.vregs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;justify-content:center}
+.vr{font-family:var(--f-disp);font-size:.82rem;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:999px;padding:.3em .75em;cursor:pointer}
+.vr[aria-pressed="true"]{background:color-mix(in srgb,var(--linec) 30%,var(--surface));border-color:var(--linec);font-weight:700}
+.vr:disabled{cursor:default;opacity:.8}
+.setbox{font-family:var(--f-mono);font-size:1.05rem;letter-spacing:.01em}
+.elgrid{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.elgrid button{min-width:2.6em;font-family:var(--f-mono);font-size:.95rem;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:8px;padding:.35em .5em;cursor:pointer}
+.elgrid button[aria-pressed="true"]{background:color-mix(in srgb,var(--linec) 32%,var(--surface));border-color:var(--linec);font-weight:700}
+.elgrid button.out{opacity:.45}
+.subs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.subs span{font-family:var(--f-mono);font-size:.9rem;padding:.25em .6em;border-radius:8px;background:var(--surface-2)}
+.subs span.hl{background:color-mix(in srgb,var(--linec) 30%,var(--surface));font-weight:700}

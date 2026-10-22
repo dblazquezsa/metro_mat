@@ -7,36 +7,42 @@ const LINES={
   rec:{name:"La recta real",short:"Recta real",c:"--l-rec"},
   alg:{name:"Álgebra básica",short:"Álgebra",c:"--l-alg"},
   ecu:{name:"Ecuaciones",short:"Ecuaciones",c:"--l-ecu"},
-  bie:{name:"Bienestar y aprendizaje",short:"Bienestar",c:"--l-bie"}};
+  bie:{name:"Bienestar y aprendizaje",short:"Bienestar",c:"--l-bie"},
+  con:{name:"Conjuntos",short:"Conjuntos",c:"--l-con"}};
 /* Plano: cinco líneas de matemáticas en columnas, numeradas en el orden recomendado (1 Enteros → 5 Ecuaciones),
    más Bienestar. Cada línea empieza en su propia estación de diagnóstico. Un pasillo de transbordo une las cabeceras
    para que el viajero pueda caminar de una línea a otra; las líneas no forman una secuencia. */
 const LNUM={ent:1,rac:2,rec:3,alg:4,ecu:5};
-const COLX={bie:60,ent:235,rac:410,rec:585,alg:760,ecu:935},HEADY=110,ST0=185,STEP=70;
-const PATHS={pas:[[COLX.bie,HEADY],[COLX.ecu,HEADY]]};
+/* Conjuntos es una línea alternativa, sin número: queda a la izquierda de la salida, paralela a las demás. */
+const LBADGE={bie:"♥",con:"∩"};
+const lineTitle=l=>LNUM[l]?`Línea ${LNUM[l]} · ${LINES[l].short}`:`Línea alternativa · ${LINES[l].short}`;
+const COLX={con:60,bie:235,ent:410,rac:585,rec:760,alg:935,ecu:1110},HEADY=110,ST0=185,STEP=62,MAPW=1290;
+const PATHS={pas:[[COLX.con,HEADY],[COLX.ecu,HEADY]]};
 const ST=[];
-const LABS={ent:[["Sumando","y restando"],["Calcular","con economía"],["Diferencias","y paréntesis"],["Las caras","del menos"],["Una sola","fórmula"],["Productos","con signo"]],
-  rac:[["Repartir","y medir"],["Fracciones","equivalentes"],["Comparar","y ordenar"],["Sumar y restar","fracciones"],["Multiplicar","y dividir"],["Decimales y","porcentajes"]],
-  rec:[["Decimales","periódicos"],["Números","irracionales"],["Densidad","y orden"],["Valor","absoluto"],["Intervalos"]],
-  alg:[["Fórmulas","y patrones"],["Potencias"],["Productos","notables"],["Factorización"],["Fracciones","algebraicas"]],
-  ecu:[["Igualdad y","equivalencia"],["Primer grado"],["Problemas con","ecuaciones"],["Sistemas 2 × 2"]],
-  bie:[["Creencias sobre","las matemáticas"],["Cómo me veo","como estudiante"],["Cómo organizo","mi estudio"],["Ansiedad ante","las matemáticas"]]};
-LABS.ecu.push(["Inecuaciones"]);
-const PREF={ent:"E",rac:"R",rec:"L",alg:"A",ecu:"Q",bie:"B"},DIAGID={ent:"Dent",rac:"Drac",rec:"Drec",alg:"Dalg",ecu:"Decu"};
+/* Estaciones de cada línea, en orden de recorrido: [id, etiqueta]. Los id no cambian aunque cambie el orden. */
+const LABS={ent:[["E1",["Sumando","y restando"]],["E2",["Calcular","con economía"]],["E3",["Diferencias","y paréntesis"]],["E4",["Las caras","del menos"]],["E5",["Una sola","fórmula"]],["E6",["Productos","con signo"]]],
+  rac:[["R1",["Repartir","y medir"]],["R2",["Fracciones","equivalentes"]],["R3",["Comparar","y ordenar"]],["R4",["Sumar y restar","fracciones"]],["R5",["Multiplicar","y dividir"]],["R6",["Decimales y","porcentajes"]]],
+  rec:[["L1",["Decimales","periódicos"]],["L2",["Números","irracionales"]],["L3",["Densidad","y orden"]],["L4",["Valor","absoluto"]],["L5",["Intervalos"]],["L8",["El plano","cartesiano"]],["L9",["Distancias","en el plano"]],["L6",["La función","exponencial"]],["L7",["Logaritmos"]]],
+  alg:[["A1",["Fórmulas","y patrones"]],["A2",["Potencias"]],["A6",["Polinomios"]],["A3",["Productos","notables"]],["A4",["Factorización"]],["A7",["División de","polinomios"]],["A8",["Residuo","y raíces"]],["A5",["Fracciones","algebraicas"]]],
+  ecu:[["Q1",["Igualdad y","equivalencia"]],["Q2",["Primer grado"]],["Q3",["Problemas con","ecuaciones"]],["Q11",["La ecuación","de la recta"]],["Q4",["Sistemas 2 × 2"]],["Q12",["La ecuación de la","circunferencia"]],["Q5",["Inecuaciones"]],["Q6",["Segundo grado:","factorizar"]],["Q7",["La fórmula","general"]],["Q8",["Con valor","absoluto"]],["Q9",["Con fracciones"]],["Q10",["Con radicales"]]],
+  con:[["C1",["Elementos y","pertenencia"]],["C2",["Extensión y","comprensión"]],["C3",["Subconjuntos","e inclusión"]],["C4",["Operaciones y","diagramas de Venn"]],["C5",["Contar con","inclusión-exclusión"]]],
+  bie:[["B1",["Creencias sobre","las matemáticas"]],["B2",["Cómo me veo","como estudiante"]],["B3",["Cómo organizo","mi estudio"]],["B4",["Ansiedad ante","las matemáticas"]]]};
+const DIAGID={ent:"Dent",rac:"Drac",rec:"Drec",alg:"Dalg",ecu:"Decu",con:"Dcon"};
 for(const l of Object.keys(COLX)){const x=COLX[l];
   if(l==="bie"){
     // Bienestar: «Creencias sobre las matemáticas» es la estación de salida, a la altura de los diagnósticos
-    LABS.bie.forEach((lab,k)=>ST.push(k===0?{id:"B1",line:l,x,y:HEADY,lab,lp:"rbot",start:true}:{id:"B"+(k+1),line:l,x,y:ST0+35+(k-1)*STEP,lab,lp:"right"}));
-    PATHS[l]=[[x,HEADY],[x,ST0+35+(LABS.bie.length-2)*STEP]];continue}
+    LABS.bie.forEach(([id,lab],k)=>ST.push(k===0?{id,line:l,x,y:HEADY,lab,lp:"rbot",start:true}:{id,line:l,x,y:ST0+35+(k-1)*70,lab,lp:"right"}));
+    PATHS[l]=[[x,HEADY],[x,ST0+35+(LABS.bie.length-2)*70]];continue}
   ST.push({id:DIAGID[l],line:l,x,y:HEADY,lab:["Diagnóstico"],lp:"rtop",diag:true,built:true});
-  LABS[l].forEach((lab,k)=>ST.push({id:PREF[l]+(k+1),line:l,x,y:ST0+k*STEP,lab,lp:"right"}));
+  LABS[l].forEach(([id,lab],k)=>ST.push({id,line:l,x,y:ST0+k*STEP,lab,lp:"right"}));
   PATHS[l]=[[x,HEADY],[x,ST0+(LABS[l].length-1)*STEP]]}
+const MAPH=Math.max(...ST.map(s=>s.y))+45;
 const STM=Object.fromEntries(ST.map(s=>[s.id,s]));
-const SEQS=[["B1","Dent","Drac","Drec","Dalg","Decu"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
+const SEQS=[["Dcon","B1","Dent","Drac","Drec","Dalg","Decu"],...Object.keys(COLX).map(l=>ST.filter(x=>x.line===l).map(x=>x.id))];
 const ADJ={};SEQS.forEach(q=>q.forEach((id,i)=>{ADJ[id]=ADJ[id]||new Set();if(i>0)ADJ[id].add(q[i-1]);if(i<q.length-1)ADJ[id].add(q[i+1])}));
 // Una estación está construida cuando su línea la registró (js/lineas/*.js o js/bienestar.js)
 ST.forEach(s=>{if(s.diag||s.hidden)return;if(s.line==="bie")s.built=!!SOCIO[s.id];else s.built=!!NODES[s.id]});
-const MLINES=["ent","rac","rec","alg","ecu"];
+const MLINES=["ent","rac","rec","alg","ecu","con"];
 const LSEQ={};MLINES.forEach(l=>LSEQ[l]=ST.filter(s=>s.line===l&&s.built&&!s.diag).map(s=>s.id));
 const ACTIVE=MLINES.filter(l=>LSEQ[l].length);
 const MATH=ACTIVE.flatMap(l=>LSEQ[l]);
@@ -78,7 +84,7 @@ const nodeSt=id=>(S.nodes[id]=S.nodes[id]||{moment:0,max:0,results:{},done:false
 const conv=id=>{const d=S.diags&&S.diags[lineOf(id)];return!!(d&&d.conv&&d.conv.includes(id))};
 const hasDiag=()=>!!(S.diags&&Object.keys(S.diags).length);
 const isDone=id=>id[0]==="B"?!!(S.bie&&S.bie[id]):!!(S.nodes[id]&&S.nodes[id].done);
-function unlocked(id){const s=STM[id];if(!s||!s.built)return false;if(RT.guest)return true;if(s.diag||id[0]==="B")return true;
+function unlocked(id){const s=STM[id];if(!s||!s.built)return false;if(RT.guest)return true;if(S.nodes&&S.nodes[id]&&S.nodes[id].max>0)return true;if(s.diag||id[0]==="B")return true;
   const seq=LSEQ[lineOf(id)]||[],k=seq.indexOf(id);if(k===0)return true;if(k>0){const p=seq[k-1];return isDone(p)||conv(p)||conv(id)}return false}
 function nextTarget(){const l=lineOf(S.current);const order=LSEQ[l]&&LSEQ[l].length?[...LSEQ[l],...MATH]:MATH;return order.find(id=>unlocked(id)&&!isDone(id)&&!conv(id))}
 
@@ -152,8 +158,8 @@ function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";
   for(const l of Object.keys(COLX)){const pts=PATHS[l],built=l==="bie"||ACTIVE.includes(l),x=COLX[l];
     h+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${col(l)}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" ${built?"":'stroke-opacity=".32"'}/>`;
     const ids=ST.filter(s=>s.line===l&&s.built&&!s.diag&&!s.hidden).map(s=>s.id),done=ids.filter(id=>isDone(id)||conv(id)).length;
-    h+=`<g class="lhead"><circle cx="${x+30}" cy="40" r="13" fill="${col(l)}"/><text x="${x+30}" y="45" text-anchor="middle" class="lnum">${LNUM[l]||"♥"}</text>
-      <text x="${x+50}" y="38" class="lname" fill="${col(l)}">${LINES[l].short}</text><text x="${x+50}" y="54" class="lcount">${done} de ${ids.length}</text></g>`}
+    h+=`<g class="lhead"><circle cx="${x+30}" cy="40" r="13" fill="${col(l)}"/><text x="${x+30}" y="45" text-anchor="middle" class="lnum">${LNUM[l]||LBADGE[l]}</text>
+      <text x="${x+50}" y="38" class="lname" fill="${col(l)}">${LINES[l].short}</text><text x="${x+50}" y="54" class="lcount">${done} de ${ids.length}${l==="con"?" · alternativa":""}</text></g>`}
   // estaciones
   const tgt=nextTarget();
   for(const s of ST){if(s.hidden)continue;const st=stState(s);const c=col(s.line);
@@ -174,7 +180,7 @@ function renderMap(){if(!STM[S.current]||STM[S.current].hidden)S.current="B1";
     h+=`<text text-anchor="${anchor}" x="${lx}" y="${ly}">${lines.map((t,i)=>`<tspan x="${lx}" dy="${i?15:0}">${esc(t)}</tspan>`).join("")}</text></g>`}
   // avatar
   h+=`<g id="avatar" style="transform:${avPos(S.current)}" aria-hidden="true"><g transform="scale(1.3)">${avatarSVG(S.avatar,false,RT.faceLeft)}</g></g>`;
-  svg.innerHTML=h;
+  svg.setAttribute("viewBox",`0 0 ${MAPW} ${MAPH}`);svg.innerHTML=h;
   $$(".st",svg).forEach(g=>{const go=()=>clickStation(g.dataset.id);g.addEventListener("click",go);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
   renderProg()}
 function route(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];
@@ -235,8 +241,8 @@ function mountItem(box,item,opts){
     if(single){finish("shown");return true}
     if(attempts===1){fb("hint","Todavía no. Pista:",(extra?extra+" ":"")+(item.hint||"Revisa con calma cada paso."));return false}
     finish("shown");return true}
-  function correctText(){if(item.type==="choice")return item.opts[0].replace(/<[^>]+>/g,"");if(item.type==="fill")return item.kind==="pair"?`x = ${fmt(item.answer[0])}, y = ${fmt(item.answer[1])}`:item.kind==="num"?(item.show||fmt(item.answer)):item.show;
-    if(item.type==="order")return item.correct.join("  <  ");if(item.type==="line")return item.den>1?frs(Math.round(item.answer*item.den),item.den):fmt(item.answer);if(item.type==="shade"||item.type==="slider")return item.show||"";if(item.type==="bins")return item.bins.join(" · ");if(item.type==="cancel")return "tachar "+item.pairsIdx.length+" términos";if(item.type==="match")return item.pairs.map(p=>p[0]+" → "+p[1]).join(";  ");return""}
+  function correctText(){if(item.show&&["choice","grid","venn"].includes(item.type))return item.show;if(item.type==="fill"&&item.kind==="set"&&item.showText)return item.showText;if(item.type==="choice")return item.opts[0].replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");if(item.type==="fill")return item.kind==="set"?item.show:item.kind==="pair"?`x = ${fmt(item.answer[0])}, y = ${fmt(item.answer[1])}`:item.kind==="num"?(item.show||fmt(item.answer)):item.show;
+    if(item.type==="order")return item.correct.join(item.sep||"  <  ");if(item.type==="line")return item.den>1?frs(Math.round(item.answer*item.den),item.den):fmt(item.answer);if(item.type==="shade"||item.type==="slider")return item.show||"";if(item.type==="bins")return item.bins.join(" · ");if(item.type==="cancel")return "tachar "+item.pairsIdx.length+" términos";if(item.type==="match")return item.pairs.map(p=>p[0]+" → "+p[1]).join(";  ");return""}
 
   if(item.type==="choice"){
     const order=shuffle(item.opts.map((t,i)=>({t,i})),opts.key);
@@ -249,7 +255,7 @@ function mountItem(box,item,opts){
     if(opts.prev){reveal();finish(opts.prev,true)}}
 
   else if(item.type==="fill"&&item.kind==="pair"){
-    area.innerHTML=`<div class="fillrow pair"><label>x = <input type="text" autocomplete="off" spellcheck="false" aria-label="Valor de x"></label><label>y = <input type="text" autocomplete="off" spellcheck="false" aria-label="Valor de y"></label><button class="btn primary">Comprobar</button></div><span class="tip">Escribe el valor de cada incógnita. Puede ser negativo o una fracción.</span>`;
+    area.innerHTML=`<div class="fillrow pair"><label>x = <input type="text" autocomplete="off" spellcheck="false" aria-label="Valor de x"></label><label>y = <input type="text" autocomplete="off" spellcheck="false" aria-label="Valor de y"></label><button class="btn primary">Comprobar</button></div><span class="tip">${item.tip||"Escribe el valor de cada incógnita. Puede ser negativo o una fracción."}</span>`;
     const ins=$$("input",area),btn=$("button",area);
     const lock=()=>{ins.forEach((i,k)=>{i.disabled=true;i.value=fmt(item.answer[k]);i.classList.add("okv")});btn.disabled=true};
     const check=()=>{if(finished)return;const vals=[];for(const i of ins){const t=i.value.trim();if(!t){fb("info","Escribe los dos valores.","");return}try{const a=parseExpr(t);if(varsOf(a).size)throw 0;vals.push(evalAst(a,{}))}catch(e){fb("info","No entendí alguno de los valores.","Escribe solo números, como -3 o 5/2.");return}}
@@ -258,10 +264,17 @@ function mountItem(box,item,opts){
     if(opts.prev){lock();finish(opts.prev,true)}}
 
   else if(item.type==="fill"){
-    area.innerHTML=`<div class="fillrow"><input type="text" inputmode="${item.kind==="num"?"text":"text"}" autocomplete="off" spellcheck="false" aria-label="Tu respuesta" id="in-${opts.key}" placeholder="${item.kind==="ineq"?"Por ejemplo: x < 4":item.kind==="num"?"Escribe un número":item.kind==="frac"?"Escribe una fracción, como 3/4":item.kind==="between"?"Escribe un número, como 2,35":"Escribe la expresión"}"><button class="btn primary">Comprobar</button></div><span class="tip">${item.kind==="ineq"?"Escribe la solución despejando x: x < 4, x > -2, x <= 5 o x >= 1/2 (también sirven ≤ y ≥).":item.kind==="num"?"Para un negativo, escribe el signo menos: -7. Para decimales usa la coma: 0,75. Para miles no pongas puntos: 1500.":item.kind==="frac"?"Escribe la fracción con una barra: 3/4. Para un negativo: -5/12.":item.kind==="between"?"Escribe un decimal con coma, como 2,35, o una fracción, como 3/4.":"Puedes escribir 2x, a-5, (x+1). Para potencias usa ^, como x^2."}</span>`;
+    area.innerHTML=`<div class="fillrow"><input type="text" inputmode="${item.kind==="num"?"text":"text"}" autocomplete="off" spellcheck="false" aria-label="Tu respuesta" id="in-${opts.key}" placeholder="${item.ph?item.ph:item.kind==="set"?"Por ejemplo: 2; -3":item.kind==="ineq"?"Por ejemplo: x < 4":item.kind==="num"?"Escribe un número":item.kind==="frac"?"Escribe una fracción, como 3/4":item.kind==="between"?"Escribe un número, como 2,35":"Escribe la expresión"}"><button class="btn primary">Comprobar</button></div><span class="tip">${item.tip?item.tip:item.kind==="set"?"Escribe todas las soluciones separadas por punto y coma (2; -3; 1/2). Si no hay ninguna, escribe «no tiene».":item.kind==="ineq"?"Escribe la solución despejando x: x < 4, x > -2, x <= 5 o x >= 1/2 (también sirven ≤ y ≥).":item.kind==="num"?"Para un negativo, escribe el signo menos: -7. Para decimales usa la coma: 0,75. Para miles no pongas puntos: 1500.":item.kind==="frac"?"Escribe la fracción con una barra: 3/4. Para un negativo: -5/12.":item.kind==="between"?"Escribe un decimal con coma, como 2,35, o una fracción, como 3/4.":"Puedes escribir 2x, a-5, (x+1). Para potencias usa ^, como x^2."}</span>`;
     const inp=$("input",area),btn=$("button",area);
     const lock=()=>{inp.disabled=true;btn.disabled=true;inp.value=item.kind==="num"?(item.show||fmt(item.answer)):item.show;inp.classList.add("okv")};
     const check=()=>{if(finished)return;const v=inp.value.trim();if(!v)return;let ast;
+      if(item.kind==="set"){const t=v.toLowerCase().replace(/[−–]/g,"-").replace(/[{}]/g," ");let vals=[];const el=item.noun==="elemento";
+        if(!/(no (tiene|hay)|ningun|ninguna|∅|vac)/.test(t)){for(const part of t.split(/;|,\s+| o | y /)){const q=part.replace(/^\s*[a-z]\s*=\s*/,"").trim();if(!q)continue;
+          try{const a=parseExpr(q);if(varsOf(a).size)throw 0;vals.push(evalAst(a,{}))}catch(e){fb("info",el?"No entendí alguno de los elementos.":"No entendí alguna de las soluciones.",el?"Escribe los elementos separados por punto y coma, por ejemplo: 2; -3; 5. Si el conjunto es vacío, escribe ∅ o «vacío».":"Escribe los valores separados por punto y coma, por ejemplo: 2; -3. Si no hay solución, escribe «no tiene».");return}}}
+        const want=item.answer.slice().sort((a,b)=>a-b),got=[...new Set(vals.map(x=>Math.round(x*1e9)/1e9))].sort((a,b)=>a-b);
+        const same=got.length===want.length&&got.every((x,i)=>Math.abs(x-want[i])<1e-9);
+        const part=!same&&got.length&&got.every(x=>want.some(w=>Math.abs(w-x)<1e-9));
+        if(same){lock();finish(attempts===0?"first":"hint")}else if(wrong(part?(el?"Los elementos que escribiste están bien, pero falta alguno.":"Lo que escribiste es correcto, pero falta alguna solución."):el&&got.some(x=>!want.some(w=>Math.abs(w-x)<1e-9))?"Sobra algún elemento: revisa si cada uno cumple la condición.":got.some(x=>!want.some(w=>Math.abs(w-x)<1e-9))&&item.extraneous&&got.some(x=>item.extraneous.some(e=>Math.abs(e-x)<1e-9))?"Comprueba cada valor en la ecuación original: alguno no la cumple.":""))lock();return}
       if(item.kind==="ineq"){const r=parseIneq(v);if(!r){fb("info","Escribe la solución despejando x.","Por ejemplo: x < 4, x >= -2 o x ≤ 1/2.");return}
         if(r.op===item.op&&Math.abs(r.val-item.value)<1e-9){lock();finish(attempts===0?"first":"hint")}else if(wrong(r.op!==item.op&&Math.abs(r.val-item.value)<1e-9?"El número límite es correcto, pero revisa el sentido de la desigualdad.":""))lock();return}
       try{ast=parseExpr(v)}catch(e){if(e&&e.message==="num"){fb("info","Revisa cómo escribiste el número.","Para decimales usa una sola coma: 0,75. Para miles no pongas puntos, o ponlos de tres en tres: 1500 o 1.500.");return}fb("info","No entendí lo que escribiste.","Usa números, las letras de las cantidades Variables, +, −, paréntesis y ^ para potencias.");return}
@@ -381,6 +394,42 @@ function mountItem(box,item,opts){
     btn.onclick=()=>{if(finished)return;const pick=chips.filter(c=>c.getAttribute("aria-pressed")==="true").map(c=>+c.dataset.i);if(!pick.length){fb("info","Tacha primero las parejas que se anulan.","");return}
       const ok=pick.length===want.size&&pick.every(i=>want.has(i));if(ok){solve();finish(attempts===0?"first":"hint")}else if(wrong(pick.some(i=>!want.has(i))?"Tachaste algún término que no tiene pareja.":"Falta alguna pareja por tachar.")){solve()}};
     if(opts.prev){solve();finish(opts.prev,true)}}
+
+  /* Marcar puntos en el plano cartesiano: cruces de la cuadrícula */
+  else if(item.type==="grid"){const n=item.n||1,pts=[];let cur=null;const W=item.w||460,B={xmin:item.xmin,xmax:item.xmax,ymin:item.ymin,ymax:item.ymax};
+    const H=Math.round(68+(W-68)*(B.ymax-B.ymin)/(B.xmax-B.xmin));
+    area.innerHTML=`<div class="svgwrap gridpick" tabindex="0" role="application" aria-label="Plano cartesiano: marca ${n===1?"un punto":n+" puntos"}. Usa las flechas para moverte y Enter para marcar."></div><div class="fillrow"><button class="btn primary">Comprobar</button><span class="tip">${item.tip||(n===1?"Toca un cruce de la cuadrícula para marcar el punto; si tocas otro, el punto se mueve.":`Toca ${n} cruces de la cuadrícula. Si tocas un punto marcado, se borra.`)} Con el teclado: flechas para moverte y Enter para marcar.</span></div>`;
+    const wrap=$(".gridpick",area),btn=$(".btn",area);
+    const draw=state=>{const list=state==="sol"?(item.answer||item.sol||pts):pts;
+      const P=list.map(([x,y])=>({x,y,color:state?"var(--ok)":"var(--linec)",r:7,label:item.labels||state?`(${fmt(x)}, ${fmt(y)})`:""}));
+      if(cur&&!state)P.push({x:cur[0],y:cur[1],open:true,color:"var(--muted)",r:5});
+      const rv=state&&item.reveal?item.reveal:{};
+      wrap.innerHTML=plot({...B,w:W,equal:true,xstep:1,ystep:1,axes:true,segs:[...(item.segs||[]),...(rv.segs||[])],circs:[...(item.circs||[]),...(rv.circs||[])],polys:[...(item.polys||[]),...(rv.polys||[])],fns:[...(item.fns||[]),...(rv.fns||[])],pts:[...(item.given||[]),...P],aria:"Plano cartesiano"})};
+    const tog=q=>{if(finished)return;const k=pts.findIndex(p=>p[0]===q[0]&&p[1]===q[1]);if(k>=0)pts.splice(k,1);else{if(pts.length>=n)pts.shift();pts.push(q)}fbz.innerHTML="";draw()};
+    wrap.addEventListener("pointerdown",e=>{if(finished)return;const svg=$("svg",wrap);if(!svg)return;const p=svgPt(svg,e);
+      const x=Math.round(B.xmin+(p.x-34)/(W-68)*(B.xmax-B.xmin)),y=Math.round(B.ymax-(p.y-34)/(H-68)*(B.ymax-B.ymin));
+      if(x<B.xmin||x>B.xmax||y<B.ymin||y>B.ymax)return;cur=null;tog([x,y])});
+    wrap.addEventListener("keydown",e=>{if(finished)return;const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];
+      if(d){e.preventDefault();cur=cur||[0,0];cur=[Math.max(B.xmin,Math.min(B.xmax,cur[0]+d[0])),Math.max(B.ymin,Math.min(B.ymax,cur[1]+d[1]))];draw()}
+      else if((e.key==="Enter"||e.key===" ")&&cur){e.preventDefault();tog(cur.slice())}});
+    const lock=()=>{btn.disabled=true;cur=null;draw("sol")};
+    btn.onclick=()=>{if(finished)return;if(pts.length<n){fb("info",n-pts.length===1?"Falta marcar un punto.":`Faltan ${n-pts.length} puntos por marcar.`,"");return}
+      const ok=item.check?item.check(pts.slice()):item.answer.length===pts.length&&item.answer.every(a=>pts.some(p=>p[0]===a[0]&&p[1]===a[1]));
+      if(ok){btn.disabled=true;cur=null;draw("ok");finish(attempts===0?"first":"hint")}else if(wrong(item.why?item.why(pts.slice()):""))lock()};
+    draw();if(opts.prev){lock();finish(opts.prev,true)}}
+
+  /* Sombrear regiones de un diagrama de Venn */
+  else if(item.type==="venn"){const nS=item.sets||2,names=item.names||["A","B","C"].slice(0,nS),regs=VENN[nS].regs,on=new Set(),uid="vz"+String(opts.key).replace(/[^a-z0-9]/gi,"");
+    area.innerHTML=`<div class="svgwrap vennpick"></div><div class="vregs" role="group" aria-label="Regiones del diagrama">${regs.map(r=>`<button class="vr" data-r="${r}" aria-pressed="false">${vennName(r,names)}</button>`).join("")}</div><div class="fillrow"><button class="btn primary chk">Comprobar</button><span class="tip">Toca las regiones del diagrama para sombrearlas, o usa los botones. Si tocas otra vez, se quita la sombra.</span></div>`;
+    const wrap=$(".vennpick",area),btn=$(".chk",area),rb=$$(".vr",area);
+    const draw=(okc,list)=>{const sh=list||[...on];wrap.innerHTML=vennSVG({n:nS,names,shade:sh,uid,color:okc||"var(--linec)",uname:item.uname,texts:item.texts,aria:"Diagrama de Venn para sombrear"});rb.forEach(b=>b.setAttribute("aria-pressed",sh.includes(b.dataset.r)))};
+    const tog=r=>{if(finished||!r)return;on.has(r)?on.delete(r):on.add(r);fbz.innerHTML="";draw()};
+    wrap.addEventListener("click",e=>{const svg=$("svg",wrap);if(!svg)return;const p=svgPt(svg,e);tog(vennRegion(nS,p.x,p.y))});
+    rb.forEach(b=>b.onclick=()=>tog(b.dataset.r));
+    const lock=()=>{rb.forEach(b=>b.disabled=true);btn.disabled=true;draw("var(--ok)",item.answer)};
+    btn.onclick=()=>{if(finished)return;if(!on.size){fb("info","Sombrea primero alguna región.","");return}const want=new Set(item.answer),ok=on.size===want.size&&[...on].every(r=>want.has(r));
+      if(ok){lock();finish(attempts===0?"first":"hint")}else if(wrong([...on].some(r=>!want.has(r))?"Sombreaste alguna región que no forma parte del conjunto.":"Lo que sombreaste está bien, pero falta alguna región."))lock()};
+    draw();if(opts.prev){lock();finish(opts.prev,true)}}
 }
 
 /* ============ ficha de estación ============ */
@@ -453,7 +502,7 @@ function calcStars(items,res){const pts=items.reduce((a,_,i)=>a+(res[i]==="first
 /* ============ diagnóstico (uno por línea) ============ */
 function openDiag(line){const v=$("#view-node");line=line||"ent";
   const res={},dseed=newSeed(),DG=buildDiag(dseed,line),N=DG.length,seq=LSEQ[line],L=LINES[line];
-  v.innerHTML=`<article class="node" style="--linec:var(${L.c})"><div class="nodehead"><span class="badge"><i style="background:var(${L.c})"></i>Línea ${LNUM[line]} · ${L.short} · Diagnóstico opcional</span><h2>Diagnóstico: ${L.name.toLowerCase()}</h2><p class="muted">${N} preguntas, unos ${Math.round(N*1.2)} minutos.</p></div><div class="body"></div><div class="navrow"></div></article>`;showView("node");
+  v.innerHTML=`<article class="node" style="--linec:var(${L.c})"><div class="nodehead"><span class="badge"><i style="background:var(${L.c})"></i>${lineTitle(line)} · Diagnóstico opcional</span><h2>Diagnóstico: ${L.name.toLowerCase()}</h2><p class="muted">${N} preguntas, unos ${Math.round(N*1.2)} minutos.</p></div><div class="body"></div><div class="navrow"></div></article>`;showView("node");
   const body=$(".body",v),nav=$(".navrow",v),back=()=>{showView("map");renderMap()};
   const d=S.diags[line];
   if(d){const c=d.conv||[];body.innerHTML=`<p class="lead">Ya hiciste este diagnóstico: acertaste ${d.score} de ${N}.</p><p>${c.length?`Convalidaste ${c.length===1?"la estación":"las estaciones"} ${c.map(id=>`«${NODES[id].title}»`).join(", ")}. Puedes visitarlas cuando quieras para repasar.`:`No convalidaste estaciones: empieza por «${NODES[seq[0]].title}».`}</p>`;
@@ -476,7 +525,7 @@ function renderMe(){const v=$("#view-me");
   const stTxt=id=>{if(isDone(id)){const s=S.nodes[id]&&S.nodes[id].stars;return"Completada"+(id[0]!=="B"&&s?" · "+"★".repeat(s):"")}if(conv(id))return"Convalidada en el diagnóstico";if(!unlocked(id))return"Bloqueada";return S.nodes[id]&&S.nodes[id].max>0?"En curso":"Disponible"};
   v.innerHTML=`<div class="panel"><div><span class="eyebrow">Mi progreso</span><h2 style="font-size:1.6rem;font-weight:800">${esc(S.nombre||(RT.guest?"Recorrido sin cuenta":"Tu recorrido"))}</h2>${RT.guest?"":`<p class="muted">${esc(RT.email)}</p>`}</div>
     <h3>Línea Bienestar</h3><div class="stlist">${BIE_IDS.map(id=>row(id,"bie",SOCIO[id].title,stTxt(id)+(isDone(id)&&BIE.ans[id]&&SOCIO[id].items.every((_,i)=>BIE.ans[id][i])?" · "+bandName(id,bieScore(id).band).toLowerCase():""))).join("")}</div>
-    ${ACTIVE.map(l=>`<h3>Línea ${LNUM[l]} · ${LINES[l].short}</h3><p class="muted">${S.diags[l]?`Diagnóstico: ${S.diags[l].score} de ${diagN(l)} aciertos.`:"Diagnóstico opcional sin hacer: es la primera estación de la línea."}</p><div class="stlist">${LSEQ[l].map(id=>row(id,l,NODES[id].title,stTxt(id))).join("")}</div>`).join("")}
+    ${ACTIVE.map(l=>`<h3>${lineTitle(l)}</h3><p class="muted">${S.diags[l]?`Diagnóstico: ${S.diags[l].score} de ${diagN(l)} aciertos.`:"Diagnóstico opcional sin hacer: es la primera estación de la línea."}</p><div class="stlist">${LSEQ[l].map(id=>row(id,l,NODES[id].title,stTxt(id))).join("")}</div>`).join("")}
     ${MLINES.filter(l=>!ACTIVE.includes(l)).length?`<p class="muted">En construcción: ${MLINES.filter(l=>!ACTIVE.includes(l)).map(l=>LINES[l].name.toLowerCase()).join(", ")}.</p>`:""}
     ${RT.guest?`<div class="callout"><span class="eyebrow">Sin cuenta</span><p>Este recorrido no se guarda: al cerrar o recargar la página empiezas de cero. Crea una cuenta si quieres conservar tu avance.</p></div><div class="fillrow"><button class="btn primary" id="mkacc">Crear una cuenta</button></div>`:""}
     ${dataSection()}</div>`;
