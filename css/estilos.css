@@ -306,7 +306,7 @@ form.dialog{box-shadow:none;border:1px solid var(--rule);max-width:none}
 .field{display:grid;gap:6px}
 .field label{font-family:var(--f-disp);font-weight:600;font-size:.92rem}
 .field input{border:1.5px solid var(--rule);border-radius:8px;padding:.55em .75em;background:var(--surface);font-family:var(--f-body)}
-.avs{display:flex;gap:10px}
+.avs{display:flex;flex-wrap:wrap;gap:10px}
 .avs button{width:44px;height:44px;border-radius:50%;border:3px solid transparent;cursor:pointer;display:grid;place-items:center;background:var(--surface-2)}
 .avs button[aria-pressed="true"]{border-color:var(--ink)}
 .avs button i{width:24px;height:24px;border-radius:50%;display:block}

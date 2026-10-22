@@ -15,7 +15,7 @@ Q1:{title:"Igualdad y equivalencia",sub:"Una ecuación es una balanza en equilib
  <p class="calc">3x + 2 = 14  →  (restar 2)  3x = 12  →  (dividir entre 3)  x = 4</p></div>
  <p>Algunas igualdades se cumplen para cualquier valor: 2(x + 1) = 2x + 2. Se llaman <b>identidades</b>. Las ecuaciones, en cambio, solo se cumplen para algunos valores.</p>
  <div class="callout"><span class="eyebrow">Mejor que «pasar al otro lado»</span><p>La regla «lo que suma pasa restando» es un atajo de lo mismo: restar en los dos lados. Si la olvidas, piensa en la balanza.</p></div>`,
- explore:{intro:"Resuelve la ecuación en la balanza: quita lo mismo de los dos platos o reparte en grupos iguales. Prueba también a quitar de un solo lado y mira qué pasa.",fn:"qBalanza"},
+ explore:{intro:"Resuelve la ecuación en la balanza: quita lo mismo de los dos platos o divide los dos platos entre el mismo número. Prueba también a quitar de un solo lado y mira qué pasa.",fn:"qBalanza"},
  key:"Una solución es un valor que cumple la igualdad. Hacer lo mismo en los dos lados da una ecuación equivalente. Una identidad se cumple para cualquier valor.",
  ojo:"Si cambias solo un lado, la balanza se desequilibra: la ecuación nueva ya no tiene las mismas soluciones."},
 
@@ -181,7 +181,7 @@ Q5:{map:[0,1,3,2,1],pts:[
 Object.assign(EXPLORE,{
 qBalanza(host){let st,sol,hist;
   host.innerHTML=`<div class="xp"><div class="svgwrap"><svg id="bsv" viewBox="0 0 600 270" role="img" aria-label="Balanza con cajas x y unidades" style="max-width:560px"></svg></div>
-   <div class="readout" id="brr"></div><div class="ctrl"><button class="btn sm" id="bx">Quitar una x de cada plato</button><button class="btn sm" id="bu">Quitar una unidad de cada plato</button><button class="btn sm" id="bd">Repartir en grupos iguales</button></div>
+   <div class="readout" id="brr"></div><div class="ctrl"><button class="btn sm" id="bx">Quitar una x de cada plato</button><button class="btn sm" id="bu">Quitar una unidad de cada plato</button><button class="btn sm" id="bd">Dividir entre 2</button></div>
    <div class="ctrl"><button class="btn sm ghost" id="b1">Quitar una unidad solo a la izquierda</button><button class="btn sm ghost" id="bn">Nueva ecuación</button></div><ol class="hist" id="bh"></ol></div>`;
   const fresh=()=>{sol=R0.i(1,4);const d=R0.i(0,2),a=d+R0.i(1,3),b=R0.i(0,5);st={L:{x:a,u:b},R:{x:d,u:(a-d)*sol+b}};hist=[]};
   const R0=rng(newSeed());
@@ -195,12 +195,12 @@ qBalanza(host){let st,sol,hist;
     g+=pan(lx,ly,st.L)+pan(rx,ry,st.R);$("#bsv",host).innerHTML=g;
     const bal=wL===wR,done=st.L.x===1&&st.L.u===0&&st.R.x===0;
     $("#brr",host).innerHTML=`<span class="k">Ecuación</span>${side(st.L)} = ${side(st.R)}<br><span class="k">Balanza</span>${bal?"en equilibrio":"¡desequilibrada! Cambiaste solo un lado: esta ecuación ya no tiene la misma solución"}${done&&bal?`<br><span class="k">Resuelta</span>x = ${st.R.u}. Comprueba en la ecuación de partida`:""}`;
-    $("#bx",host).disabled=!(st.L.x>0&&st.R.x>0);$("#bu",host).disabled=!(st.L.u>0&&st.R.u>0);$("#bd",host).disabled=!(st.L.u===0&&st.R.x===0&&st.L.x>1&&st.R.u%st.L.x===0);$("#b1",host).disabled=st.L.u===0;
+    $("#bx",host).disabled=!(st.L.x>0&&st.R.x>0);$("#bu",host).disabled=!(st.L.u>0&&st.R.u>0);$("#bd",host).disabled=!(st.L.u===0&&st.R.x===0&&st.L.x>1&&st.R.u%st.L.x===0);$("#bd",host).textContent=`Dividir entre ${Math.max(2,st.L.x)}`;$("#b1",host).disabled=st.L.u===0;
     $("#bh",host).innerHTML=hist.map(h=>`<li>${h}</li>`).join("")};
   const step=(f,txt)=>{f();hist.push(txt+" → "+side(st.L)+" = "+side(st.R));draw()};
   $("#bx",host).onclick=()=>step(()=>{st.L.x--;st.R.x--},"Quito una x de cada lado");
   $("#bu",host).onclick=()=>step(()=>{st.L.u--;st.R.u--},"Quito una unidad de cada lado");
-  $("#bd",host).onclick=()=>{const k=st.L.x;step(()=>{st.L.x=1;st.R.u/=k},`Reparto en ${k} grupos iguales`)};
+  $("#bd",host).onclick=()=>{const k=st.L.x;step(()=>{st.L.x=1;st.R.u/=k},`Divido los dos platos entre ${k}`)};
   $("#b1",host).onclick=()=>step(()=>{st.L.u--},"Quito una unidad solo a la izquierda");
   $("#bn",host).onclick=()=>{fresh();draw()};fresh();draw()},
 

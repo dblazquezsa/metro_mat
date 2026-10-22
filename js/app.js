@@ -12,7 +12,7 @@ const PATHS={ent:[[90,120],[810,120]],rac:[[810,120],[900,210],[900,520]],rec:[[
   alg:[[280,580],[200,500],[200,340]],ecu:[[200,340],[260,280],[810,280]],bie:[[90,120],[170,200],[650,200]]};
 const ST=[
   {id:"inicio",line:"hub",x:90,y:120,lab:["Inicio","Diagnóstico"],lp:"top",built:true},
-  {id:"E1",line:"ent",x:210,y:120,lab:["Programas","de cálculo"],lp:"top",built:true},
+  {id:"E1",line:"ent",x:210,y:120,lab:["Sumando","y restando"],lp:"top",built:true},
   {id:"E2",line:"ent",x:330,y:120,lab:["Calcular","con economía"],lp:"top",built:true},
   {id:"E3",line:"ent",x:450,y:120,lab:["Diferencias","y paréntesis"],lp:"top",built:true},
   {id:"E4",line:"ent",x:570,y:120,lab:["Las caras","del menos"],lp:"top",built:true},
@@ -74,7 +74,6 @@ function reflMsg(r,st){if(!r)return"";const m=[];
   return m.join(" ")}
 
 /* ============ estado y almacenamiento ============ */
-const AVS=["coral","sol","menta","lila"];
 function freshState(){return{v:1,nombre:"",grupo:"",avatar:"coral",current:"inicio",nodes:{},diags:{},bie:{},updatedAt:0}}
 let S=freshState();
 let BIE={ans:{},hist:{},notes:{},plan:[],goal:""};
@@ -115,16 +114,41 @@ function enterGuest(){RT.guest=true;RT.uid=null;RT.email="";RT.teacher=false;S=f
 $("#tab-out").onclick=async()=>{if(RT.guest){leaveGuest();return}clearTimeout(saveT);if(RT.uid)await flush();if(RT.unsubPanel){RT.unsubPanel();RT.unsubPanel=null}await RT.auth.signOut()};
 
 /* ============ avatar: estudiante con su morral ============ */
-function avatarSVG(col,still,left){return `<g class="${still?"":"bob"}"><g class="fig"${left?' transform="scale(-1,1)"':""}>
+/* Viajeros: aspectos variados (pelo, piel, ropa, gafas, falda, hiyab). Los ids antiguos (coral, sol, menta, lila) siguen valiendo. */
+const AVATARS={
+  coral:{lab:"Pelo corto",shirt:"var(--av-coral)",skin:"#D9A47E",hair:"#3A281C",style:"short"},
+  sol:{lab:"Pelo largo",shirt:"var(--av-sol)",skin:"#F1C9A5",hair:"#6B4226",style:"long",skirt:true},
+  menta:{lab:"Coleta",shirt:"var(--av-menta)",skin:"#8D5A3B",hair:"#21150E",style:"pony"},
+  lila:{lab:"Pelo rizado",shirt:"var(--av-lila)",skin:"#6E4429",hair:"#1B120C",style:"afro"},
+  cielo:{lab:"Trenzas",shirt:"var(--l-ent)",skin:"#B07850",hair:"#2A1A12",style:"braids",skirt:true},
+  arena:{lab:"Hiyab",shirt:"var(--l-rac)",skin:"#C99272",hair:"#1F5F8B",style:"hijab",skirt:true},
+  bosque:{lab:"Gafas",shirt:"var(--l-rec)",skin:"#F1C9A5",hair:"#C9973F",style:"short",glasses:true},
+  ciruela:{lab:"Moño",shirt:"var(--l-ecu)",skin:"#A8714B",hair:"#3A2416",style:"bun",glasses:true}
+};
+const AVS=Object.keys(AVATARS);
+const avOf=id=>AVATARS[id]||AVATARS.coral;
+function avatarSVG(id,still,left){const a=avOf(id),H=a.hair,st=a.style;
+  const fringe=`<path d="M-5.1 -21.2 Q-4.8 -27.4 1 -27 Q6 -26.5 6.3 -21.6 Q3.4 -24.4 -5.1 -21.2 Z" fill="${H}"/>`;
+  const back=st==="long"?`<path d="M-5.6 -23 Q-7.2 -16 -5.8 -12.6 L-0.6 -12.8 L-0.2 -21 Z" fill="${H}"/>`
+    :st==="pony"?`<path d="M-4.4 -24.6 Q-10.4 -24 -9.4 -15.6 Q-8 -19.6 -4.6 -21.4 Z" fill="${H}"/><circle cx="-5" cy="-23.6" r="1.4" fill="var(--av-coral)"/>`
+    :st==="afro"?`<circle cx="-0.2" cy="-22.6" r="7.9" fill="${H}"/>`
+    :st==="bun"?`<circle cx="-3.4" cy="-27.4" r="2.9" fill="${H}"/>`
+    :st==="braids"?`<path d="M-4.2 -21 Q-6.2 -17 -5.6 -11.6" fill="none" stroke="${H}" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.6 0.9"/><path d="M-1.8 -17 Q-2.6 -14 -2.2 -11.2" fill="none" stroke="${H}" stroke-width="2" stroke-linecap="round" stroke-dasharray="1.6 0.9"/>`
+    :st==="hijab"?`<path d="M0.6 -28.2 Q-7.6 -28.4 -7.4 -20 Q-7.6 -13.6 -1.6 -12.6 L5 -13.6 Q2 -15.6 0.6 -18 Z" fill="${H}"/>`:"";
+  const front=st==="afro"?"":st==="hijab"?`<path d="M6.9 -21.2 Q7 -28.4 0.6 -28.2 Q-6 -28 -6.3 -21 Q-3.6 -25.6 1.2 -25.4 Q5.2 -25.2 6.9 -21.2 Z" fill="${H}"/>`:fringe;
+  return `<g class="${still?"":"bob"}"><g class="fig"${left?' transform="scale(-1,1)"':""}>
   <ellipse cx="0" cy="12.5" rx="9" ry="2.6" fill="var(--ink)" fill-opacity=".18"/>
   <rect x="-11" y="-13.5" width="8" height="13.5" rx="2.8" fill="var(--bag)" stroke="var(--surface)" stroke-width="1.4"/>
   <rect x="-9.8" y="-6.5" width="5.6" height="4.2" rx="1.2" fill="var(--bag-2)"/>
   <path class="leg leg-a" d="M-3.2 5 L-3.6 11.8" stroke="var(--legs)" stroke-width="3.3" stroke-linecap="round"/><path class="leg leg-b" d="M2.4 5 L2.9 11.8" stroke="var(--legs)" stroke-width="3.3" stroke-linecap="round"/>
-  <path d="M-6 -11.5 Q-6.2 -14.6 -1.5 -14.6 L1.8 -14.6 Q6 -14.6 5.7 -10.5 L5.2 6 L-5.6 6 Z" fill="${col}" stroke="var(--surface)" stroke-width="1.4"/>
+  <path d="M-6 -11.5 Q-6.2 -14.6 -1.5 -14.6 L1.8 -14.6 Q6 -14.6 5.7 -10.5 L5.2 6 L-5.6 6 Z" fill="${a.shirt}" stroke="var(--surface)" stroke-width="1.4"/>
+  ${a.skirt?`<path d="M-5.8 2.6 L5.4 2.6 L7.2 8.4 L-7.4 8.4 Z" fill="${a.shirt}" stroke="var(--surface)" stroke-width="1.2"/><path d="M-5.8 2.6 L5.4 2.6" stroke="var(--ink)" stroke-opacity=".25" stroke-width="1"/>`:""}
   <path d="M-4.6 -13.8 L3.6 -1.2" stroke="var(--bag)" stroke-width="2.3" stroke-linecap="round"/>
-  <circle cx="0.6" cy="-20.6" r="5.7" fill="var(--skin)" stroke="var(--surface)" stroke-width="1.4"/>
-  <path d="M-5.1 -21.2 Q-4.8 -27.4 1 -27 Q6 -26.5 6.3 -21.6 Q3.4 -24.4 -5.1 -21.2 Z" fill="var(--hair)"/>
-  <circle cx="3.5" cy="-20.2" r="0.95" fill="var(--ink)"/></g></g>`}
+  ${back}
+  <circle cx="0.6" cy="-20.6" r="5.7" fill="${a.skin}" stroke="var(--surface)" stroke-width="1.4"/>
+  ${front}
+  <circle cx="3.5" cy="-20.2" r="0.95" fill="var(--ink)"/>
+  ${a.glasses?`<rect x="2.1" y="-21.7" width="3.4" height="2.6" rx="1" fill="#fff" fill-opacity=".35" stroke="var(--ink)" stroke-width="0.55"/><path d="M2.1 -20.8 L-1.2 -21.6" stroke="var(--ink)" stroke-width="0.55" stroke-linecap="round"/>`:""}</g></g>`}
 
 // El viajero se para encima de su estación; la etiqueta de esa estación sube para dejarle sitio.
 function avPos(id){const s=STM[id]||STM.inicio;return `translate(${s.x}px,${s.y-20}px)`}
@@ -162,7 +186,7 @@ function renderMap(){
     h+=`<text text-anchor="${anchor}" x="${lx}" y="${ly}">${lines.map((t,i)=>`<tspan x="${lx}" dy="${i?15:0}">${esc(t)}</tspan>`).join("")}</text></g>`}
   // avatar
   const p=STM[S.current]||STM.inicio;
-  h+=`<g id="avatar" style="transform:${avPos(S.current)}" aria-hidden="true"><g transform="scale(1.3)">${avatarSVG(`var(--av-${S.avatar})`,false,RT.faceLeft)}</g></g>`;
+  h+=`<g id="avatar" style="transform:${avPos(S.current)}" aria-hidden="true"><g transform="scale(1.3)">${avatarSVG(S.avatar,false,RT.faceLeft)}</g></g>`;
   svg.innerHTML=h;
   $$(".st",svg).forEach(g=>{const go=()=>clickStation(g.dataset.id);g.addEventListener("click",go);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
   renderProg()}
@@ -490,7 +514,7 @@ function openProfile(){const m=$("#modal");let av=S.avatar;
   m.hidden=false;bindAvatar(m,a=>av=a);
   $("#pcancel",m).onclick=()=>m.hidden=true;
   $("#psave",m).onclick=()=>{S.avatar=av;save();m.hidden=true;renderMap();renderMe()}}
-const avatarPicker=av=>`<div class="field"><span style="font-family:var(--f-disp);font-weight:600;font-size:.92rem">Color de tu viajero</span><div class="avs" role="group" aria-label="Color del avatar">${AVS.map(a=>`<button type="button" data-a="${a}" aria-pressed="${a===av}" aria-label="${a}"><svg viewBox="-13 -29 26 43" width="26" height="40">${avatarSVG(`var(--av-${a})`,true)}</svg></button>`).join("")}</div></div>`;
+const avatarPicker=av=>`<div class="field"><span style="font-family:var(--f-disp);font-weight:600;font-size:.92rem">Elige tu viajero</span><div class="avs" role="group" aria-label="Viajero">${AVS.map(a=>`<button type="button" data-a="${a}" aria-pressed="${a===av}" aria-label="${avOf(a).lab}" title="${avOf(a).lab}"><svg viewBox="-13 -31 26 45" width="26" height="42">${avatarSVG(a,true)}</svg></button>`).join("")}</div></div>`;
 function bindAvatar(root,set){$$(".avs button",root).forEach(b=>b.onclick=()=>{set(b.dataset.a);$$(".avs button",root).forEach(x=>x.setAttribute("aria-pressed",x===b))})}
 function openStart(){const m=$("#modal");
   m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="st-t"><span class="eyebrow">Cuenta creada</span><h2 id="st-t">Hola, ${esc(S.nombre)}</h2>
@@ -506,7 +530,7 @@ const authMsg=e=>{console.error("[Caja] Error de Firebase:",e&&e.code,e&&e.messa
 const dbMsg=e=>{console.error("[Caja] Error de Firestore:",e&&e.code,e&&e.message);const c=e&&e.code;
   return(c==="permission-denied"?"Firestore rechazó la escritura: revisa que las reglas de firestore.rules estén publicadas (Firestore → Reglas).":c==="not-found"||c==="failed-precondition"?"No se encontró la base de datos Firestore: créala con el ID (default).":c==="unavailable"?"No hay conexión con Firestore. Revisa tu internet.":"No se pudo guardar en Firestore.")+(c?` (código: ${c})`:"")};
 const USER_RE=/^[a-z0-9_.]{3,20}$/;
-const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)">${avatarSVG("var(--av-coral)")}</g></svg>`;
+const MINI_MAP=`<svg viewBox="0 0 460 150" aria-hidden="true"><polyline points="20,40 300,40 360,100 440,100" fill="none" stroke="var(--l-ent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="20,40 80,100 260,100" fill="none" stroke="var(--l-bie)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="300,40 300,130" fill="none" stroke="var(--l-rac)" stroke-width="8" stroke-linecap="round" stroke-opacity=".35"/>${[[20,40],[110,40],[200,40],[300,40],[400,100],[150,100],[240,100]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i?8:11}" fill="var(--surface)" stroke="${i===0?"var(--ink)":y===40||x===400?"var(--l-ent)":"var(--l-bie)"}" stroke-width="4"/>`).join("")}<g transform="translate(110,26)">${avatarSVG("sol")}</g></svg>`;
 function renderAuth(mode){const v=$("#view-auth");let av="coral";
   const intro=`<div class="authintro"><h2>Desarrollemos las bases del pensamiento matemático estación a estación.</h2>${MINI_MAP}
     <p>En cada estación lees una explicación, exploras con una herramienta interactiva, resuelves un reto y recibes retroalimentación. Con una cuenta, tu avance queda guardado.</p>

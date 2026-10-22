@@ -2,8 +2,10 @@
 /* ============ Línea: Los números enteros (E1–E6) ============ */
 
 Object.assign(NODES,{
-E1:{title:"Programas de cálculo",sub:"Cuando falta un dato, la respuesta es una fórmula.",
- info:`<p class="lead">Cuando a un problema le falta un dato, la respuesta ya no es un número: es una <b>fórmula</b> que guarda el programa de cálculo y sirve para cualquier valor de ese dato.</p>
+E1:{title:"Sumando y restando",sub:"En la recta numérica sumar o restar es desplazarse a la izquierda o la derecha.",
+ info:`<p class="lead">En la recta numérica, <b>sumar</b> es desplazarse hacia la <b>derecha</b> y <b>restar</b> es desplazarse hacia la <b>izquierda</b>. Cada «+ número» o «− número» es un salto, y varios saltos seguidos se pueden juntar en uno solo.</p>
+ <div class="ex-box"><span class="eyebrow">Dos saltos, un solo desplazamiento</span>${figHops([-9,7])}<p>Restar 9 es saltar 9 hacia la izquierda; sumar 7 es saltar 7 hacia la derecha. Al final quedas 2 a la izquierda de donde empezaste: <span class="m">− 9 + 7</span> equivale a <span class="m">− 2</span>, empieces donde empieces.</p></div>
+ <p>Por eso, cuando a un problema le falta un dato, la respuesta puede ser una <b>fórmula</b> que guarda esos desplazamientos y sirve para cualquier punto de partida.</p>
  <div class="ex-box"><span class="eyebrow">Ejemplo</span><p>Laura llevó sus tazos al colegio. En la primera partida perdió 9 y en la segunda ganó 7. ¿Cuántos tiene ahora?</p>
  <p>No sabemos con cuántos empezó, así que llamamos <span class="m">a</span> a ese número. La respuesta es <span class="m">a − 9 + 7</span>.</p></div>
  <p>Esa fórmula se puede decir más corta. Perder 9 y después ganar 7 tiene el mismo efecto que perder 2:</p>
@@ -14,7 +16,7 @@ E1:{title:"Programas de cálculo",sub:"Cuando falta un dato, la respuesta es una
  <div class="ex-box"><span class="eyebrow">Ejemplo resuelto</span><p>Un tren sale con <span class="m">b</span> pasajeros. En la primera parada bajan 15 y suben 12; en la segunda bajan 38 y suben 42. ¿Con cuántos llega?</p>
  <p class="calc">b − 15 + 12 − 38 + 42<br>= b − 3 + 4<br>= b + 1</p><p>Si salió con 427 pasajeros, llegó con 428. La fórmula responde todas las preguntas de ese tipo a la vez.</p></div>`,
  explore:{intro:"Arma un programa de movimientos y mira cómo varios saltos se convierten en uno solo, empieces donde empieces.",fn:"xTraslaciones"},
- key:"Una fórmula guarda un programa de cálculo. Los signos + y − quedan pegados al número que los sigue e indican si se suma o se resta; varios movimientos seguidos se componen en uno solo.",
+ key:"En la recta, sumar es desplazarse a la derecha y restar a la izquierda. Los signos + y − quedan pegados al número que los sigue, y varios desplazamientos seguidos se componen en uno solo.",
  ojo:"En los cálculos con expresiones en las que aparecen cantidades Variables no siempre se puede operar de izquierda a derecha. La pregunta útil es: ¿qué efecto tienen todos estos movimientos juntos?"},
 
 E2:{title:"Calcular con economía",sub:"En álgebra se elige el camino más corto.",
