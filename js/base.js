@@ -13,11 +13,19 @@ function shuffle(arr,key){const r=seeded(key);const a=arr.slice();for(let i=a.le
 let toastT;function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3400)}
 
 /* ============ lector de expresiones (para corregir respuestas algebraicas) ============ */
+/* Números escritos a la colombiana: coma decimal (0,75) y punto de miles (1.500 o 1.500,25).
+   También se acepta el punto decimal (0.75, 2.5) cuando no puede ser un separador de miles. */
+function readNum(raw){let t=raw;const dots=(t.match(/\./g)||[]).length,commas=(t.match(/,/g)||[]).length;
+  if(commas>1)throw Error("num");
+  if(commas&&dots){if(!/^\d{1,3}(\.\d{3})+,\d*$/.test(t))throw Error("num");t=t.replace(/\./g,"").replace(",",".")}
+  else if(commas)t=t.replace(",",".");
+  else if(dots){if(/^[1-9]\d{0,2}(\.\d{3})+$/.test(t))t=t.replace(/\./g,"");else if(dots>1)throw Error("num")}
+  if(t==="."||t==="")throw Error("num");const v=+t;if(isNaN(v))throw Error("num");return v}
 function tokenize(src){
   let s=String(src).replace(/[−–—]/g,"-").replace(/[·×]/g,"*").replace(/²/g,"^2").replace(/³/g,"^3").replace(/\s+/g,"").toLowerCase();
   const out=[];let i=0;
   while(i<s.length){const c=s[i];
-    if(/[0-9.,]/.test(c)){let j=i;while(j<s.length&&/[0-9.,]/.test(s[j]))j++;const t=s.slice(i,j).replace(",",".");if(isNaN(+t))throw Error("num");out.push({t:"n",v:+t});i=j;continue}
+    if(/[0-9.,]/.test(c)){let j=i;while(j<s.length&&/[0-9.,]/.test(s[j]))j++;out.push({t:"n",v:readNum(s.slice(i,j))});i=j;continue}
     if(/[a-z]/.test(c)){out.push({t:"v",v:c});i++;continue}
     if("+-*/^()".includes(c)){out.push({t:c});i++;continue}
     throw Error("char")}

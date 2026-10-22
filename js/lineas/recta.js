@@ -8,15 +8,15 @@ L1:{title:"Decimales periódicos",sub:"Toda fracción es un decimal finito o per
  info:`<p class="lead">Al dividir el numerador entre el denominador de una fracción, el decimal o se <b>termina</b> o se <b>repite</b> para siempre. Nunca hace otra cosa.</p>
  <div class="ex-box"><span class="eyebrow">¿Por qué se repite?</span><p>Al dividir entre 6, los restos posibles son 1, 2, 3, 4 y 5. Si alguno es 0, la división termina. Si no, tarde o temprano un resto se repite, y desde ahí todas las cifras se repiten en el mismo orden:</p>
  <p class="calc">${F(1,3)} = 0,333…    ${F(5,6)} = 0,8333…    ${F(1,7)} = 0,142857142857…</p>
- <p>En esta caja escribimos entre paréntesis la parte que se repite (el <b>periodo</b>): 0,(3), 0,8(3), 0,(142857).</p></div>
+ <p>La parte que se repite (el <b>periodo</b>) se escribe con una barra encima: 0,<span class='ovl'>3</span>, 0,8<span class='ovl'>3</span>, 0,<span class='ovl'>142857</span>.</p></div>
  <p><b>¿Cuándo termina?</b> Cuando el denominador de la fracción irreducible solo tiene los factores 2 y 5: ${F(3,8)} = 0,375 termina, porque 8 = 2 · 2 · 2; ${F(1,6)} no termina, porque 6 = 2 · 3.</p>
- <div class="ex-box"><span class="eyebrow">Del periódico a la fracción</span><p>Si x = 0,(7), entonces 10x = 7,(7). Al restar, el periodo desaparece:</p>
- <p class="calc">10x − x = 7,(7) − 0,(7) = 7  →  9x = 7  →  x = ${F(7,9)}</p>
- <p>Con dos cifras en el periodo se multiplica por 100: 0,(12) = ${F(12,99)}.</p></div>
- <div class="callout"><span class="eyebrow">Una sorpresa</span><p>0,(9) = 0,999… es exactamente 1. Con el mismo método: 10x − x = 9, así que x = 1. También se ve así: 3 · ${F(1,3)} = 3 · 0,(3) = 0,(9), y 3 · ${F(1,3)} = 1.</p></div>`,
+ <div class="ex-box"><span class="eyebrow">Del periódico a la fracción</span><p>Si x = 0,<span class='ovl'>7</span>, entonces 10x = 7,<span class='ovl'>7</span>. Al restar, el periodo desaparece:</p>
+ <p class="calc">10x − x = 7,<span class='ovl'>7</span> − 0,<span class='ovl'>7</span> = 7  →  9x = 7  →  x = ${F(7,9)}</p>
+ <p>Con dos cifras en el periodo se multiplica por 100: 0,<span class='ovl'>12</span> = ${F(12,99)}.</p></div>
+ <div class="callout"><span class="eyebrow">Una sorpresa</span><p>0,<span class='ovl'>9</span> = 0,999… es exactamente 1. Con el mismo método: 10x − x = 9, así que x = 1. También se ve así: 3 · ${F(1,3)} = 3 · 0,<span class='ovl'>3</span> = 0,<span class='ovl'>9</span>, y 3 · ${F(1,3)} = 1.</p></div>`,
  explore:{intro:"Elige una fracción y sigue la división paso a paso. Mira los restos: en cuanto uno se repite, las cifras empiezan a repetirse.",fn:"lDivision"},
  key:"Toda fracción es un decimal finito o periódico, porque los restos de la división son limitados. Y al revés: todo decimal periódico se puede escribir como fracción.",
- ojo:"Un decimal periódico es un número exacto: 0,(3) es exactamente 1/3, y 0,(9) es exactamente 1."},
+ ojo:"Un decimal periódico es un número exacto: 0,<span class='ovl'>3</span> es exactamente 1/3, y 0,<span class='ovl'>9</span> es exactamente 1."},
 
 L2:{title:"Números irracionales",sub:"Hay números que no son fracciones.",
  info:`<p class="lead">Durante siglos se pensó que cualquier longitud podía medirse con una fracción. No es así: hay números que <b>no son fracciones</b>. Se llaman <b>irracionales</b>.</p>
@@ -25,7 +25,7 @@ L2:{title:"Números irracionales",sub:"Hay números que no son fracciones.",
  <p>Su desarrollo decimal nunca termina y nunca se repite: √2 = 1,41421356… Lo mismo pasa con √3, √5, √7… (la raíz de un natural que no es un cuadrado perfecto) y con π.</p>
  <div class="ex-box"><span class="eyebrow">Encerrar a √2</span><p>1,4² = 1,96 es menor que 2 y 1,5² = 2,25 es mayor, así que √2 está entre 1,4 y 1,5. Con 1,41² = 1,9881 y 1,42² = 2,0164, queda entre 1,41 y 1,42. Se puede seguir afinando sin fin.</p></div>
  <p>Racionales e irracionales juntos forman los <b>números reales</b>: todos los puntos de la recta.</p>
- <div class="callout"><span class="eyebrow">Muchos decimales no es lo mismo que irracional</span><p>${F(1,7)} = 0,(142857) tiene un decimal largo, pero es racional: tiene periodo. Lo que define a un irracional es que sus cifras nunca forman un periodo.</p></div>`,
+ <div class="callout"><span class="eyebrow">Muchos decimales no es lo mismo que irracional</span><p>${F(1,7)} = 0,<span class='ovl'>142857</span> tiene un decimal largo, pero es racional: tiene periodo. Lo que define a un irracional es que sus cifras nunca forman un periodo.</p></div>`,
  explore:{intro:"Lleva la diagonal de un rectángulo hasta la recta con un compás, y después encierra el número entre decimales cada vez más cercanos.",fn:"lIrracional"},
  key:"Un número irracional no se puede escribir como fracción: su decimal no termina ni se repite. √2, la diagonal de un cuadrado de lado 1, es el ejemplo clásico. Racionales e irracionales forman los reales.",
  ojo:"Que un decimal sea largo no lo hace irracional. Lo que importa es si tiene periodo."},
@@ -74,19 +74,19 @@ L1:[
    explain:fin?`${b} solo tiene los factores 2 y 5, así que la división termina: ${F(a,b)} = ${decs(a/b,4)}.`:`${b} tiene factores distintos de 2 y 5, así que la división nunca termina y las cifras se repiten. Toda fracción es racional, nunca irracional.`}},
  R=>{const b=R.p([8,16,20,40,25,32]),a=cop(R,b);
   return{type:"fill",kind:"num",answer:a/b,show:decs(a/b,5),q:`Escribe ${F(a,b)} como número decimal.`,hint:`Divide ${a} entre ${b}. La división termina porque ${b} solo tiene factores 2 y 5.`,explain:`${a} : ${b} = ${decs(a/b,5)}.`}},
- R=>{const two=R.f()<.4;if(!two){const d=R.i(1,8);return{type:"fill",kind:"frac",answer:d/9,show:frs(d,9),q:`Escribe ${M(`0,(${d})`)} = 0,${String(d).repeat(4)}… como fracción.`,
-    hint:`Llama x al número y calcula 10x − x: el periodo desaparece.`,explain:`10x − x = ${d},(${d}) − 0,(${d}) = ${d}, así que 9x = ${d} y x = ${F(d,9)}${gcd(d,9)>1?` = ${FR(d,9)}`:""}.`}}
+ R=>{const two=R.f()<.4;if(!two){const d=R.i(1,8);return{type:"fill",kind:"frac",answer:d/9,show:frs(d,9),q:`Escribe ${M(`0,<span class='ovl'>${d}</span>`)} = 0,${String(d).repeat(4)}… como fracción.`,
+    hint:`Llama x al número y calcula 10x − x: el periodo desaparece.`,explain:`10x − x = ${d},<span class='ovl'>${d}</span> − 0,<span class='ovl'>${d}</span> = ${d}, así que 9x = ${d} y x = ${F(d,9)}${gcd(d,9)>1?` = ${FR(d,9)}`:""}.`}}
   let ab=R.i(10,98);if(ab%11===0)ab++;const s=String(ab).padStart(2,"0");
-  return{type:"fill",kind:"frac",answer:ab/99,show:frs(ab,99),q:`Escribe ${M(`0,(${s})`)} = 0,${s.repeat(3)}… como fracción.`,hint:"El periodo tiene dos cifras: calcula 100x − x.",
+  return{type:"fill",kind:"frac",answer:ab/99,show:frs(ab,99),q:`Escribe ${M(`0,<span class='ovl'>${s}</span>`)} = 0,${s.repeat(3)}… como fracción.`,hint:"El periodo tiene dos cifras: calcula 100x − x.",
    explain:`100x − x = ${ab}, así que 99x = ${ab} y x = ${F(ab,99)}${gcd(ab,99)>1?` = ${FR(ab,99)}`:""}.`}},
  R=>{const v=R.f()<.5;
-  return{type:"choice",q:v?`¿Cuánto vale ${M("0,(9) = 0,999…")}?`:`Sabemos que ${F(1,3)} = 0,(3). ¿Cuánto vale ${M("3 · 0,(3)")}?`,opts:v?["Exactamente 1","Un poco menos que 1","0,9","No se puede saber, tiene infinitas cifras"]:["Exactamente 1","0,(9), que es un poco menos que 1","0,9","No se puede calcular"],
-   hint:v?"Llama x = 0,(9) y calcula 10x − x.":"3 · 1/3 es 1. ¿Puede dar otra cosa al escribirlo como decimal?",explain:"0,(9) es exactamente 1: con x = 0,(9), 10x − x = 9, así que x = 1. Que tenga infinitas cifras no le impide ser un número exacto."}},
+  return{type:"choice",q:v?`¿Cuánto vale ${M("0,<span class='ovl'>9</span> = 0,999…")}?`:`Sabemos que ${F(1,3)} = 0,<span class='ovl'>3</span>. ¿Cuánto vale ${M("3 · 0,<span class='ovl'>3</span>")}?`,opts:v?["Exactamente 1","Un poco menos que 1","0,9","No se puede saber, tiene infinitas cifras"]:["Exactamente 1","0,<span class='ovl'>9</span>, que es un poco menos que 1","0,9","No se puede calcular"],
+   hint:v?"Llama x = 0,<span class='ovl'>9</span> y calcula 10x − x.":"3 · 1/3 es 1. ¿Puede dar otra cosa al escribirlo como decimal?",explain:"0,<span class='ovl'>9</span> es exactamente 1: con x = 0,<span class='ovl'>9</span>, 10x − x = 9, así que x = 1. Que tenga infinitas cifras no le impide ser un número exacto."}},
  R=>{const t=R.i(1,8);const vals=[[t/10,decs(t/10)],[11*t/100,decs(11*t/100)],[t/9,`${t}/9`],[(11*t+1)/100,decs((11*t+1)/100)]];
   return{type:"order",q:"Ordena de menor a mayor.",items:R.sh(vals).map(v=>v[1]),correct:vals.map(v=>v[1]),hint:`Escribe ${t}/9 como decimal: 0,${String(t).repeat(4)}…`,
-   explain:`${t}/9 = 0,(${t}), que es un poco más que ${decs(11*t/100)} y un poco menos que ${decs((11*t+1)/100)}: ${vals.map(v=>v[1]).join(" < ")}.`}}],
+   explain:`${t}/9 = 0,<span class='ovl'>${t}</span>, que es un poco más que ${decs(11*t/100)} y un poco menos que ${decs((11*t+1)/100)}: ${vals.map(v=>v[1]).join(" < ")}.`}}],
 L2:[
- R=>{const n=R.p([2,3,5,6,7,8,10,11,12]);const rats=R.sh([`${M("0,(27)")}`,F(R.i(2,9),R.i(11,13)),`${M("√"+R.p([4,9,16,25,36]))}`,M(decs(R.i(101,199)/100)),M("−"+R.i(2,9))]).slice(0,3);
+ R=>{const n=R.p([2,3,5,6,7,8,10,11,12]);const rats=R.sh([`${M("0,<span class='ovl'>27</span>")}`,F(R.i(2,9),R.i(11,13)),`${M("√"+R.p([4,9,16,25,36]))}`,M(decs(R.i(101,199)/100)),M("−"+R.i(2,9))]).slice(0,3);
   return{type:"choice",q:"¿Cuál de estos números es irracional?",opts:[M("√"+n),...rats],hint:"Una raíz cuadrada es irracional cuando el número no es un cuadrado perfecto. Un decimal con periodo es una fracción.",
    explain:`√${n} es irracional: ${n} no es un cuadrado perfecto. Los demás son racionales: fracciones, decimales finitos o periódicos, o raíces exactas como √16 = 4.`}},
  R=>{let n=R.i(2,99);while(Number.isInteger(Math.sqrt(n)))n++;const f=Math.floor(Math.sqrt(n));
@@ -150,10 +150,10 @@ L5:[
 
 Object.assign(RECAP,{
 L1:{map:[1,0,2,3,0],pts:[
-  {s:"Finito o periódico",t:"Toda fracción da un decimal finito o periódico, porque los restos de la división son limitados.",ex:"5/6 = 0,8(3)"},
-  {s:"Cuándo termina",t:"El decimal termina si el denominador irreducible solo tiene factores 2 y 5.",ex:"3/8 = 0,375; 1/6 = 0,1(6)"},
-  {s:"Del periódico a la fracción",t:"Multiplicando por 10 o por 100 y restando, el periodo desaparece.",ex:"0,(7) = 7/9"},
-  {s:"0,(9) = 1",t:"Un decimal periódico es un número exacto; 0,(9) es exactamente 1.",ex:"3 · 0,(3) = 0,(9) = 1"}]},
+  {s:"Finito o periódico",t:"Toda fracción da un decimal finito o periódico, porque los restos de la división son limitados.",ex:"5/6 = 0,8<span class='ovl'>3</span>"},
+  {s:"Cuándo termina",t:"El decimal termina si el denominador irreducible solo tiene factores 2 y 5.",ex:"3/8 = 0,375; 1/6 = 0,1<span class='ovl'>6</span>"},
+  {s:"Del periódico a la fracción",t:"Multiplicando por 10 o por 100 y restando, el periodo desaparece.",ex:"0,<span class='ovl'>7</span> = 7/9"},
+  {s:"0,<span class='ovl'>9</span> = 1",t:"Un decimal periódico es un número exacto; 0,<span class='ovl'>9</span> es exactamente 1.",ex:"3 · 0,<span class='ovl'>3</span> = 0,<span class='ovl'>9</span> = 1"}]},
 L2:{map:[1,2,0,2,3],pts:[
   {s:"La diagonal y √2",t:"La diagonal de un cuadrado de lado 1 mide √2, por el teorema de Pitágoras.",ex:"d² = 1² + 1² = 2"},
   {s:"No es una fracción",t:"Un irracional no se puede escribir como fracción; la raíz de un natural que no es cuadrado perfecto es irracional.",ex:"√2, √3, √5, π"},
@@ -183,7 +183,7 @@ lDivision(host){let a=5,b=6;
    <div class="readout" id="dres"></div><h4>Los pasos de la división</h4><div class="remrow" id="drem"></div><p class="tip">Cada paso: el resto se multiplica por 10, se divide entre el denominador y queda una cifra y un resto nuevo. Los restos con borde de color forman el periodo: después se repiten en el mismo orden.</p></div>`;
   const draw=()=>{const q0=Math.floor(a/b);let r=a%b;const steps=[],seen={};let ps=-1;
     while(steps.length<24){if(r===0)break;if(seen[r]!=null){ps=seen[r];break}seen[r]=steps.length;const d=Math.floor(r*10/b);steps.push({r,d});r=(r*10)%b}
-    const digs=steps.map(s=>s.d).join(""),txt=ps<0?(digs?`${q0},${digs}`:String(q0)):`${q0},${digs.slice(0,ps)}(${digs.slice(ps)})`;
+    const digs=steps.map(s=>s.d).join(""),txt=ps<0?(digs?`${q0},${digs}`:String(q0)):`${q0},${digs.slice(0,ps)}<span class='ovl'>${digs.slice(ps)}</span>`;
     const [ra,rb]=red(a,b);let f=rb;const fs=[];for(const p of [2,3,5,7,11,13,17]){while(f%p===0){fs.push(p);f/=p}}if(f>1)fs.push(f);
     $("#dres",host).innerHTML=`<span class="k">Resultado</span>${F(a,b)} = ${txt}${ps>=0?` <span class="muted">(periodo: ${digs.slice(ps)})</span>`:""}<br><span class="k">Restos posibles</span>de 1 a ${b-1}: como mucho ${b-1} restos distintos antes de que uno se repita<br><span class="k">El denominador</span>${gcd(a,b)>1?`simplificada, la fracción es ${F(ra,rb)}. `:""}Denominador ${rb}${fs.length>1?" = "+fs.join(" · "):""}: ${rb===1?"es un número entero":factor25(rb)?"solo factores 2 y 5, el decimal termina":"tiene factores distintos de 2 y 5, el decimal es periódico"}`;
     $("#drem",host).innerHTML=steps.map((s,i)=>`<span class="remchip ${ps>=0&&i>=ps?"per":""}"><small>resto</small><b>${s.r}</b><small>cifra ${s.d}</small></span>`).join("")+(ps>=0?`<span class="remchip again"><small>resto</small><b>${steps[ps].r}</b><small>¡se repite!</small></span>`:r===0&&steps.length?`<span class="remchip end"><small>resto</small><b>0</b><small>termina</small></span>`:"");

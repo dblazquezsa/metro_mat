@@ -12,6 +12,7 @@ js/lineas/racionales.js  línea Racionales: lo mismo
 js/lineas/recta.js       línea Recta real
 js/lineas/algebra.js     línea Álgebra básica
 js/lineas/ecuaciones.js  línea Ecuaciones
+js/desafios.js           desafíos opcionales al final de algunas exploraciones (tareas adaptadas de Liljedahl)
 js/bienestar.js          línea Bienestar: autodiagnósticos y retroalimentación
 js/datos.js              política de datos personales, autorización y borrado de la cuenta
 js/app.js                plano, motor de ejercicios, vistas, cuentas y arranque
