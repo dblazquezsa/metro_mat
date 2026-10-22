@@ -18,6 +18,7 @@ js/lineas/ecuaciones2.js Ecuaciones: segundo grado, valor absoluto, fracciones y
 js/lineas/notacion.js    Recta real: notación científica, orden de magnitud y cifras significativas (L10)
 js/lineas/funciones.js   Funciones: F1–F8 (qué es una función … función inversa)
 js/lineas/trigo.js       Trigonometría: T1–T6
+js/lineas/racional.js    Álgebra: racionalización (A9)
 js/lineas/plano.js       Recta real: el plano cartesiano y distancias (L8–L9)
 js/lineas/rectas.js      Ecuaciones: la ecuación de la recta y la de la circunferencia (Q11–Q12)
 js/lineas/conjuntos.js   línea alternativa Conjuntos (C1–C5)
@@ -32,7 +33,7 @@ LICENCIA.md              licencia Creative Commons BY-NC-SA 4.0
 
 Para publicar hay que subir **toda la carpeta**, manteniendo las subcarpetas `css` y `js`. Si solo subes `index.html`, la página no funciona.
 
-Cada línea vive en su propio fichero dentro de `js/lineas/`. Para corregir un texto de una explicación o de un reto, basta con editar ese fichero. Las siete líneas numeradas tienen 56 estaciones y la línea alternativa Conjuntos, 5; con Bienestar son 65. El orden de las estaciones de cada línea se define en la lista LABS de js/app.js. Si en el futuro quitas una estación de su fichero, el plano la mostrará en gris como «en construcción».
+Cada línea vive en su propio fichero dentro de `js/lineas/`. Para corregir un texto de una explicación o de un reto, basta con editar ese fichero. Las siete líneas numeradas tienen 57 estaciones y la línea alternativa Conjuntos, 5; con Bienestar son 66. El orden de las estaciones de cada línea se define en la lista LABS de js/app.js. Si en el futuro quitas una estación de su fichero, el plano la mostrará en gris como «en construcción».
 
 Las cuentas y el progreso se guardan en **Firebase** (de Google), que tiene un plan gratuito suficiente para varios grupos. La puesta en marcha toma unos 20 minutos.
 

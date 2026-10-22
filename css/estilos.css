@@ -338,7 +338,7 @@ form.dialog{box-shadow:none;border:1px solid var(--rule);max-width:none}
 .sqg i.p{background:var(--surface);border-color:var(--sqc)}
 
 /* Fracciones en el texto y figura para sombrear */
-.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;font-family:var(--f-mono);font-size:.86em;margin:0 .12em;font-weight:600}
+.fr{display:inline-flex;flex-direction:column;align-items:stretch;text-align:center;vertical-align:middle;line-height:1.05;font-family:var(--f-mono);font-size:.86em;margin:0 .12em;font-weight:600}
 .fr>span:first-child{border-bottom:1.6px solid currentColor;padding:0 .18em}
 .fr>span:last-child{padding:0 .18em}
 .shadesvg{touch-action:none;cursor:pointer;max-width:600px}
@@ -507,3 +507,6 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .pw{display:inline-flex;align-items:center;gap:4px;vertical-align:middle}
 .pw .pwb{font-size:2.6em;line-height:1;font-weight:300;transform:scaleX(.7)}
 .pw .pwl{display:grid;grid-template-columns:auto auto;gap:2px 14px;font-family:var(--f-mono);font-size:.95em}
+
+/* Raíces con vínculo */
+.rad{border-top:1.5px solid currentColor;padding:0 2px 0 1px;margin-left:1px}

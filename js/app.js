@@ -25,7 +25,7 @@ const ST=[];
 const LABS={ent:[["E1",["Sumando","y restando"]],["E2",["Calcular","con economía"]],["E3",["Diferencias","y paréntesis"]],["E4",["Las caras","del menos"]],["E5",["Una sola","fórmula"]],["E6",["Productos","con signo"]]],
   rac:[["R1",["Repartir","y medir"]],["R2",["Fracciones","equivalentes"]],["R3",["Comparar","y ordenar"]],["R4",["Sumar y restar","fracciones"]],["R5",["Multiplicar","y dividir"]],["R6",["Decimales y","porcentajes"]]],
   rec:[["L1",["Decimales","periódicos"]],["L2",["Números","irracionales"]],["L3",["Densidad","y orden"]],["L10",["Notación","científica"]],["L4",["Valor","absoluto"]],["L5",["Intervalos"]],["L8",["El plano","cartesiano"]],["L9",["Distancias","en el plano"]]],
-  alg:[["A1",["Fórmulas","y patrones"]],["A2",["Potencias"]],["A6",["Polinomios"]],["A3",["Productos","notables"]],["A4",["Factorización"]],["A7",["División de","polinomios"]],["A8",["Residuo","y raíces"]],["A5",["Fracciones","algebraicas"]]],
+  alg:[["A1",["Fórmulas","y patrones"]],["A2",["Potencias"]],["A6",["Polinomios"]],["A3",["Productos","notables"]],["A4",["Factorización"]],["A7",["División de","polinomios"]],["A8",["Residuo","y raíces"]],["A5",["Fracciones","algebraicas"]],["A9",["Racionalización"]]],
   ecu:[["Q1",["Igualdad y","equivalencia"]],["Q2",["Primer grado"]],["Q3",["Problemas con","ecuaciones"]],["Q11",["La ecuación","de la recta"]],["Q4",["Sistemas 2 × 2"]],["Q12",["La ecuación de la","circunferencia"]],["Q5",["Inecuaciones"]],["Q6",["Segundo grado:","factorizar"]],["Q7",["La fórmula","general"]],["Q8",["Con valor","absoluto"]],["Q9",["Con fracciones"]],["Q10",["Con radicales"]]],
   fun:[["F1",["¿Qué es una","función?"]],["F2",["Dominio","y rango"]],["F3",["La gráfica de","una función"]],["F4",["Funciones","lineales"]],["F5",["Por tramos y","valor absoluto"]],["F6",["Funciones","de potencia"]],["F7",["Composición"]],["F8",["Función","inversa"]],["F9",["La función","exponencial"]],["F10",["El logaritmo"]]],
   tri:[["T1",["Triángulos","rectángulos"]],["T2",["Ángulos","y radianes"]],["T3",["Circunferencia","trigonométrica"]],["T4",["Seno","y coseno"]],["T5",["Tangente y","cotangente"]],["T6",["Identidades"]]],
@@ -296,7 +296,8 @@ function mountItem(box,item,opts){
           const why=countTerms(ast)>item.maxTerms?["simplificar","Junta los términos que se puedan juntar."]:(item.noParens&&/[()]/.test(v))?["desarrollar","Quita los paréntesis multiplicando cada término."]
             :(item.noDiv&&/\//.test(v))?["simplificar","Factoriza el numerador y tacha los factores comunes: el resultado no lleva fracción."]
             :(item.onePow&&(/[*·(]/.test(v)||(v.match(/\^/g)||[]).length>1))?["escribir como una sola potencia","Usa las reglas de los exponentes para dejar una base y un exponente."]
-            :(item.factor&&!isProduct(ast))?["factorizar","Escríbela como una multiplicación de factores, por ejemplo 3(x + 2) o (x + 1)(x − 1)."]:null;
+            :(item.factor&&!isProduct(ast))?["factorizar","Escríbela como una multiplicación de factores, por ejemplo 3(x + 2) o (x + 1)(x − 1)."]
+            :(item.noRootDen&&rootInDen(ast))?["racionalizar","Todavía hay una raíz en el denominador: multiplica arriba y abajo por el factor adecuado."]:null;
           if(why&&!single){fb("info","Es equivalente, pero todavía se puede "+why[0]+".",why[1]);return}
           ok=!why}}
       if(ok){lock();finish(attempts===0?"first":"hint")}else{if(wrong())lock()}};

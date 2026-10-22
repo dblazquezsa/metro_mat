@@ -22,16 +22,17 @@ function readNum(raw){let t=raw;const dots=(t.match(/\./g)||[]).length,commas=(t
   else if(dots){if(/^[1-9]\d{0,2}(\.\d{3})+$/.test(t))t=t.replace(/\./g,"");else if(dots>1)throw Error("num")}
   if(t==="."||t==="")throw Error("num");const v=+t;if(isNaN(v))throw Error("num");return v}
 function tokenize(src){
-  let s=String(src).replace(/[−–—]/g,"-").replace(/[·×]/g,"*").replace(/²/g,"^2").replace(/³/g,"^3").replace(/\s+/g,"").toLowerCase();
+  let s=String(src).replace(/[−–—]/g,"-").replace(/[·×]/g,"*").replace(/²/g,"^2").replace(/³/g,"^3").replace(/\s+/g,"").toLowerCase().replace(/sqrt|ra[ií]z/g,"√");
   const out=[];let i=0;
   while(i<s.length){const c=s[i];
     if(/[0-9.,]/.test(c)){let j=i;while(j<s.length&&/[0-9.,]/.test(s[j]))j++;out.push({t:"n",v:readNum(s.slice(i,j))});i=j;continue}
     if(/[a-z]/.test(c)){out.push({t:"v",v:c});i++;continue}
     if("+-*/^()".includes(c)){out.push({t:c});i++;continue}
+    if(c==="√"){out.push({t:"r"});i++;continue}
     throw Error("char")}
   const res=[];
   for(let k=0;k<out.length;k++){const a=res[res.length-1],b=out[k];
-    if(a&&(a.t==="n"||a.t==="v"||a.t===")")&&(b.t==="v"||b.t==="("||(a.t===")"&&b.t==="n")))res.push({t:"*"});
+    if(a&&(a.t==="n"||a.t==="v"||a.t===")")&&(b.t==="v"||b.t==="("||b.t==="r"||(a.t===")"&&b.t==="n")))res.push({t:"*"});
     res.push(b)}
   return res}
 function parseExpr(src){
@@ -42,17 +43,23 @@ function parseExpr(src){
   function power(){const b=atom();if(peek()&&peek().t==="^"){p++;return{op:"^",a:b,b:unary()}}return b}
   function atom(){const t=peek();if(!t)throw Error("end");
     if(t.t==="n"){p++;return{num:t.v}}if(t.t==="v"){p++;return{v:t.v}}
-    if(t.t==="("){p++;const e=expr();eat(")");return e}throw Error("syntax")}
+    if(t.t==="("){p++;const e=expr();eat(")");return e}
+    if(t.t==="r"){p++;return{op:"sqrt",a:atom()}}throw Error("syntax")}
   const n=expr();if(p!==tk.length)throw Error("trail");return n}
 function evalAst(n,env){
   if("num"in n)return n.num;if("v"in n)return env[n.v]??0;
   switch(n.op){case"neg":return-evalAst(n.a,env);case"+":return evalAst(n.a,env)+evalAst(n.b,env);case"-":return evalAst(n.a,env)-evalAst(n.b,env);
-    case"*":return evalAst(n.a,env)*evalAst(n.b,env);case"/":return evalAst(n.a,env)/evalAst(n.b,env);case"^":return Math.pow(evalAst(n.a,env),evalAst(n.b,env))}}
+    case"*":return evalAst(n.a,env)*evalAst(n.b,env);case"/":return evalAst(n.a,env)/evalAst(n.b,env);case"^":return Math.pow(evalAst(n.a,env),evalAst(n.b,env));case"sqrt":return Math.sqrt(evalAst(n.a,env))}}
 function varsOf(n,s=new Set()){if("v"in n)s.add(n.v);if(n.a)varsOf(n.a,s);if(n.b)varsOf(n.b,s);return s}
 function countTerms(n){if(n.op==="+"||n.op==="-")return countTerms(n.a)+countTerms(n.b);return 1}
-function equivalent(a,b){const vs=new Set([...varsOf(a),...varsOf(b)]);
-  for(let k=0;k<6;k++){const env={};vs.forEach(v=>env[v]=((k*7.31+v.charCodeAt(0)*1.17)%9)-4.21);
-    const x=evalAst(a,env),y=evalAst(b,env);if(!isFinite(x)||Math.abs(x-y)>1e-7*Math.max(1,Math.abs(y)))return false}return true}
+/* Se compara en varios puntos; los puntos donde la respuesta esperada no existe (raíz de un negativo, división
+   entre 0) se saltan, y se añaden puntos positivos para las expresiones con raíces. */
+function equivalent(a,b){const vs=new Set([...varsOf(a),...varsOf(b)]);let ok=0;
+  for(let k=0;k<20&&ok<6;k++){const env={};vs.forEach(v=>env[v]=k<6?((k*7.31+v.charCodeAt(0)*1.17)%9)-4.21:((k*1.37+v.charCodeAt(0)*.11)%7)+.31);
+    const y=evalAst(b,env);if(!isFinite(y))continue;const x=evalAst(a,env);if(!isFinite(x)||Math.abs(x-y)>1e-7*Math.max(1,Math.abs(y)))return false;ok++}return ok>=3}
+/* ¿Queda alguna raíz en un denominador? */
+function hasRoot(n){return!!n&&(n.op==="sqrt"||hasRoot(n.a)||hasRoot(n.b))}
+function rootInDen(n){if(!n||!n.op)return false;if(n.op==="/"&&hasRoot(n.b))return true;if(n.op==="^"&&hasRoot(n.a)&&"num"in n.b&&n.b.num<0)return true;return rootInDen(n.a)||rootInDen(n.b)}
 
 /* ============ ejercicios con variación: cada visita genera números nuevos ============ */
 function rng(seed){const r=seeded(String(seed));return{f:r,i:(a,b)=>a+Math.floor(r()*(b-a+1)),p:arr=>arr[Math.floor(r()*arr.length)],
