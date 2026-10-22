@@ -8,23 +8,24 @@ const SC=1.32,sc=p=>[p[0]*SC,p[1]*SC];
 const RIVER0=[[520,1260],[540,1150],[562,1030],[585,910],[600,800],[612,700],[618,620],[628,540],[640,450],[652,360],[666,260],[682,160],[700,20],[714,-80],[730,-200]];
 const RIVER=RIVER0.map(sc);
 const TRUNK=[[605,965],[622,880],[640,745],[650,650],[656,585],[667,480],[676,400],[684,330],[695,250],[712,160],[724,70],[738,-30],[752,-120]].map(sc);
-const NUTI=[445,335,48]; /* vuelta de Conjuntos alrededor del cerro El Volador */
+const NUTI=[440,330,58]; /* vuelta de la línea 2 alrededor del cerro El Volador */
 /* Trazado de cada línea desde su cabecera. side: lado de los nombres (1 o −1); alt: alterna lados; curve: suaviza.
-   Las líneas más cercanas a la salida son Conjuntos, 1, 2 y 3; después 4 y 5 al sur y los cables (6 al norte, 7 al sur). */
+   De norte a sur: Conjuntos (cable al norte), 1 Enteros, 2 Racionales (bus alrededor del cerro El Volador), 3 Recta
+   real, 4 Álgebra, 5 Ecuaciones, 6 Funciones y 7 Trigonometría (cable al sur): el avance va hacia el sur. */
 const ROUTES={
   bie:{pts:[],side:1},
-  fun:{pts:[[724,70],[470,44],[170,12]],side:-1,alt:true,cable:true},
+  con:{pts:[[724,70],[470,44],[170,12]],side:-1,alt:true,cable:true},
   ent:{pts:[[697,240],[790,226],[880,204],[960,174],[1040,138],[1110,98],[1170,56]],side:-1,curve:true},
-  con:{pts:[],side:-1},
-  rac:{pts:[[676,420],[590,432],[500,440],[410,450],[320,464],[230,486],[150,516]],side:1,curve:true,alt:true},
-  rec:{pts:[[670,472],[760,496],[850,522],[935,558],[1005,604],[1060,660],[1100,724],[1130,792]],side:1,curve:true},
-  alg:{pts:[[650,640],[560,660],[470,698],[390,748],[320,808],[262,868],[214,930],[178,992]],side:-1,curve:true},
-  ecu:{pts:[[633,770],[722,788],[810,816],[890,854],[960,902],[1012,960],[1052,1028],[1080,1100],[1100,1170],[1110,1235]],side:1,curve:true,alt:true},
+  rac:{pts:[],side:1,alt:true,ring:true},
+  rec:{pts:[[673,440],[590,452],[500,460],[410,470],[320,484],[230,506],[150,536]],side:1,curve:true,alt:true},
+  alg:{pts:[[670,472],[760,496],[850,522],[935,558],[1005,604],[1060,660],[1100,724],[1130,792]],side:1,curve:true},
+  ecu:{pts:[[650,640],[560,660],[470,698],[390,748],[320,808],[262,868],[214,930],[178,992]],side:-1,curve:true},
+  fun:{pts:[[633,770],[722,788],[810,816],[890,854],[960,902],[1012,960],[1052,1028],[1080,1100],[1100,1170],[1110,1235]],side:1,curve:true,alt:true},
   tri:{pts:[[608,935],[420,1000],[220,1060]],side:-1,alt:true,cable:true}};
-{const [cx,cy,r]=NUTI,p=[[684,332],[600,348],[520,350]];for(let k=0;k<=34;k++){const a=.3+k/34*Math.PI*1.62;p.push([cx+r*Math.cos(a),cy+r*Math.sin(a)])}ROUTES.con.pts=p}
+{const [cx,cy,r]=NUTI,p=[[684,332],[600,344],[520,346]];for(let k=0;k<=34;k++){const a=.3+k/34*Math.PI*1.62;p.push([cx+r*Math.cos(a),cy+r*Math.sin(a)])}ROUTES.rac.pts=p}
 for(const R of Object.values(ROUTES))R.pts=R.pts.map(sc);
 const HOODS=[["Bello",820,-95],["Castilla",600,128],["Robledo",225,190],["Aranjuez",930,295],["Santo Domingo",1090,250],["Manrique",910,650],["Centro",770,610],["Laureles",430,585],["San Javier",150,660],["Belén",410,895],["Guayabal",540,1090],["El Poblado",760,965],["Envigado",780,1225],["Itagüí",400,1225],["Santa Elena",1210,560],["Las Palmas",1190,945]].map(([n,x,y])=>[n,x*SC,y*SC]);
-const HILLS=[["Cerro Nutibara",480,800],["Cerro El Volador",455,268],["Pan de Azúcar",960,640]].map(([n,x,y])=>[n,x*SC,y*SC]);
+const HILLS=[["Cerro Nutibara",480,800],["Cerro El Volador",440,333],["Pan de Azúcar",960,640]].map(([n,x,y])=>[n,x*SC,y*SC]);
 const CREEKS=[[[1250,560],[1100,580],[950,560],[820,560],[700,555],[630,548]],[[60,520],[200,560],[340,590],[470,600],[612,610]],[[1150,960],[1000,930],[860,900],[700,890],[592,890]]].map(c=>c.map(sc));
 const W0=1300*SC,H0=1260*SC;
 
@@ -96,11 +97,13 @@ function badge(l,col,txt){const m=GEO[l],e=at(m,m.len),x=e.x+e.dx*26,y=e.y+e.dy*
   return`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" fill="${col}" stroke="var(--casing)" stroke-width="2.5"/><text x="${x.toFixed(1)}" y="${(y+5).toFixed(1)}" text-anchor="middle" class="lnum">${txt}</text>`}
 /* nombre de la estación, a un lado del trazado (alternando en las líneas con alt) */
 function label(s,lines){const R=ROUTES[s.line],sd=R.side*(R.alt&&s.k%2?-1:1);let nx=-s.dy*sd,ny=s.dx*sd;if(s.start){nx=-1;ny=-.15}
+  /* en la vuelta alrededor del cerro, los nombres van hacia fuera del círculo */
+  if(R.ring){const cx=NUTI[0]*SC,cy=NUTI[1]*SC,dd=Math.hypot(s.x-cx,s.y-cy);if(dd<NUTI[2]*SC*1.25){nx=(s.x-cx)/dd;ny=(s.y-cy)/dd}}
   const off=s.diag||s.start?24:17,lx=s.x+nx*off,ly=s.y+ny*off,anchor=nx>.35?"start":nx<-.35?"end":"middle",dy0=ny<-.35?-(lines.length-1)*14:ny>.35?10:-(lines.length-1)*7+4;
   return`<text x="${lx.toFixed(1)}" y="${(ly+dy0).toFixed(1)}" text-anchor="${anchor}">${lines.map((t,i)=>`<tspan x="${lx.toFixed(1)}" dy="${i?14:0}">${t}</tspan>`).join("")}</text>`}
 
-/* ---------- viaje: por la línea hasta su cabecera, por el corredor del río y por la otra línea ---------- */
-const RIDE={ent:"metro",rac:"metro",rec:"metro",alg:"metro",ecu:"metro",rio:"metro",fun:"cable",tri:"cable",bie:"bus",con:"bus"};
+/* ---------- viaje (metro: líneas 1 y 3 a 6 y el corredor; cable: Conjuntos y 7; bus: Bienestar y 2): por la línea hasta su cabecera, por el corredor del río y por la otra línea ---------- */
+const RIDE={ent:"metro",rec:"metro",alg:"metro",ecu:"metro",fun:"metro",rio:"metro",con:"cable",tri:"cable",bie:"bus",rac:"bus"};
 function legs(a,b){if(a.line===b.line)return[{line:a.line,pts:slice(GEO[a.line],a.s,b.s)}];
   return[{line:a.line,pts:slice(GEO[a.line],a.s,GEO[a.line].headS)},{line:"rio",pts:slice(trunkM,HEADS[a.line],HEADS[b.line])},{line:b.line,pts:slice(GEO[b.line],GEO[b.line].headS,b.s)}].filter(l=>measure(l.pts).len>2)}
 const headSVG=(skin,hair)=>`<circle cx="0" cy="0" r="3.4" fill="${skin}" stroke="var(--ink)" stroke-width=".6"/><path d="M-3.1 -.6 Q-2.8 -4 .4 -3.8 Q3.2 -3.6 3.4 -.8 Q1.6 -2.4 -3.1 -.6Z" fill="${hair}"/>`;

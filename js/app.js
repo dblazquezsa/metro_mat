@@ -196,7 +196,7 @@ function mapInit(){const box=$("#mapbox");if(!MV.vb){if(!mapFit(box.getBoundingC
   box.addEventListener("pointerup",up);box.addEventListener("pointercancel",up);
   const mid=k=>{const r=box.getBoundingClientRect();mapZoom(k,r.left+r.width/2,r.top+r.height/2)};
   $("#zin").onclick=()=>mid(1/1.3);$("#zout").onclick=()=>mid(1.3);$("#zfit").onclick=()=>mapFit(false)}
-/* viaje: metro por las líneas 1 a 5 y el corredor del río, cable por las líneas 6 y 7, bus por Bienestar y Conjuntos */
+/* viaje: metro por las líneas 1 y 3 a 6 y el corredor del río, cable por Conjuntos y la línea 7, bus por Bienestar y la línea 2 */
 let moving=false;
 const mapTween=(ms,fn)=>new Promise(res=>{const t0=performance.now();const f=t=>{const u=Math.min(1,(t-t0)/ms);fn(u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2);if(u<1)requestAnimationFrame(f);else res()};requestAnimationFrame(f)});
 function follow(p){const v=MV.vb;if(!v)return;const mx=v.w*.15,my=v.h*.15;let ch=false;
