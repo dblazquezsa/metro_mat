@@ -123,4 +123,9 @@ function vehicle(kind,c,m,sv,head){const T=p=>`translate(${p.x.toFixed(1)} ${p.y
   const p1=at(m,sv),p2=at(m,sv-34*1.6);return[[p2,false],[p1,true]].map(([p,f])=>`<g transform="${T(p)} scale(1.6) ${orient(p)}">${carSVG(c,f,head)}</g>`).join("")}
 
 const FULL={x:-30,y:-200,w:W0+60,h:H0+230};
-return{ROUTES,GEO,FULL,at,build,base,lineSVG,badge,label,legs,measure,vehicle,headSVG,RIDE}})();
+/* zona visible: el corredor del río y las líneas, con margen para nombres e insignias */
+let BOUNDS=null;
+function bounds(){if(BOUNDS)return BOUNDS;const P=[...trunkM.pts,...Object.values(GEO).flatMap(m=>m.pts)];
+  const xs=P.map(p=>p[0]),ys=P.map(p=>p[1]),x0=Math.min(...xs)-130,x1=Math.max(...xs)+130,y0=Math.min(...ys)-70,y1=Math.max(...ys)+80;
+  return BOUNDS={x:x0,y:y0,w:x1-x0,h:y1-y0}}
+return{ROUTES,GEO,FULL,bounds,at,build,base,lineSVG,badge,label,legs,measure,vehicle,headSVG,RIDE}})();

@@ -176,13 +176,17 @@ function renderLegend(){const lg=$("#maplegend");if(!lg)return;
     return`<button class="lg" data-l="${l}" aria-pressed="${MV.focus===l}"><span class="badge" style="background:${lcol(l)}">${LNUM[l]||LBADGE[l]}</span>${LINES[l].short}<small>${done} de ${ids.length}${l==="con"?" · alternativa":""}</small></button>`}).join("");
   $$(".lg",lg).forEach(b=>b.onclick=()=>{MV.focus=MV.focus===b.dataset.l?null:b.dataset.l;renderMap()})}
 /* acercar y desplazar: rueda, botones +/−, arrastre y pellizco */
-function mapApply(){const v=MV.vb;$("#map").setAttribute("viewBox",`${v.x.toFixed(1)} ${v.y.toFixed(1)} ${v.w.toFixed(1)} ${v.h.toFixed(1)}`)}
-function mapFit(around){const box=$("#mapbox"),r=box.getBoundingClientRect();if(!r.width||!r.height)return false;const F=MAPA.FULL,ar=r.width/r.height;
-  if(around){const s=STM[S.current]||STM.B1,w=F.w*.36;MV.vb={x:s.x-w/2,y:s.y-w/ar/2,w,h:w/ar}}
-  else MV.vb=ar>F.w/F.h?{w:F.h*ar,h:F.h,x:F.x-(F.h*ar-F.w)/2,y:F.y}:{w:F.w,h:F.w/ar,x:F.x,y:F.y-(F.w/ar-F.h)/2};
+/* el plano no se desplaza más allá de la zona del río y de las líneas (MAPA.bounds) */
+function mapMaxW(){const r=$("#mapbox").getBoundingClientRect(),B=MAPA.bounds(),ar=r.width&&r.height?r.width/r.height:1;return Math.min(B.w,B.h*ar)}
+function mapClamp(){const v=MV.vb,B=MAPA.bounds(),k=v.h/v.w,mw=mapMaxW();if(v.w>mw){const cx=v.x+v.w/2,cy=v.y+v.h/2;v.w=mw;v.h=mw*k;v.x=cx-v.w/2;v.y=cy-v.h/2}
+  v.x=v.w>=B.w?B.x-(v.w-B.w)/2:Math.max(B.x,Math.min(B.x+B.w-v.w,v.x));
+  v.y=v.h>=B.h?B.y-(v.h-B.h)/2:Math.max(B.y,Math.min(B.y+B.h-v.h,v.y))}
+function mapApply(){mapClamp();const v=MV.vb;$("#map").setAttribute("viewBox",`${v.x.toFixed(1)} ${v.y.toFixed(1)} ${v.w.toFixed(1)} ${v.h.toFixed(1)}`)}
+function mapFit(around){const box=$("#mapbox"),r=box.getBoundingClientRect();if(!r.width||!r.height)return false;const B=MAPA.bounds(),ar=r.width/r.height;
+  const s=STM[S.current]||STM.B1,w=around?Math.min(mapMaxW(),B.w*.45):mapMaxW();MV.vb={x:s.x-w/2,y:s.y-w/ar/2,w,h:w/ar};
   mapApply();return true}
 function mapZoom(k,cx,cy){const v=MV.vb,r=$("#mapbox").getBoundingClientRect(),px=v.x+(cx-r.left)/r.width*v.w,py=v.y+(cy-r.top)/r.height*v.h;
-  const nw=Math.max(260,Math.min(MAPA.FULL.w*1.6,v.w*k)),f=nw/v.w;MV.vb={x:px-(px-v.x)*f,y:py-(py-v.y)*f,w:nw,h:v.h*f};mapApply()}
+  const nw=Math.max(260,Math.min(mapMaxW(),v.w*k)),f=nw/v.w;MV.vb={x:px-(px-v.x)*f,y:py-(py-v.y)*f,w:nw,h:v.h*f};mapApply()}
 let mapReady=false;
 function mapInit(){const box=$("#mapbox");if(!MV.vb){if(!mapFit(box.getBoundingClientRect().width<700))return}else mapApply();if(mapReady)return;mapReady=true;
   box.addEventListener("wheel",e=>{e.preventDefault();mapZoom(e.deltaY>0?1.12:1/1.12,e.clientX,e.clientY)},{passive:false});
@@ -217,7 +221,16 @@ async function clickStation(id){if(moving)return;const s=STM[id];if(!s||s.hidden
   if(!unlocked(id)){const seq=LSEQ[lineOf(id)],k=seq.indexOf(id);toast(`Completa «${NODES[seq[k-1]].title}» o haz el diagnóstico para desbloquear esta estación.`);return}
   await moveAvatar(id);if(!reduceMotion)await sleep(120);
   const adv=(s.diag||LSEQ[s.line]&&LSEQ[s.line][0]===id)?lineAdvice(id):"";if(adv)toast(adv);
-  if(s.diag)openDiag(s.line);else if(id[0]==="B")openSocio(id);else openNode(id)}
+  if(s.diag)askDiag(s.line);else if(id[0]==="B")openSocio(id);else openNode(id)}
+/* Al llegar a un diagnóstico: hacer el diagnóstico o seguir a la primera estación pendiente de la línea */
+function askDiag(line){const m=$("#modal"),L=LINES[line],seq=LSEQ[line],N=diagN(line),d=S.diags&&S.diags[line];
+  const nxt=seq.find(id=>unlocked(id)&&!isDone(id)&&!conv(id))||seq[0],first=nxt===seq[0]&&!seq.some(id=>isDone(id)||conv(id));
+  m.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dq-t"><span class="eyebrow">${esc(lineTitle(line))}</span><h2 id="dq-t">Diagnóstico de ${esc(L.name.toLowerCase())}</h2>
+   <p>${d?`Ya hiciste este diagnóstico${d.conv&&d.conv.length?` y convalidaste ${d.conv.length} ${d.conv.length===1?"estación":"estaciones"}`:""}. Puedes repetirlo o seguir con la línea.`:`Son ${N} preguntas, unos ${Math.round(N*1.2)} minutos. Si respondes bien las preguntas de una estación, esa estación queda convalidada y puedes saltarla. Es opcional: también puedes empezar la línea desde el principio.`}</p>
+   <div class="dlg-actions"><button class="btn primary" id="dq-d">${d?"Repetir el diagnóstico":"Hacer el diagnóstico"}</button><button class="btn" id="dq-s">${first?"Ir a la primera estación":"Seguir"}: ${esc(NODES[nxt].title)}</button><button class="btn ghost" id="dq-m">Quedarme en el plano</button></div></div>`;
+  m.hidden=false;$("#dq-d",m).focus();
+  $("#dq-d",m).onclick=()=>{m.hidden=true;openDiag(line)};$("#dq-m",m).onclick=()=>m.hidden=true;
+  $("#dq-s",m).onclick=()=>{m.hidden=true;clickStation(nxt)}}
 
 /* ============ arrastre (ratón y pantalla táctil) ============ */
 function dragify(el,{onDrop,onTap,can}){
